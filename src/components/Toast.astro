@@ -1,0 +1,53 @@
+---
+/**
+ * Toast - Container for toast notifications
+ * Use window.showToast('message', 'type') to display
+ * Types: 'success', 'error', 'info', 'warning'
+ */
+---
+
+<div id="toast-container" class="fixed top-24 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
+</div>
+
+<script is:inline>
+    window.showToast = function(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        
+        // Color schemes
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            warning: 'bg-amber-500',
+            info: 'bg-tuio-navy'
+        };
+        
+        const icons = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        
+        toast.className = `${colors[type] || colors.info} text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 transform translate-x-full opacity-0 transition-all duration-300 pointer-events-auto max-w-sm`;
+        toast.innerHTML = `
+            <span class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center shrink-0 font-bold">${icons[type] || icons.info}</span>
+            <span class="font-medium">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-x-full', 'opacity-0');
+        });
+        
+        // Auto-dismiss after 4 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    };
+</script>

@@ -1,11 +1,588 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { supabase } from "../lib/supabase";
+import Leaderboard from "../components/home/Leaderboard";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Data Fetching with Robust Fallback
+let articles: any[] = [];
+let categories: any[] = [];
+
+// Data Fetching with Robust Fallback and Leaderboard Logic
+let leaderboardData: any[] = [];
+
+try {
+    // 1. Fetch Categories
+    const { data: catData } = await supabase
+        .from("categories")
+        .select("name, slug")
+        .limit(20);
+    if (catData) categories = catData;
+
+    // 2. Fetch Articles
+    const { data: artData } = await supabase
+        .from("articles")
+        .select("*, author:profiles(full_name, avatar_url)")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(6);
+    if (artData) articles = artData;
+
+    // 3. Fetch Leaderboard (SSR to bypass CORS/RLS)
+    // Use Service Role to bypass RLS policies
+    import { createClient } from "@supabase/supabase-js";
+    const adminSupabase = createClient(
+        import.meta.env.PUBLIC_SUPABASE_URL,
+        import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+    );
+
+    // Try view first
+    const { data: viewData, error: viewError } = await (
+        adminSupabase.from("profile_composite_reputation") as any
+    )
+        .select(
+            `
+          profile_id,
+          reputation,
+          profiles:profile_id (
+            first_name, last_name, avatar_url, specialty, is_verified
+          )
+        `,
+        )
+        .order("reputation", { ascending: false })
+        .limit(10);
+
+    if (!viewError && viewData) {
+        leaderboardData = viewData.map((item: any) => {
+            const profile = Array.isArray(item.profiles)
+                ? item.profiles[0]
+                : item.profiles;
+            return {
+                profile_id: item.profile_id,
+                reputation: item.reputation,
+                first_name: profile?.first_name || "",
+                last_name: profile?.last_name || "",
+                full_name:
+                    profile?.first_name && profile?.last_name
+                        ? `${profile.first_name} ${profile.last_name}`
+                        : profile?.first_name || "Anonymous User",
+                avatar_url: profile?.avatar_url,
+                specialty: profile?.specialty,
+                is_verified: profile?.is_verified,
+            };
+        });
+    } else {
+        // Fallback manual calculation if view fails
+        console.log("View failed, falling back to manual fetch");
+        const { data: profiles, error: manualError } = await adminSupabase
+            .from("profiles")
+            .select("*")
+            .limit(50);
+        if (manualError) {
+            console.error(
+                "Manual fetch failed:",
+                JSON.stringify(manualError, null, 2),
+            );
+        }
+        if (profiles) {
+            // simplified reputation for SSR speed
+            leaderboardData = profiles
+                .map((p: any) => ({
+                    profile_id: p.id,
+                    reputation: p.reputation_score || 0,
+                    first_name: p.first_name || "Dr.",
+                    last_name:
+                        p.last_name || p.full_name?.split(" ").pop() || "User",
+                    full_name: p.full_name,
+                    avatar_url: p.avatar_url,
+                    specialty: p.specialty,
+                    is_verified: p.is_verified,
+                }))
+                .sort((a, b) => b.reputation - a.reputation)
+                .slice(0, 10);
+        }
+    }
+} catch (e) {
+    console.error("Supabase connection failed", e);
+}
+
+// Mock Data Fallbacks
+if (categories.length === 0) {
+    categories = [
+        { name: "Digital Dentistry", slug: "digital" },
+        { name: "Implantology", slug: "implants" },
+        { name: "Practice Management", slug: "business" },
+        { name: "Orthodontics", slug: "ortho" },
+        { name: "Esthetics", slug: "esthetics" },
+        { name: "Technology", slug: "tech" },
+    ];
+}
+
+if (articles.length === 0) {
+    articles = [
+        {
+            title: "The Future of Digital Impressioning",
+            slug: "future-digital-impressioning",
+            excerpt:
+                "How intraoral scanners are revolutionizing the modern dental practice workflow.",
+            image_url:
+                "https://images.pexels.com/photos/3845126/pexels-photo-3845126.jpeg?auto=compress&cs=tinysrgb&w=800",
+            author: { full_name: "Dr. Sarah Johnson" },
+            category: "Technology",
+        },
+        {
+            title: "Sustainable Dentistry: A Practical Guide",
+            slug: "sustainable-dentistry",
+            excerpt:
+                "Reducing waste and energy consumption in your clinic without compromising care.",
+            image_url:
+                "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
+            author: { full_name: "Dr. Mark Smith" },
+            category: "Practice Management",
+        },
+        {
+            title: "Clear Aligners vs. Traditional Braces",
+            slug: "aligners-vs-braces",
+            excerpt:
+                "A comprehensive comparison of treatment outcomes and patient satisfaction.",
+            image_url:
+                "https://images.pexels.com/photos/3845806/pexels-photo-3845806.jpeg?auto=compress&cs=tinysrgb&w=800",
+            author: { full_name: "Dr. Emily Chen" },
+            category: "Orthodontics",
+        },
+    ];
+}
+
+const stats = [
+    { value: "50K+", label: "Dental Professionals", icon: "👥" },
+    { value: "12K+", label: "Published Articles", icon: "📝" },
+    { value: "500+", label: "Events Hosted", icon: "📅" },
+    { value: "100+", label: "Countries", icon: "🌍" },
+];
+
+const features = [
+    {
+        icon: "📰",
+        title: "News & Articles",
+        desc: "Stay updated with the latest in dental science and practice.",
+    },
+    {
+        icon: "🎓",
+        title: "CME Courses",
+        desc: "Earn credits with accredited online learning modules.",
+    },
+    {
+        icon: "🏢",
+        title: "Directory",
+        desc: "Find clinics, labs, and suppliers near you.",
+    },
+    {
+        icon: "💼",
+        title: "Job Board",
+        desc: "Connect with top dental employers worldwide.",
+    },
+    {
+        icon: "🛒",
+        title: "Marketplace",
+        desc: "Shop equipment and supplies from verified sellers.",
+    },
+    {
+        icon: "🏆",
+        title: "Awards",
+        desc: "Recognize excellence with our annual awards program.",
+    },
+];
+
+const testimonials = [
+    {
+        name: "Dr. Priya Sharma",
+        role: "Prosthodontist, Mumbai",
+        quote: "DentalReach has transformed how I stay current with industry trends. The articles are top-notch!",
+        avatar: "https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=200",
+    },
+    {
+        name: "Dr. James Liu",
+        role: "Orthodontist, Singapore",
+        quote: "The community here is incredible. I've connected with peers I never would have met otherwise.",
+        avatar: "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=200",
+    },
+    {
+        name: "Dr. Sarah Mitchell",
+        role: "General Dentist, London",
+        quote: "From job listings to CME credits, DentalReach is my one-stop platform for professional growth.",
+        avatar: "https://images.pexels.com/photos/5327656/pexels-photo-5327656.jpeg?auto=compress&cs=tinysrgb&w=200",
+    },
+];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="DentalReach | The Future of Dentistry">
+    <div class="bg-tuio-bg min-h-screen font-body">
+        <!-- HERO SECTION -->
+        <section class="p-4 md:p-8">
+            <div
+                class="max-w-[1800px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6"
+            >
+                <!-- Trending Topics -->
+                <div
+                    class="col-span-1 md:col-span-4 lg:col-span-3 row-span-2 bg-tuio-pink rounded-[32px] p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                >
+                    <div class="relative z-10">
+                        <h3
+                            class="text-white font-tuio text-3xl mb-8 uppercase tracking-wide"
+                        >
+                            Trending<br />Topics
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {
+                                categories.map((cat) => (
+                                    <a
+                                        href={`/articles?category=${cat.slug}`}
+                                        class="bg-white/20 hover:bg-white hover:text-tuio-pink text-white px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 backdrop-blur-sm border border-white/10"
+                                    >
+                                        {cat.name}
+                                    </a>
+                                ))
+                            }
+                        </div>
+                    </div>
+                    <div
+                        class="absolute -bottom-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-500"
+                    >
+                    </div>
+                </div>
+
+                <!-- Hero Header -->
+                <div
+                    class="col-span-1 md:col-span-8 lg:col-span-9 bg-white rounded-[32px] p-8 md:p-12 flex flex-col justify-center items-start shadow-sm min-h-[400px]"
+                >
+                    <span
+                        class="text-tuio-pink font-bold tracking-widest uppercase mb-4 text-sm animate-pulse"
+                        >#1 Digital Magazine</span
+                    >
+                    <h1
+                        class="font-tuio text-5xl md:text-7xl lg:text-9xl uppercase leading-[0.9] text-tuio-navy mb-8 tracking-tight"
+                    >
+                        The Future<br />
+                        <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-pink to-purple-600"
+                            >Of Dentistry</span
+                        ><br />
+                        Is Here
+                    </h1>
+                    <p class="text-xl text-gray-500 max-w-2xl font-light">
+                        Curated insights, clinical breakthroughs, and global
+                        trends for the modern dental professional.
+                    </p>
+                </div>
+
+                <!-- Search Bar -->
+                <div
+                    class="col-span-1 md:col-span-12 bg-tuio-navy rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between text-white shadow-sm gap-6"
+                >
+                    <form
+                        action="/search"
+                        class="flex items-center gap-4 w-full md:w-auto flex-grow"
+                    >
+                        <div
+                            class="w-12 h-12 bg-tuio-pink rounded-full flex items-center justify-center shrink-0"
+                        >
+                            🔍
+                        </div>
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="Search articles, events, listings..."
+                            class="bg-transparent border-none text-2xl font-tuio placeholder-gray-500 focus:ring-0 w-full text-white"
+                        />
+                    </form>
+                    <div class="flex gap-4 shrink-0">
+                        <a
+                            href="/login"
+                            class="px-8 py-3 bg-white text-tuio-navy rounded-full font-bold hover:bg-tuio-pink hover:text-white transition-all"
+                        >
+                            Join Community
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS SECTION -->
+        <section class="py-16 bg-tuio-navy relative overflow-hidden">
+            <div
+                class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+            >
+            </div>
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    {
+                        stats.map((stat) => (
+                            <div class="text-center text-white">
+                                <div class="text-4xl mb-3">{stat.icon}</div>
+                                <div class="text-5xl md:text-6xl font-tuio text-tuio-pink mb-2">
+                                    {stat.value}
+                                </div>
+                                <div class="text-white/70 uppercase tracking-widest text-sm">
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD SECTION -->
+        <div class="bg-tuio-navy">
+            <Leaderboard client:visible initialLeaders={leaderboardData} />
+        </div>
+
+        <!-- ARTICLES SECTION -->
+        <section class="py-16 px-4 md:px-8">
+            <div class="max-w-[1800px] mx-auto">
+                <div class="flex items-end justify-between mb-12">
+                    <div>
+                        <span
+                            class="text-tuio-pink font-bold uppercase tracking-widest mb-2 block"
+                            >Latest</span
+                        >
+                        <h2
+                            class="font-tuio text-4xl md:text-5xl uppercase text-tuio-navy"
+                        >
+                            Featured Articles
+                        </h2>
+                    </div>
+                    <a
+                        href="/articles"
+                        class="hidden md:flex items-center gap-2 text-tuio-navy font-bold hover:text-tuio-pink transition-colors"
+                    >
+                        View All →
+                    </a>
+                </div>
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                    {
+                        articles.map((article: any) => (
+                            <article class="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+                                <div class="relative h-64 overflow-hidden">
+                                    <img
+                                        src={
+                                            article.image_url ||
+                                            "/images/pattern.png"
+                                        }
+                                        alt={article.title}
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                    <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-tuio-navy px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        {article.category || "News"}
+                                    </span>
+                                </div>
+                                <div class="p-8">
+                                    <h3 class="font-tuio text-2xl text-tuio-navy mb-4 leading-tight group-hover:text-tuio-pink transition-colors">
+                                        <a href={`/articles/${article.slug}`}>
+                                            {article.title}
+                                        </a>
+                                    </h3>
+                                    <p class="text-gray-500 line-clamp-2 mb-6">
+                                        {article.excerpt}
+                                    </p>
+                                    <div class="flex items-center justify-between border-t border-gray-100 pt-6">
+                                        <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">
+                                            By{" "}
+                                            {article.author?.full_name ||
+                                                "DentalReach"}
+                                        </span>
+                                        <a
+                                            href={`/articles/${article.slug}`}
+                                            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-tuio-navy group-hover:text-white group-hover:border-tuio-navy transition-all"
+                                        >
+                                            →
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section class="py-16 px-4 md:px-8 bg-white">
+            <div class="max-w-[1400px] mx-auto">
+                <div class="text-center mb-16">
+                    <span
+                        class="text-tuio-pink font-bold uppercase tracking-widest mb-2 block"
+                        >Platform</span
+                    >
+                    <h2
+                        class="font-tuio text-4xl md:text-5xl uppercase text-tuio-navy mb-4"
+                    >
+                        Everything You Need
+                    </h2>
+                    <p
+                        class="text-gray-500 max-w-2xl mx-auto font-light text-lg"
+                    >
+                        One platform for education, networking, career growth,
+                        and commerce.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    {
+                        features.map((feature) => (
+                            <div class="bg-tuio-bg rounded-[24px] p-8 text-center hover:bg-tuio-navy hover:text-white group transition-all duration-300 cursor-pointer">
+                                <div class="text-5xl mb-6 group-hover:scale-110 transition-transform">
+                                    {feature.icon}
+                                </div>
+                                <h3 class="font-tuio text-xl uppercase mb-3 text-tuio-navy group-hover:text-white transition-colors">
+                                    {feature.title}
+                                </h3>
+                                <p class="text-gray-500 group-hover:text-white/70 font-light transition-colors">
+                                    {feature.desc}
+                                </p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS SECTION -->
+        <section
+            class="py-20 px-4 md:px-8 bg-gradient-to-br from-tuio-pink to-purple-600 relative overflow-hidden"
+        >
+            <div
+                class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+            >
+            </div>
+            <div class="max-w-[1400px] mx-auto relative z-10">
+                <div class="text-center mb-16">
+                    <span
+                        class="text-white/80 font-bold uppercase tracking-widest mb-2 block"
+                        >Testimonials</span
+                    >
+                    <h2
+                        class="font-tuio text-4xl md:text-5xl uppercase text-white"
+                    >
+                        Loved by Dentists
+                    </h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    {
+                        testimonials.map((t) => (
+                            <div class="bg-white/10 backdrop-blur-sm rounded-[24px] p-8 border border-white/20">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <img
+                                        src={t.avatar}
+                                        alt={t.name}
+                                        class="w-14 h-14 rounded-full object-cover border-2 border-white"
+                                    />
+                                    <div>
+                                        <h4 class="font-bold text-white">
+                                            {t.name}
+                                        </h4>
+                                        <p class="text-white/70 text-sm">
+                                            {t.role}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="text-white/90 font-light italic">
+                                    "{t.quote}"
+                                </p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- NEWSLETTER CTA -->
+        <section class="py-20 px-4 md:px-8">
+            <div
+                class="max-w-4xl mx-auto bg-tuio-navy rounded-[40px] p-12 md:p-16 text-center text-white relative overflow-hidden"
+            >
+                <div
+                    class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+                >
+                </div>
+                <div class="relative z-10">
+                    <div class="text-5xl mb-6">📬</div>
+                    <h2 class="font-tuio text-4xl md:text-5xl uppercase mb-4">
+                        Stay In The Loop
+                    </h2>
+                    <p
+                        class="text-white/70 mb-10 max-w-xl mx-auto font-light text-lg"
+                    >
+                        Get weekly insights, event invites, and exclusive
+                        content delivered to your inbox.
+                    </p>
+                    <form
+                        class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
+                    >
+                        <input
+                            type="email"
+                            placeholder="Your email address"
+                            class="flex-grow px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                        />
+                        <button
+                            type="submit"
+                            class="px-8 py-4 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-white hover:text-tuio-pink transition-all shrink-0"
+                        >
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVENTS CTA -->
+        <section class="pb-16 px-4 md:px-8">
+            <div class="max-w-[1400px] mx-auto grid md:grid-cols-2 gap-8">
+                <div
+                    class="bg-tuio-pink rounded-[32px] p-12 text-white relative overflow-hidden group"
+                >
+                    <div class="relative z-10">
+                        <span
+                            class="font-bold tracking-widest uppercase mb-2 inline-block"
+                            >Upcoming</span
+                        >
+                        <h3 class="font-tuio text-4xl mb-6 leading-tight">
+                            DON'T MISS<br />THE ACTION
+                        </h3>
+                        <a
+                            href="/events"
+                            class="inline-block px-8 py-3 bg-white text-tuio-pink rounded-full font-bold hover:bg-tuio-navy hover:text-white transition-all"
+                        >
+                            View Events
+                        </a>
+                    </div>
+                    <div
+                        class="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+                    >
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-[32px] p-12 relative overflow-hidden group border-2 border-tuio-navy"
+                >
+                    <div class="relative z-10">
+                        <span
+                            class="font-bold tracking-widest uppercase mb-2 inline-block text-tuio-pink"
+                            >Careers</span
+                        >
+                        <h3
+                            class="font-tuio text-4xl mb-6 leading-tight text-tuio-navy"
+                        >
+                            FIND YOUR<br />DREAM JOB
+                        </h3>
+                        <a
+                            href="/jobs"
+                            class="inline-block px-8 py-3 bg-tuio-navy text-white rounded-full font-bold hover:bg-tuio-pink transition-all"
+                        >
+                            Browse Jobs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</BaseLayout>

@@ -1,0 +1,201 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const team = [
+    { name: 'Dr. Rockson Samuel', role: 'Founder & Chief Dental Officer', icon: '👨‍⚕️', color: 'tuio-pink' },
+    { name: 'Dr. Nupur Shrirao', role: 'Chief Editor', icon: '📚', color: 'purple-500' },
+    { name: 'Dr. Zainab Rangawala', role: 'Media & PR', icon: '🌐', color: 'teal-500' },
+];
+
+const techTeam = [
+    { name: 'Bhavye', role: 'Technical Lead', email: 'bhavye29@gmail.com' },
+    { name: 'Nehan', role: 'Full Stack Developer', email: 'nehanlil06@gmail.com' },
+    { name: 'Nikhil', role: 'UI/UX Developer', email: 'nikhilgaur@gmail.com' },
+];
+
+const objectives = [
+    { icon: '🌍', title: 'Global Community', desc: 'Foster a worldwide network of dental professionals sharing knowledge and expertise' },
+    { icon: '📖', title: 'Knowledge Sharing', desc: 'Enable seamless sharing of clinical knowledge, research, and best practices' },
+    { icon: '🏆', title: 'Professional Growth', desc: 'Promote career advancement through recognition, collaboration, and learning' },
+    { icon: '❤️', title: 'Bridge Education Gaps', desc: 'Improve access to dental education and resources for professionals worldwide' },
+    { icon: '💡', title: 'Drive Innovation', desc: 'Support digital transformation and innovation in modern dentistry' },
+];
+
+const features = [
+    { icon: '📖', title: 'Knowledge & Content', items: ['Peer-reviewed articles & clinical case studies', 'Journals and research archives', 'Newsletter and educational resources'] },
+    { icon: '🤝', title: 'Community & Networking', items: ['Professional forums & discussions', 'Events, webinars, and conferences', 'Business listings and classifieds'] },
+    { icon: '🏆', title: 'Recognition & Growth', items: ['Leaderboard and awards', 'Profile building and digital reputation', 'Product showcases and reviews'] },
+    { icon: '📱', title: 'Digital Tools', items: ['Submission and publishing workflow', 'Advanced search and filtering', 'Mobile-friendly, modern UI'] },
+];
+
+const stats = [
+    { value: '50K+', label: 'Professionals' },
+    { value: '100+', label: 'Countries' },
+    { value: '1000+', label: 'Articles' },
+    { value: '24/7', label: 'Support' },
+];
+---
+
+<BaseLayout title="About DentalReach | Our Mission & Vision">
+    <!-- Hero -->
+    <section class="bg-tuio-navy text-white py-24 relative overflow-hidden rounded-b-[40px]">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="text-5xl md:text-7xl font-tuio uppercase mb-6 leading-[0.9]">
+                        About<br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-pink to-purple-500">DentalReach</span>
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-8 font-light leading-relaxed">
+                        Empowering dental professionals worldwide with a collaborative, innovative, and accessible digital platform for education, networking, and growth.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <span class="bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 font-medium">🌍 Global Community</span>
+                        <span class="bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 font-medium">🎯 Professional Growth</span>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-[32px] p-8 border border-white/20">
+                    <div class="bg-white rounded-[24px] p-8 text-center">
+                        <div class="text-5xl mb-4">❤️</div>
+                        <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-2">Our Mission</h3>
+                        <p class="text-gray-600 font-light">
+                            Advancing dental care through collaboration, innovation, and knowledge sharing
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="bg-tuio-pink py-12 -mt-8 relative z-20 rounded-[32px] mx-4 md:mx-8 lg:mx-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+                {stats.map(stat => (
+                    <div>
+                        <div class="text-4xl md:text-5xl font-tuio mb-2">{stat.value}</div>
+                        <div class="text-white/80 uppercase tracking-widest text-sm">{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Leaders -->
+    <section class="py-20 bg-tuio-bg">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-tuio uppercase text-tuio-navy mb-4">Community Leaders</h2>
+                <div class="w-24 h-1 bg-tuio-pink mx-auto"></div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                {team.map(member => (
+                    <div class="bg-white rounded-[32px] p-8 text-center shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all group">
+                        <div class="text-6xl mb-6">{member.icon}</div>
+                        <h3 class="font-tuio text-2xl uppercase text-tuio-navy mb-2">{member.name}</h3>
+                        <p class="text-tuio-pink font-bold uppercase tracking-wide">{member.role}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Objectives -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-tuio uppercase text-tuio-navy mb-4">Our Objectives</h2>
+                <div class="w-24 h-1 bg-tuio-pink mx-auto mb-6"></div>
+                <p class="text-xl text-gray-500 max-w-3xl mx-auto font-light">
+                    We're committed to transforming the dental profession through these key objectives
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {objectives.map(obj => (
+                    <div class="bg-tuio-bg rounded-[32px] p-8 hover:shadow-lg transition-all group border border-transparent hover:border-tuio-pink">
+                        <div class="text-4xl mb-6 group-hover:scale-110 transition-transform">{obj.icon}</div>
+                        <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-4">{obj.title}</h3>
+                        <p class="text-gray-500 font-light">{obj.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features -->
+    <section class="py-20 bg-tuio-bg">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-tuio uppercase text-tuio-navy mb-4">Core Features</h2>
+                <div class="w-24 h-1 bg-tuio-pink mx-auto mb-6"></div>
+                <p class="text-xl text-gray-500 max-w-3xl mx-auto font-light">
+                    Comprehensive tools and features designed specifically for dental professionals
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8">
+                {features.map(feat => (
+                    <div class="bg-white rounded-[32px] p-8 shadow-sm hover:shadow-xl transition-all">
+                        <div class="flex items-start gap-6 mb-6">
+                            <div class="text-4xl">{feat.icon}</div>
+                            <div>
+                                <h3 class="font-tuio text-2xl uppercase text-tuio-navy mb-2">{feat.title}</h3>
+                            </div>
+                        </div>
+                        <ul class="space-y-3">
+                            {feat.items.map(item => (
+                                <li class="flex items-start gap-3">
+                                    <span class="w-2 h-2 bg-tuio-pink rounded-full mt-2 shrink-0"></span>
+                                    <span class="text-gray-600">{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Team -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-tuio uppercase text-tuio-navy mb-4">Technical Team</h2>
+                <div class="w-24 h-1 bg-tuio-pink mx-auto mb-6"></div>
+                <p class="text-xl text-gray-500 max-w-3xl mx-auto font-light">
+                    Our skilled developers and engineers who bring DentalReach to life
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                {techTeam.map(member => (
+                    <div class="bg-tuio-bg rounded-[32px] p-8 text-center hover:shadow-lg transition-all group border border-transparent hover:border-tuio-pink">
+                        <div class="w-20 h-20 bg-tuio-navy rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-tuio-pink transition-colors">
+                            <span class="text-3xl">💻</span>
+                        </div>
+                        <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-2">{member.name}</h3>
+                        <p class="text-tuio-pink font-bold mb-3">{member.role}</p>
+                        <a href={`mailto:${member.email}`} class="text-gray-500 text-sm hover:text-tuio-pink transition-colors">{member.email}</a>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission CTA -->
+    <section class="py-20 bg-tuio-navy text-white rounded-t-[40px]">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl md:text-5xl font-tuio uppercase mb-8 leading-tight">
+                    Advancing<br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-pink to-purple-500">Global Oral Health</span>
+                </h2>
+                <p class="text-xl text-gray-300 mb-10 font-light leading-relaxed">
+                    Our mission is to empower dental professionals worldwide by providing a collaborative, innovative, and accessible digital platform—enabling them to excel in their practice, advance dental care, and make a meaningful impact on global oral health.
+                </p>
+                <a href="/community" class="inline-block px-10 py-4 bg-tuio-pink text-white rounded-full font-bold hover:bg-white hover:text-tuio-pink transition-all uppercase tracking-wide">
+                    Join Our Community
+                </a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>

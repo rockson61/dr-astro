@@ -1,0 +1,149 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import { createSupabaseServerClient } from '../../../lib/supabase';
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
+
+const listingTypes = [
+  { value: 'clinic', label: 'Dental Clinic' },
+  { value: 'lab', label: 'Dental Laboratory' },
+  { value: 'supplier', label: 'Equipment Supplier' },
+  { value: 'education', label: 'Training Institute' },
+  { value: 'other', label: 'Other' },
+];
+---
+
+<DashboardLayout title="Add New Listing">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold dark:text-white">Add New Listing</h2>
+                <p class="text-gray-500">List your business in the DentalReach directory.</p>
+            </div>
+            <a href="/dashboard/my-listings" class="text-gray-500 hover:text-tuio-pink transition-colors">
+                ← Back to My Listings
+            </a>
+        </div>
+
+        <form class="space-y-6">
+            <!-- Business Name -->
+            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Business Name</label>
+                <input 
+                    type="text" 
+                    name="business_name"
+                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none text-xl font-medium" 
+                    placeholder="Smile Dental Clinic"
+                />
+            </div>
+
+            <!-- Type & City -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Business Type</label>
+                    <select name="type" class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none">
+                        {listingTypes.map(type => (
+                            <option value={type.value}>{type.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">City</label>
+                    <input 
+                        type="text" 
+                        name="city"
+                        class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none" 
+                        placeholder="Mumbai"
+                    />
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Full Address</label>
+                <textarea 
+                    name="address"
+                    rows="2"
+                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none resize-none"
+                    placeholder="123 Main Street, Medical Complex, Building A"
+                ></textarea>
+            </div>
+
+            <!-- Contact -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        name="phone"
+                        class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none" 
+                        placeholder="+91 98765 43210"
+                    />
+                </div>
+                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Website</label>
+                    <input 
+                        type="url" 
+                        name="website"
+                        class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none" 
+                        placeholder="https://smiledental.com"
+                    />
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Description</label>
+                <textarea 
+                    name="description"
+                    rows="5"
+                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none resize-none"
+                    placeholder="Describe your services, specialties, and what makes your business unique..."
+                ></textarea>
+            </div>
+
+            <!-- Services -->
+            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-4">Services Offered</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {['General Dentistry', 'Orthodontics', 'Implants', 'Cosmetic', 'Pediatric', 'Oral Surgery', 'Periodontics', 'Endodontics', 'Prosthodontics'].map(service => (
+                        <label class="flex items-center gap-2 p-3 bg-tuio-bg dark:bg-neutral-700 rounded-[12px] cursor-pointer hover:bg-tuio-pink/10 transition-colors">
+                            <input type="checkbox" name="services" value={service.toLowerCase().replace(' ', '-')} class="w-4 h-4 accent-tuio-pink" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{service}</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
+                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Business Photos</label>
+                <div class="border-2 border-dashed border-gray-200 dark:border-neutral-700 rounded-[16px] p-8 text-center">
+                    <div class="text-4xl mb-4">📸</div>
+                    <p class="text-gray-500 mb-4">Upload photos of your business (max 5 images)</p>
+                    <input type="file" name="images" accept="image/*" multiple class="hidden" id="images-upload" />
+                    <label for="images-upload" class="inline-block px-6 py-2 bg-tuio-bg text-tuio-navy rounded-full font-medium cursor-pointer hover:bg-tuio-pink hover:text-white transition-all">
+                        Choose Files
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-4 justify-end">
+                <button type="button" class="px-8 py-3 border border-gray-200 dark:border-neutral-700 text-gray-600 dark:text-gray-300 rounded-full font-bold hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all">
+                    Save as Draft
+                </button>
+                <button type="submit" class="px-8 py-3 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all">
+                    Submit for Verification
+                </button>
+            </div>
+        </form>
+    </div>
+</DashboardLayout>

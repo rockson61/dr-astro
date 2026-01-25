@@ -1,0 +1,84 @@
+---
+/**
+ * Skeleton - Loading placeholder component
+ * Use for content that's loading from the server
+ * 
+ * Props:
+ * - variant: 'text' | 'circle' | 'rect' | 'card' (default: 'text')
+ * - width: string (default: '100%')
+ * - height: string (default: '1rem')
+ * - count: number (default: 1) - for text variant
+ */
+
+interface Props {
+    variant?: 'text' | 'circle' | 'rect' | 'card';
+    width?: string;
+    height?: string;
+    count?: number;
+    class?: string;
+}
+
+const { 
+    variant = 'text', 
+    width = '100%', 
+    height = '1rem',
+    count = 1,
+    class: className = ''
+} = Astro.props;
+---
+
+{variant === 'text' && (
+    <div class={`space-y-2 ${className}`}>
+        {Array.from({ length: count }).map((_, i) => (
+            <div 
+                class="skeleton rounded" 
+                style={`width: ${i === count - 1 ? '75%' : width}; height: ${height};`}
+            />
+        ))}
+    </div>
+)}
+
+{variant === 'circle' && (
+    <div 
+        class={`skeleton rounded-full ${className}`} 
+        style={`width: ${width}; height: ${width};`}
+    />
+)}
+
+{variant === 'rect' && (
+    <div 
+        class={`skeleton rounded-2xl ${className}`} 
+        style={`width: ${width}; height: ${height};`}
+    />
+)}
+
+{variant === 'card' && (
+    <div class={`bg-white rounded-[32px] p-6 shadow-sm ${className}`}>
+        <div class="skeleton rounded-2xl w-full h-48 mb-6"></div>
+        <div class="skeleton rounded h-6 w-3/4 mb-3"></div>
+        <div class="skeleton rounded h-4 w-full mb-2"></div>
+        <div class="skeleton rounded h-4 w-5/6"></div>
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div class="skeleton rounded-full w-10 h-10"></div>
+            <div class="skeleton rounded h-4 w-24"></div>
+        </div>
+    </div>
+)}
+
+<style>
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            #e5e7eb 0%,
+            #f3f4f6 50%,
+            #e5e7eb 100%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes skeleton-shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+</style>

@@ -1,0 +1,284 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch profile
+const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+---
+
+<DashboardLayout title="Settings">
+    <div class="max-w-3xl mx-auto">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold dark:text-white">Account Settings</h2>
+            <p class="text-gray-500">Manage your profile and preferences.</p>
+        </div>
+
+        <form class="space-y-6">
+            <!-- Profile Info -->
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm"
+            >
+                <h3
+                    class="font-tuio text-lg uppercase text-tuio-navy dark:text-white mb-6"
+                >
+                    Profile Information
+                </h3>
+
+                <!-- Avatar -->
+                <div class="flex items-center gap-6 mb-6">
+                    <div
+                        class="w-20 h-20 bg-tuio-pink rounded-full flex items-center justify-center text-white text-2xl shrink-0 overflow-hidden"
+                    >
+                        {
+                            profile?.avatar_url ? (
+                                <img
+                                    src={profile.avatar_url}
+                                    alt="Avatar"
+                                    class="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span>👤</span>
+                            )
+                        }
+                    </div>
+                    <div>
+                        <button
+                            type="button"
+                            class="px-4 py-2 text-sm bg-tuio-bg text-tuio-navy rounded-full font-medium hover:bg-tuio-pink hover:text-white transition-all"
+                        >
+                            Change Photo
+                        </button>
+                        <p class="text-xs text-gray-400 mt-2">
+                            JPG, PNG up to 2MB
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2"
+                            >Full Name</label
+                        >
+                        <input
+                            type="text"
+                            name="full_name"
+                            value={profile?.full_name || ""}
+                            class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2"
+                            >Professional Title</label
+                        >
+                        <input
+                            type="text"
+                            name="title"
+                            value={profile?.title || ""}
+                            placeholder="e.g. General Dentist"
+                            class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                        />
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label
+                        class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2"
+                        >Bio</label
+                    >
+                    <textarea
+                        name="bio"
+                        rows="4"
+                        class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none resize-none"
+                        placeholder="Tell us about yourself..."
+                        >{profile?.bio || ""}</textarea
+                    >
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm"
+            >
+                <h3
+                    class="font-tuio text-lg uppercase text-tuio-navy dark:text-white mb-6"
+                >
+                    Contact Information
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2"
+                            >Email</label
+                        >
+                        <input
+                            type="email"
+                            value={user.email}
+                            disabled
+                            class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-700 text-gray-500 cursor-not-allowed"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2"
+                            >Location</label
+                        >
+                        <input
+                            type="text"
+                            name="location"
+                            value={profile?.location || ""}
+                            placeholder="City, Country"
+                            class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm"
+            >
+                <h3
+                    class="font-tuio text-lg uppercase text-tuio-navy dark:text-white mb-6"
+                >
+                    Notifications
+                </h3>
+                <div class="space-y-4">
+                    <label
+                        class="flex items-center justify-between p-4 bg-tuio-bg dark:bg-neutral-700 rounded-[16px] cursor-pointer"
+                    >
+                        <div>
+                            <span
+                                class="font-medium text-tuio-navy dark:text-white"
+                                >Email Notifications</span
+                            >
+                            <p class="text-sm text-gray-500">
+                                Receive updates about your articles and listings
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="email_notifications"
+                            checked
+                            class="w-5 h-5 accent-tuio-pink"
+                        />
+                    </label>
+                    <label
+                        class="flex items-center justify-between p-4 bg-tuio-bg dark:bg-neutral-700 rounded-[16px] cursor-pointer"
+                    >
+                        <div>
+                            <span
+                                class="font-medium text-tuio-navy dark:text-white"
+                                >Marketing Emails</span
+                            >
+                            <p class="text-sm text-gray-500">
+                                Receive news about events and promotions
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            name="marketing_emails"
+                            class="w-5 h-5 accent-tuio-pink"
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end">
+                <button
+                    type="submit"
+                    class="px-8 py-3 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all"
+                >
+                    Save Changes
+                </button>
+            </div>
+        </form>
+
+        <div
+            class="mt-12 bg-red-50 dark:bg-red-900/20 rounded-[24px] p-6 border border-red-200 dark:border-red-800"
+        >
+            <h3 class="font-tuio text-lg uppercase text-red-600 mb-4">
+                Danger Zone
+            </h3>
+            <p class="text-red-600/80 mb-4 text-sm">
+                Once you delete your account, there is no going back. Please be
+                certain.
+            </p>
+            <button
+                type="button"
+                class="px-6 py-2 border border-red-500 text-red-500 rounded-full font-medium hover:bg-red-500 hover:text-white transition-all"
+            >
+                Delete Account
+            </button>
+        </div>
+    </div>
+</DashboardLayout>
+
+<script>
+    import { supabase } from "../../lib/supabase";
+
+    const form = document.querySelector("form");
+    const saveBtn = form?.querySelector(
+        'button[type="submit"]',
+    ) as HTMLButtonElement;
+
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!saveBtn) return;
+
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const updates = {
+                full_name: formData.get("full_name"),
+                title: formData.get("title"),
+                bio: formData.get("bio"),
+                location: formData.get("location"),
+                updated_at: new Date().toISOString(),
+            };
+
+            try {
+                const {
+                    data: { user },
+                } = await supabase.auth.getUser();
+
+                if (!user) throw new Error("No user logged in");
+
+                const { error } = await supabase
+                    .from("profiles")
+                    .update(updates)
+                    .eq("id", user.id);
+
+                if (error) throw error;
+
+                alert("Profile updated successfully!");
+            } catch (error: any) {
+                console.error("Error updating profile:", error);
+                alert("Error updating profile: " + error.message);
+            } finally {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        });
+    }
+</script>

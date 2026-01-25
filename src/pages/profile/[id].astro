@@ -1,0 +1,213 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { supabase } from "../../lib/supabase";
+
+import ProfileReviewForm from "../../components/profile/ProfileReviewForm";
+import ProfileReviewsList from "../../components/profile/ProfileReviewsList";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+// Get current user for review form
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+// Admin Supabase for Data Fetching (Bypass RLS)
+import { createClient } from "@supabase/supabase-js";
+const adminSupabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+// Fetch profile and reviews
+let profile: any = null;
+let reviews: any[] = [];
+
+try {
+    const { data } = await adminSupabase
+        .from("profiles")
+        .select("*, specializations:custom_fields(value)") // Adjusted if needed, or keep as is if schema matches
+        // Actually legacy schema uses 'specializations' column or text array.
+        // Based on seed script standard 'specialty' column exists, but 'specializations' might be complex.
+        // Let's stick to simple select first.
+        .select("*, specializations, social_links")
+        .eq("id", id)
+        .single();
+    if (data) profile = data;
+
+    // Fetch Reviews (SSR)
+    const { data: reviewData } = await adminSupabase
+        .from("profile_ratings")
+        .select("*, rater:rater_id(first_name, last_name, avatar_url)")
+        .eq("profile_id", id)
+        .order("created_at", { ascending: false });
+
+    if (reviewData) reviews = reviewData;
+} catch (e) {
+    console.error("DB error", e);
+}
+
+// Mock fallback
+if (!profile) {
+    profile = {
+        id: "mock-id",
+        full_name: "Dr. Sarah Chen",
+        title: "Prosthodontist",
+        bio: "Digital dentistry specialist with 15 years of experience in implantology, CAD/CAM technologies, and full-mouth rehabilitation. Published researcher with 50+ peer-reviewed articles.",
+        avatar_url:
+            "https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=400",
+        location: "Mumbai, India",
+        reputation_score: 1250,
+        articles_count: 23,
+        followers_count: 1540,
+        specializations: ["Prosthodontics", "Implantology", "CAD/CAM"],
+        verified: true,
+    };
+}
+
+const stats = [
+    { label: "Reputation", value: profile.reputation_score || 0, icon: "⭐" },
+    { label: "Articles", value: profile.articles_count || 0, icon: "📝" },
+    { label: "Followers", value: profile.followers_count || 0, icon: "👥" },
+];
+---
+
+<BaseLayout title={`${profile.full_name} | DentalReach Profile`}>
+    <!-- Header -->
+    <section class="bg-tuio-navy text-white py-16 relative overflow-hidden">
+        <div
+            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+        >
+        </div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <!-- Avatar -->
+                <div class="relative">
+                    <div
+                        class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-tuio-pink"
+                    >
+                        <img
+                            src={profile.avatar_url ||
+                                "/images/default-avatar.png"}
+                            alt={profile.full_name}
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                    {
+                        profile.verified && (
+                            <span class="absolute -bottom-2 -right-2 w-10 h-10 bg-tuio-pink rounded-full flex items-center justify-center text-white text-lg">
+                                ✓
+                            </span>
+                        )
+                    }
+                </div>
+
+                <!-- Info -->
+                <div class="text-center md:text-left flex-grow">
+                    <h1 class="text-4xl md:text-5xl font-tuio uppercase mb-2">
+                        {profile.full_name}
+                    </h1>
+                    <p class="text-tuio-pink font-bold text-lg mb-2">
+                        {profile.title}
+                    </p>
+                    <p class="text-gray-400">
+                        📍 {profile.location || "Location not specified"}
+                    </p>
+                </div>
+
+                <!-- Action -->
+                <div class="shrink-0">
+                    <button
+                        class="px-8 py-3 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-white hover:text-tuio-pink transition-all"
+                    >
+                        Follow
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <div class="bg-tuio-pink py-6 -mt-1">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center gap-12">
+                {
+                    stats.map((stat) => (
+                        <div class="text-center text-white">
+                            <div class="text-3xl font-tuio">
+                                {stat.value.toLocaleString()}
+                            </div>
+                            <div class="text-white/80 text-sm uppercase tracking-widest">
+                                {stat.label}
+                            </div>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-tuio-bg min-h-screen py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- About -->
+                    <div class="bg-white rounded-[24px] p-6 shadow-sm">
+                        <h3
+                            class="font-tuio text-lg uppercase text-tuio-navy mb-4"
+                        >
+                            About
+                        </h3>
+                        <p class="text-gray-600 font-light">
+                            {profile.bio || "No bio available."}
+                        </p>
+                    </div>
+
+                    <!-- Specializations -->
+                    {
+                        profile.specializations &&
+                            profile.specializations.length > 0 && (
+                                <div class="bg-white rounded-[24px] p-6 shadow-sm">
+                                    <h3 class="font-tuio text-lg uppercase text-tuio-navy mb-4">
+                                        Specializations
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        {profile.specializations.map(
+                                            (spec: string) => (
+                                                <span class="px-4 py-1 bg-tuio-bg rounded-full text-sm font-medium text-tuio-navy">
+                                                    {spec}
+                                                </span>
+                                            ),
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                    }
+                </div>
+
+                <!-- Main Content -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-[24px] p-6 shadow-sm mb-8">
+                        {
+                            user && user.id !== id && (
+                                <ProfileReviewForm
+                                    client:visible
+                                    profileId={id || profile.id}
+                                    raterId={user.id}
+                                />
+                            )
+                        }
+                        <ProfileReviewsList
+                            client:visible
+                            profileId={id || profile.id}
+                            initialReviews={reviews}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</BaseLayout>

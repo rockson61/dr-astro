@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary-50: #FEF2F2;
+    --color-primary-100: #FEE2E2;
+    --color-primary-200: #FECACA;
+    --color-primary-300: #FCA5A5;
+    --color-primary-400: #F87171;
+    --color-primary-500: #D7263D;
+    --color-primary-600: #B91D33;
+    --color-primary-700: #991B1B;
+    --color-primary-800: #7F1D1D;
+    --color-primary-900: #5F1515;
+
+    --color-accent: #D7263D;
+    --color-accent-dark: #B91D33;
+
+    --color-neutral-50: #F9FAFB;
+    --color-neutral-900: #111827;
+
+    /* Tuio Design System Colors */
+    --color-tuio-pink: #C576F6;
+    --color-tuio-navy: #0F1A2A;
+    --color-tuio-bg: #F5F5F7;
+
+    --font-heading: "Playfair Display", "Georgia", serif;
+    --font-tuio: "Paytone One", sans-serif;
+    --font-body: "Lato", "system-ui", "sans-serif";
+}
+
+/* Component Styles */
+@layer base {
+    body {
+        @apply font-body antialiased text-neutral-900 bg-white dark:bg-neutral-900 dark:text-white transition-colors duration-300;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-serif font-bold;
+    }
+}
+
+@layer components {
+
+    /* Glassmorphism Utilities */
+    .glass-card {
+        @apply backdrop-blur-lg bg-white/70 border border-white/40 shadow-sm dark:bg-black/40 dark:border-white/10;
+    }
+
+    .glass-nav {
+        @apply backdrop-blur-md bg-white/80 border-b border-gray-200/50 dark:bg-neutral-900/80 dark:border-white/10 supports-[backdrop-filter]:bg-white/60;
+    }
+
+    .btn-primary {
+        @apply px-4 py-2 rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-colors font-medium cursor-pointer shadow-md;
+    }
+
+    .btn-gold {
+        @apply px-4 py-2 rounded-xl bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors font-bold cursor-pointer;
+    }
+
+    /* Tuio Design System Buttons */
+    .btn-tuio-primary {
+        @apply px-8 py-4 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+    }
+
+    .btn-tuio-secondary {
+        @apply px-8 py-4 bg-white text-tuio-navy rounded-full font-bold uppercase tracking-wide border-2 border-tuio-navy hover:bg-tuio-navy hover:text-white transition-all duration-300;
+    }
+
+    .btn-tuio-ghost {
+        @apply px-6 py-3 bg-transparent text-tuio-navy rounded-full font-medium hover:bg-tuio-bg transition-all;
+    }
+
+    /* Tuio Cards */
+    .tuio-card {
+        @apply bg-white rounded-[32px] p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300;
+    }
+
+    .tuio-card-pink {
+        @apply bg-tuio-pink rounded-[32px] p-8 text-white relative overflow-hidden;
+    }
+
+    .tuio-card-navy {
+        @apply bg-tuio-navy rounded-[32px] p-8 text-white relative overflow-hidden;
+    }
+}
+
+/* Animations */
+@layer utilities {
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.3s ease-out forwards;
+    }
+
+    .animate-pulse-slow {
+        animation: pulse 3s ease-in-out infinite;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}

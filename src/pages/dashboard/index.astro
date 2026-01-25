@@ -1,0 +1,145 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch Profile
+const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+// Fetch Stats (Mock for now, real DB queries later)
+// In a real app, we would run Promise.all for these counts
+const stats = [
+    {
+        label: "Reputation Score",
+        value: profile?.reputation_score || 0,
+        change: "Lifetime",
+        icon: "⭐",
+    },
+    { label: "Total Views", value: "12,405", change: "+12%", icon: "chart" },
+    { label: "Articles Published", value: "8", change: "+1", icon: "document" },
+];
+---
+
+<DashboardLayout title="Overview">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold dark:text-white">
+            Hello, {profile?.full_name || "Doctor"}! 👋
+        </h2>
+        <p class="text-gray-500 dark:text-gray-400">
+            Here's what's happening with your content today.
+        </p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        {
+            stats.map((stat) => (
+                <div class="glass-card p-6 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-500 text-sm">{stat.label}</span>
+                        <span
+                            class={`text-xs font-medium px-2 py-1 rounded-full ${stat.change.startsWith("+") ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                        >
+                            {stat.change}
+                        </span>
+                    </div>
+                    <div class="text-3xl font-bold dark:text-white">
+                        {stat.value}
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+
+    <!-- Recent Activity / Quick Actions -->
+    <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Quick Actions -->
+        <div
+            class="glass-card p-6 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm"
+        >
+            <h3 class="font-bold text-lg mb-4 dark:text-white">
+                Quick Actions
+            </h3>
+            <div class="space-y-3">
+                <a
+                    href="/dashboard/articles/new"
+                    class="block w-full text-left p-4 rounded-lg bg-primary-600/5 hover:bg-primary-600/10 border border-primary-600/20 transition-colors group"
+                >
+                    <span
+                        class="font-medium text-primary-600 block group-hover:underline"
+                        >Write New Article</span
+                    >
+                    <span class="text-sm text-gray-500"
+                        >Share your clinical expertise with the world.</span
+                    >
+                </a>
+                <a
+                    href="/dashboard/listings/new"
+                    class="block w-full text-left p-4 rounded-lg bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-colors group"
+                >
+                    <span
+                        class="font-medium text-yellow-700 block group-hover:underline"
+                        >Add Business Listing</span
+                    >
+                    <span class="text-sm text-gray-500"
+                        >List your clinic or lab in the directory.</span
+                    >
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Notifications (Mock) -->
+        <div
+            class="glass-card p-6 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm"
+        >
+            <h3 class="font-bold text-lg mb-4 dark:text-white">
+                Recent Updates
+            </h3>
+            <div class="space-y-4">
+                <div class="flex gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"
+                    >
+                        ℹ️
+                    </div>
+                    <div>
+                        <p class="text-sm dark:text-gray-300">
+                            <strong>System:</strong> Welcome to the new DentalReach
+                            dashboard.
+                        </p>
+                        <span class="text-xs text-gray-400">2 hours ago</span>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0"
+                    >
+                        ✓
+                    </div>
+                    <div>
+                        <p class="text-sm dark:text-gray-300">
+                            <strong>Editorial:</strong> Your article "Digital Dentistry
+                            2026" was published.
+                        </p>
+                        <span class="text-xs text-gray-400">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</DashboardLayout>

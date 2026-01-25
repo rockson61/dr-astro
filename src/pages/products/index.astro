@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+// Fetch products
+let products: any[] = [];
+try {
+  const { data } = await supabase
+    .from('products')
+    .select('*, seller:profiles(full_name, avatar_url)')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(12);
+  if (data) products = data;
+} catch (e) {
+  console.error("DB error", e);
+}
+
+// Mock products fallback
+if (products.length === 0) {
+  products = [
+    { id: 1, name: 'Intraoral Scanner Pro X5', slug: 'scanner-pro-x5', price: 24999, image_url: 'https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Equipment', seller: { full_name: 'DentalTech Inc.' } },
+    { id: 2, name: 'LED Curing Light Ultra', slug: 'led-curing-light', price: 299, image_url: 'https://images.pexels.com/photos/4226263/pexels-photo-4226263.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Instruments', seller: { full_name: 'MediDent Supplies' } },
+    { id: 3, name: 'Composite Resin Kit (20 Shades)', slug: 'composite-kit', price: 450, image_url: 'https://images.pexels.com/photos/4226264/pexels-photo-4226264.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Materials', seller: { full_name: 'OralCare Pro' } },
+    { id: 4, name: 'Dental Chair Premium 3000', slug: 'dental-chair-3000', price: 8500, image_url: 'https://images.pexels.com/photos/3845777/pexels-photo-3845777.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Equipment', seller: { full_name: 'EquipDent' } },
+    { id: 5, name: 'Autoclave Sterilizer S200', slug: 'autoclave-s200', price: 3200, image_url: 'https://images.pexels.com/photos/5217882/pexels-photo-5217882.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Sterilization', seller: { full_name: 'CleanMed Systems' } },
+    { id: 6, name: 'Implant Surgical Kit', slug: 'implant-kit', price: 1850, image_url: 'https://images.pexels.com/photos/4226219/pexels-photo-4226219.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Implants', seller: { full_name: 'ImplantPro' } },
+  ];
+}
+
+const categories = ['All', 'Equipment', 'Instruments', 'Materials', 'Sterilization', 'Implants'];
+---
+
+<BaseLayout title="Dental Products | Shop Equipment & Supplies">
+    <section class="bg-tuio-pink text-white py-20 relative overflow-hidden rounded-b-[40px]">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="container mx-auto px-4 relative z-10 text-center">
+            <h1 class="text-5xl md:text-7xl font-tuio uppercase mb-6 leading-tight">
+                Dental<br/>Products
+            </h1>
+            <p class="text-xl text-white/80 max-w-2xl mx-auto font-light">
+                Shop premium dental equipment, instruments, and supplies from verified sellers worldwide.
+            </p>
+        </div>
+    </section>
+
+    <div class="bg-tuio-bg min-h-screen py-12">
+        <div class="container mx-auto px-4">
+            <!-- Category Filter -->
+            <div class="flex flex-wrap gap-3 mb-10 justify-center">
+                {categories.map(cat => (
+                    <button class={`px-6 py-2 rounded-full font-bold uppercase tracking-wide text-sm transition-all ${cat === 'All' ? 'bg-tuio-navy text-white' : 'bg-white text-tuio-navy hover:bg-tuio-pink hover:text-white'}`}>
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
+            <!-- Products Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.map((product: any) => (
+                    <div class="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all group">
+                        <div class="relative h-64 overflow-hidden">
+                            <img 
+                                src={product.image_url || '/images/pattern.png'} 
+                                alt={product.name}
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <span class="absolute top-4 left-4 bg-tuio-navy text-white px-4 py-1 rounded-full text-xs font-bold uppercase">
+                                {product.category}
+                            </span>
+                        </div>
+                        <div class="p-8">
+                            <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest">{product.seller?.full_name || 'Seller'}</p>
+                            <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-4 leading-tight group-hover:text-tuio-pink transition-colors">
+                                {product.name}
+                            </h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-2xl font-tuio text-tuio-pink">${product.price?.toLocaleString()}</span>
+                                <button class="w-12 h-12 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy group-hover:bg-tuio-pink group-hover:text-white transition-all">
+                                    🛒
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</BaseLayout>
