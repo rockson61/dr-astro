@@ -2,6 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { supabase } from "../lib/supabase";
 import Leaderboard from "../components/home/Leaderboard";
+import Carousel from "../components/ui/Carousel";
+import { createClient } from "@supabase/supabase-js";
 
 // Data Fetching with Robust Fallback
 let articles: any[] = [];
@@ -29,7 +31,6 @@ try {
 
     // 3. Fetch Leaderboard (SSR to bypass CORS/RLS)
     // Use Service Role to bypass RLS policies
-    import { createClient } from "@supabase/supabase-js";
     const adminSupabase = createClient(
         import.meta.env.PUBLIC_SUPABASE_URL,
         import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -44,12 +45,12 @@ try {
           profile_id,
           reputation,
           profiles:profile_id (
-            first_name, last_name, avatar_url, specialty, is_verified
+            first_name, last_name, avatar_url, specialty, is_verified, slug
           )
         `,
         )
         .order("reputation", { ascending: false })
-        .limit(10);
+        .limit(5);
 
     if (!viewError && viewData) {
         leaderboardData = viewData.map((item: any) => {
@@ -68,6 +69,7 @@ try {
                 avatar_url: profile?.avatar_url,
                 specialty: profile?.specialty,
                 is_verified: profile?.is_verified,
+                slug: profile?.slug,
             };
         });
     } else {
@@ -75,7 +77,7 @@ try {
         console.log("View failed, falling back to manual fetch");
         const { data: profiles, error: manualError } = await adminSupabase
             .from("profiles")
-            .select("*")
+            .select("*, slug")
             .limit(50);
         if (manualError) {
             console.error(
@@ -96,9 +98,10 @@ try {
                     avatar_url: p.avatar_url,
                     specialty: p.specialty,
                     is_verified: p.is_verified,
+                    slug: p.slug,
                 }))
-                .sort((a, b) => b.reputation - a.reputation)
-                .slice(0, 10);
+                .sort((a: any, b: any) => b.reputation - a.reputation)
+                .slice(0, 5);
         }
     }
 } catch (e) {
@@ -212,10 +215,193 @@ const testimonials = [
         avatar: "https://images.pexels.com/photos/5327656/pexels-photo-5327656.jpeg?auto=compress&cs=tinysrgb&w=200",
     },
 ];
+
+// --- Additional Data Fetching ---
+let eventsData: any[] = [];
+let jobsData: any[] = [];
+let productsData: any[] = [];
+let podcastsData: any[] = [];
+let guidesData: any[] = [];
+let awardsData: any[] = [];
+
+try {
+    // 4. Events
+    const { data: eData } = await supabase.from("events").select("*").limit(6);
+    if (eData) eventsData = eData;
+
+    // 5. Jobs
+    const { data: jData } = await supabase.from("jobs").select("*").limit(6);
+    if (jData)
+        jobsData = jData.map((j: any) => ({
+            ...j,
+            clinic: j.company?.business_name || j.company_name,
+        }));
+
+    // 6. Products
+    const { data: pData } = await supabase
+        .from("products")
+        .select("*")
+        .limit(6);
+    if (pData)
+        productsData = pData.map((p: any) => ({
+            ...p,
+            image: p.images?.[0] || p.image || null,
+        }));
+
+    // 7. Podcasts
+    const { data: podData } = await supabase
+        .from("podcasts")
+        .select("*")
+        .limit(6);
+    if (podData)
+        podcastsData = podData.map((p: any) => ({
+            ...p,
+            date: p.created_at
+                ? new Date(p.created_at).toLocaleDateString()
+                : "Recent",
+        }));
+
+    // 8. Awards
+    const { data: aData } = await supabase.from("awards").select("*").limit(6);
+    if (aData) awardsData = aData;
+
+    // 9. Guides (Check table exists first in logic or just try fetch)
+    // Fallback if table missing
+    try {
+        const { data: gData } = await supabase
+            .from("guides")
+            .select("*")
+            .limit(3);
+        if (gData) guidesData = gData;
+    } catch (err) {
+        console.warn("Guides table missing or error", err);
+    }
+} catch (err) {
+    console.error("Error fetching homepage collections", err);
+}
+
+// Map to Carousel Format (if empty, use Fallbacks or Empty array)
+const events =
+    eventsData.length > 0
+        ? eventsData.map((e) => ({
+              title: e.title,
+              date: e.start_date
+                  ? new Date(e.start_date).toLocaleDateString()
+                  : "TBA",
+              location: e.location || "Online",
+              image: e.image_url,
+              slug: e.slug,
+          }))
+        : [
+              {
+                  title: "Dental Expo 2026",
+                  date: "Oct 15, 2026",
+                  location: "New York, NY",
+                  image: "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
+                  slug: "dental-expo-2026",
+              },
+          ];
+
+const jobs =
+    jobsData.length > 0
+        ? jobsData.map((j) => ({
+              title: j.title,
+              clinic: j.company_name || "Dental Clinic",
+              location: j.location,
+              type: j.type?.replace("_", " ") || "Full Time",
+              salary: j.salary_range || "Competitive",
+              slug: j.slug,
+          }))
+        : [
+              {
+                  title: "Associate Dentist",
+                  clinic: "Smile Care SEO",
+                  location: "New York, NY",
+                  type: "Full-Time",
+                  salary: "$150k - $200k",
+                  slug: "associate-dentist-nyc",
+              },
+          ];
+
+const products =
+    productsData.length > 0
+        ? productsData.map((p) => ({
+              title: p.name,
+              category: p.category || "Equip",
+              price: `$${p.price}`,
+              rating: "4.8",
+              image: p.image,
+              slug: p.slug,
+          }))
+        : [
+              {
+                  title: "Dental Chair X3000",
+                  category: "Equipment",
+                  price: "$4,500",
+                  rating: "4.8",
+                  image: "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
+                  slug: "dental-chair-x3000",
+              },
+          ];
+
+const podcasts =
+    podcastsData.length > 0
+        ? podcastsData.map((p) => ({
+              title: p.title,
+              guest: p.guest_names?.[0] || "DentalReach",
+              episode: p.episode_number || "1",
+              duration: `${p.duration_minutes || 45} min`,
+              date: p.date,
+              slug: p.slug,
+              image: p.image_url,
+          }))
+        : [
+              {
+                  title: "Ep 42: The Future of AI in Dentistry",
+                  guest: "Dr. A. Smith",
+                  episode: "42",
+                  duration: "45 min",
+                  date: "Oct 10",
+                  slug: "ep-42-ai-dentistry",
+              },
+          ];
+
+const guides =
+    guidesData.length > 0
+        ? guidesData.map((g) => ({
+              title: g.title,
+              description: g.description,
+              slug: g.slug,
+              image: g.image_url,
+          }))
+        : [
+              {
+                  title: "Ultimate Guide to Digital Workflow",
+                  description: "Learn how to transition your practice.",
+                  slug: "digital-workflow-guide",
+                  image: "https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=400",
+              },
+          ];
+
+const awards =
+    awardsData.length > 0
+        ? awardsData.map((a) => ({
+              title: a.title,
+              description: a.description || "Excellence in Dentistry",
+              icon: "🏆",
+          }))
+        : [
+              {
+                  title: "Best Clinical Case",
+                  description:
+                      "Awarded for exceptional clinical skill and documentation.",
+                  icon: "🦷",
+              },
+          ];
 ---
 
 <BaseLayout title="DentalReach | The Future of Dentistry">
-    <div class="bg-tuio-bg min-h-screen font-body">
+    <div class="bg-white min-h-screen font-body">
         <!-- HERO SECTION -->
         <section class="p-4 md:p-8">
             <div
@@ -223,11 +409,11 @@ const testimonials = [
             >
                 <!-- Trending Topics -->
                 <div
-                    class="col-span-1 md:col-span-4 lg:col-span-3 row-span-2 bg-tuio-pink rounded-[32px] p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                    class="col-span-1 md:col-span-4 lg:col-span-3 row-span-2 bg-primary-600 rounded-[32px] p-8 flex flex-col justify-between shadow-lg hover:shadow-xl transition-shadow relative overflow-hidden group"
                 >
                     <div class="relative z-10">
                         <h3
-                            class="text-white font-tuio text-3xl mb-8 uppercase tracking-wide"
+                            class="text-white font-heading text-3xl mb-8 uppercase tracking-wide"
                         >
                             Trending<br />Topics
                         </h3>
@@ -236,7 +422,7 @@ const testimonials = [
                                 categories.map((cat) => (
                                     <a
                                         href={`/articles?category=${cat.slug}`}
-                                        class="bg-white/20 hover:bg-white hover:text-tuio-pink text-white px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 backdrop-blur-sm border border-white/10"
+                                        class="bg-white/20 hover:bg-white hover:text-primary-600 text-white px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 backdrop-blur-sm border border-white/10"
                                     >
                                         {cat.name}
                                     </a>
@@ -255,15 +441,15 @@ const testimonials = [
                     class="col-span-1 md:col-span-8 lg:col-span-9 bg-white rounded-[32px] p-8 md:p-12 flex flex-col justify-center items-start shadow-sm min-h-[400px]"
                 >
                     <span
-                        class="text-tuio-pink font-bold tracking-widest uppercase mb-4 text-sm animate-pulse"
+                        class="text-primary-600 font-bold tracking-widest uppercase mb-4 text-sm animate-pulse"
                         >#1 Digital Magazine</span
                     >
                     <h1
-                        class="font-tuio text-5xl md:text-7xl lg:text-9xl uppercase leading-[0.9] text-tuio-navy mb-8 tracking-tight"
+                        class="font-heading text-5xl md:text-7xl lg:text-9xl uppercase leading-[0.9] text-primary-900 mb-8 tracking-tight"
                     >
                         The Future<br />
                         <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-pink to-purple-600"
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent"
                             >Of Dentistry</span
                         ><br />
                         Is Here
@@ -276,14 +462,14 @@ const testimonials = [
 
                 <!-- Search Bar -->
                 <div
-                    class="col-span-1 md:col-span-12 bg-tuio-navy rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between text-white shadow-sm gap-6"
+                    class="col-span-1 md:col-span-12 bg-primary-900 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between text-white shadow-lg gap-6"
                 >
                     <form
                         action="/search"
                         class="flex items-center gap-4 w-full md:w-auto flex-grow"
                     >
                         <div
-                            class="w-12 h-12 bg-tuio-pink rounded-full flex items-center justify-center shrink-0"
+                            class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center shrink-0"
                         >
                             🔍
                         </div>
@@ -291,72 +477,179 @@ const testimonials = [
                             type="text"
                             name="q"
                             placeholder="Search articles, events, listings..."
-                            class="bg-transparent border-none text-2xl font-tuio placeholder-gray-500 focus:ring-0 w-full text-white"
+                            class="bg-transparent border-none text-2xl font-heading placeholder-gray-500 focus:ring-0 w-full text-white"
                         />
                     </form>
                     <div class="flex gap-4 shrink-0">
                         <a
                             href="/login"
-                            class="px-8 py-3 bg-white text-tuio-navy rounded-full font-bold hover:bg-tuio-pink hover:text-white transition-all"
+                            class="px-8 py-3 bg-white text-primary-900 rounded-full font-bold hover:bg-primary-600 hover:text-white transition-all shadow-md"
+                            >Join Community</a
                         >
-                            Join Community
-                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- STATS SECTION -->
-        <section class="py-16 bg-tuio-navy relative overflow-hidden">
+        <!-- DIGITAL REACH STATS (Updated) -->
+        <section
+            class="py-12 bg-primary-900 relative overflow-hidden border-t border-white/10"
+        >
             <div
                 class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
             >
             </div>
             <div class="container mx-auto px-4 relative z-10">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    {
-                        stats.map((stat) => (
-                            <div class="text-center text-white">
-                                <div class="text-4xl mb-3">{stat.icon}</div>
-                                <div class="text-5xl md:text-6xl font-tuio text-tuio-pink mb-2">
-                                    {stat.value}
-                                </div>
-                                <div class="text-white/70 uppercase tracking-widest text-sm">
-                                    {stat.label}
-                                </div>
-                            </div>
-                        ))
-                    }
+                <div
+                    class="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10"
+                >
+                    <div class="text-center text-white px-4">
+                        <div class="text-4xl mb-3 text-accent">👥</div>
+                        <div
+                            class="text-3xl md:text-5xl font-heading font-bold mb-1"
+                        >
+                            50K+
+                        </div>
+                        <div
+                            class="text-white/60 text-xs font-bold uppercase tracking-widest"
+                        >
+                            Active Professionals
+                        </div>
+                    </div>
+                    <div class="text-center text-white px-4">
+                        <div class="text-4xl mb-3 text-tuio-red">👀</div>
+                        <div
+                            class="text-3xl md:text-5xl font-heading font-bold mb-1"
+                        >
+                            2.5M+
+                        </div>
+                        <div
+                            class="text-white/60 text-xs font-bold uppercase tracking-widest"
+                        >
+                            Monthly Impressions
+                        </div>
+                    </div>
+                    <div class="text-center text-white px-4">
+                        <div class="text-4xl mb-3 text-tuio-red">📱</div>
+                        <div
+                            class="text-3xl md:text-5xl font-heading font-bold mb-1"
+                        >
+                            150K+
+                        </div>
+                        <div
+                            class="text-white/60 text-xs font-bold uppercase tracking-widest"
+                        >
+                            Social Followers
+                        </div>
+                    </div>
+                    <div class="text-center text-white px-4">
+                        <div class="text-4xl mb-3 text-tuio-red">📬</div>
+                        <div
+                            class="text-3xl md:text-5xl font-heading font-bold mb-1"
+                        >
+                            85K+
+                        </div>
+                        <div
+                            class="text-white/60 text-xs font-bold uppercase tracking-widest"
+                        >
+                            Email Subscribers
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- LEADERBOARD SECTION -->
-        <div class="bg-tuio-navy">
-            <Leaderboard client:visible initialLeaders={leaderboardData} />
+        <!-- AD SPACE (Leaderboard) -->
+        <div class="container mx-auto px-4 py-8 flex justify-center">
+            <div
+                class="w-full max-w-[728px] h-[90px] bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm font-mono tracking-wider animate-pulse"
+            >
+                AD SPACE (728x90)
+            </div>
         </div>
 
+        <!-- EDITORIAL GLIMPSE (Moved Up) -->
+        <section class="pb-16 px-4 md:px-8">
+            <div
+                class="max-w-[1400px] mx-auto bg-primary-900 rounded-[32px] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl"
+            >
+                <div class="absolute inset-0 bg-primary-600/5"></div>
+                <div
+                    class="grid md:grid-cols-2 gap-12 items-center relative z-10"
+                >
+                    <div>
+                        <span
+                            class="text-primary-400 font-bold uppercase tracking-widest mb-4 block"
+                            >Editor's Choice</span
+                        >
+                        <h2
+                            class="font-heading text-4xl md:text-5xl border-l-4 border-primary-600 pl-6 mb-6"
+                        >
+                            The Future of AI
+                        </h2>
+                        <p
+                            class="text-white/80 text-xl mb-8 font-light leading-relaxed"
+                        >
+                            "Artificial Intelligence isn't just a buzzword in
+                            dentistry anymore; it's the invisible assistant in
+                            every diagnosis. In this month's special feature, we
+                            explore how predictive analytics is reshaping
+                            patient care plans."
+                        </p>
+                        <div class="flex items-center gap-4 mb-8">
+                            <img
+                                src="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=100"
+                                class="w-16 h-16 rounded-full border-2 border-primary-600"
+                                alt="Editor"
+                            />
+                            <div>
+                                <h4 class="font-bold">Dr. Nupur Shrirao</h4>
+                                <p class="text-white/50 text-sm">
+                                    Chief Editor, DentalReach
+                                </p>
+                            </div>
+                        </div>
+                        <a
+                            href="/articles/editors-choice"
+                            class="inline-block px-8 py-3 bg-primary-600 text-white rounded-full font-bold hover:bg-white hover:text-primary-600 transition-all shadow-md"
+                            >Read Full Editorial</a
+                        >
+                    </div>
+                    <div class="relative hidden md:block">
+                        <div
+                            class="absolute -top-10 -left-10 w-full h-full bg-primary-600/20 rounded-[40px]"
+                        >
+                        </div>
+                        <img
+                            src="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800"
+                            alt="Editor's Choice"
+                            class="relative z-10 rounded-[40px] shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ARTICLES SECTION -->
-        <section class="py-16 px-4 md:px-8">
+        <section class="py-16 px-4 md:px-8 bg-gray-50">
             <div class="max-w-[1800px] mx-auto">
                 <div class="flex items-end justify-between mb-12">
                     <div>
                         <span
-                            class="text-tuio-pink font-bold uppercase tracking-widest mb-2 block"
+                            class="text-primary-600 font-bold uppercase tracking-widest mb-2 block"
                             >Latest</span
                         >
                         <h2
-                            class="font-tuio text-4xl md:text-5xl uppercase text-tuio-navy"
+                            class="font-heading text-4xl md:text-5xl uppercase text-primary-900"
                         >
                             Featured Articles
                         </h2>
                     </div>
                     <a
                         href="/articles"
-                        class="hidden md:flex items-center gap-2 text-tuio-navy font-bold hover:text-tuio-pink transition-colors"
+                        class="hidden md:flex items-center gap-2 text-primary-900 font-bold hover:text-primary-600 transition-colors"
+                        >View All →</a
                     >
-                        View All →
-                    </a>
                 </div>
                 <div
                     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -373,12 +666,12 @@ const testimonials = [
                                         alt={article.title}
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
-                                    <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-tuio-navy px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                    <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-primary-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                                         {article.category || "News"}
                                     </span>
                                 </div>
                                 <div class="p-8">
-                                    <h3 class="font-tuio text-2xl text-tuio-navy mb-4 leading-tight group-hover:text-tuio-pink transition-colors">
+                                    <h3 class="font-heading text-2xl text-primary-900 mb-4 leading-tight group-hover:text-primary-600 transition-colors">
                                         <a href={`/articles/${article.slug}`}>
                                             {article.title}
                                         </a>
@@ -394,7 +687,7 @@ const testimonials = [
                                         </span>
                                         <a
                                             href={`/articles/${article.slug}`}
-                                            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-tuio-navy group-hover:text-white group-hover:border-tuio-navy transition-all"
+                                            class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-primary-900 group-hover:text-white group-hover:border-primary-900 transition-all"
                                         >
                                             →
                                         </a>
@@ -407,12 +700,157 @@ const testimonials = [
             </div>
         </section>
 
+        <!-- EVENTS CAROUSEL -->
+        <Carousel
+            client:visible
+            title="Upcoming Events"
+            viewAllLink="/events"
+            variant="event"
+            items={events}
+        />
+
+        <!-- AD SPACE (Banner) -->
+        <div class="container mx-auto px-4 py-8 flex justify-center bg-gray-50">
+            <div
+                class="w-full max-w-[970px] h-[120px] bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm font-mono tracking-wider animate-pulse"
+            >
+                AD SPACE (970x120)
+            </div>
+        </div>
+
+        <!-- JOBS CAROUSEL -->
+        <div class="bg-gray-50">
+            <Carousel
+                client:visible
+                title="Latest Jobs"
+                viewAllLink="/jobs"
+                variant="job"
+                items={jobs}
+            />
+        </div>
+
+        <!-- COMMUNITY & LEADERBOARD -->
+        <section class="bg-cyan-50 py-16">
+            <div
+                class="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 md:px-8"
+            >
+                <div class="lg:col-span-1">
+                    <Leaderboard
+                        client:visible
+                        initialLeaders={leaderboardData}
+                    />
+                </div>
+                <div class="lg:col-span-2 text-primary-900">
+                    <Carousel
+                        client:visible
+                        title="Community Buzz"
+                        viewAllLink="/community"
+                        variant="forum"
+                        items={[
+                            {
+                                topic: "Best Intraoral Scanner for 2026?",
+                                author: "Dr. Mark S.",
+                                replies: 45,
+                                views: "1.2k",
+                                color: "bg-blue-50 text-blue-600",
+                                slug: "best-scanner-2026",
+                            },
+                            {
+                                topic: "Handling difficult patient reviews",
+                                author: "Sarah J. (Practice Mgr)",
+                                replies: 82,
+                                views: "3.5k",
+                                color: "bg-orange-50 text-orange-600",
+                                slug: "handling-reviews",
+                            },
+                            {
+                                topic: "Clinical case discussion: Implant failure",
+                                author: "Dr. Patel",
+                                replies: 23,
+                                views: "850",
+                                color: "bg-red-50 text-red-600",
+                                slug: "implant-failure-case",
+                            },
+                            {
+                                topic: "Marketing strategies for new clinics",
+                                author: "DentalBiz",
+                                replies: 156,
+                                views: "5k+",
+                                color: "bg-green-50 text-green-600",
+                                slug: "marketing-strategies",
+                            },
+                        ]}
+                    />
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTS CAROUSEL -->
+        <div class="bg-white">
+            <Carousel
+                client:visible
+                title="Marketplace"
+                viewAllLink="/products"
+                variant="product"
+                items={products}
+            />
+        </div>
+
+        <!-- AD SPACE (Square/Grid) -->
+        <div
+            class="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+            <div
+                class="bg-gray-100 border border-gray-200 rounded-lg h-[250px] flex items-center justify-center text-gray-400 text-sm font-mono tracking-wider animate-pulse"
+            >
+                AD SPACE (Medium Rectangle)
+            </div>
+            <div
+                class="bg-gray-100 border border-gray-200 rounded-lg h-[250px] flex items-center justify-center text-gray-400 text-sm font-mono tracking-wider animate-pulse"
+            >
+                AD SPACE (Medium Rectangle)
+            </div>
+        </div>
+
+        <!-- RESOURCES & AWARDS GRID (Podcasts, Guides, Awards) -->
+        <section class="py-16 px-4 md:px-8 bg-tuio-bg">
+            <div class="max-w-[1800px] mx-auto grid grid-cols-1 gap-16">
+                <!-- PODCASTS -->
+                <Carousel
+                    client:visible
+                    title="DentalReach Podcast"
+                    viewAllLink="/podcasts"
+                    variant="podcast"
+                    items={podcasts}
+                />
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- GUIDES -->
+                    <Carousel
+                        client:visible
+                        title="Free Guides"
+                        viewAllLink="/guides"
+                        variant="guide"
+                        items={guides}
+                    />
+                    <!-- AWARDS -->
+                    <Carousel
+                        client:visible
+                        title="Awards"
+                        viewAllLink="/awards"
+                        variant="award"
+                        items={awards}
+                    />
+                </div>
+            </div>
+        </section>
+
         <!-- FEATURES SECTION -->
         <section class="py-16 px-4 md:px-8 bg-white">
             <div class="max-w-[1400px] mx-auto">
                 <div class="text-center mb-16">
                     <span
-                        class="text-tuio-pink font-bold uppercase tracking-widest mb-2 block"
+                        class="text-tuio-red font-bold uppercase tracking-widest mb-2 block"
                         >Platform</span
                     >
                     <h2
@@ -449,7 +887,7 @@ const testimonials = [
 
         <!-- TESTIMONIALS SECTION -->
         <section
-            class="py-20 px-4 md:px-8 bg-gradient-to-br from-tuio-pink to-purple-600 relative overflow-hidden"
+            class="py-20 px-4 md:px-8 bg-gradient-to-br from-tuio-red to-red-600 relative overflow-hidden"
         >
             <div
                 class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
@@ -517,71 +955,64 @@ const testimonials = [
                         content delivered to your inbox.
                     </p>
                     <form
+                        id="newsletter-form"
                         class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
                     >
                         <input
+                            name="email"
                             type="email"
+                            required
                             placeholder="Your email address"
-                            class="flex-grow px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                            class="flex-grow px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:ring-2 focus:ring-tuio-red focus:outline-none"
                         />
                         <button
                             type="submit"
-                            class="px-8 py-4 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-white hover:text-tuio-pink transition-all shrink-0"
+                            class="px-8 py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-white hover:text-tuio-red transition-all shrink-0 disabled:opacity-50"
+                            >Subscribe</button
                         >
-                            Subscribe
-                        </button>
                     </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- EVENTS CTA -->
-        <section class="pb-16 px-4 md:px-8">
-            <div class="max-w-[1400px] mx-auto grid md:grid-cols-2 gap-8">
-                <div
-                    class="bg-tuio-pink rounded-[32px] p-12 text-white relative overflow-hidden group"
-                >
-                    <div class="relative z-10">
-                        <span
-                            class="font-bold tracking-widest uppercase mb-2 inline-block"
-                            >Upcoming</span
-                        >
-                        <h3 class="font-tuio text-4xl mb-6 leading-tight">
-                            DON'T MISS<br />THE ACTION
-                        </h3>
-                        <a
-                            href="/events"
-                            class="inline-block px-8 py-3 bg-white text-tuio-pink rounded-full font-bold hover:bg-tuio-navy hover:text-white transition-all"
-                        >
-                            View Events
-                        </a>
-                    </div>
                     <div
-                        class="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"
+                        id="newsletter-response"
+                        class="mt-4 text-center font-bold text-white hidden"
                     >
                     </div>
                 </div>
-                <div
-                    class="bg-white rounded-[32px] p-12 relative overflow-hidden group border-2 border-tuio-navy"
-                >
-                    <div class="relative z-10">
-                        <span
-                            class="font-bold tracking-widest uppercase mb-2 inline-block text-tuio-pink"
-                            >Careers</span
-                        >
-                        <h3
-                            class="font-tuio text-4xl mb-6 leading-tight text-tuio-navy"
-                        >
-                            FIND YOUR<br />DREAM JOB
-                        </h3>
-                        <a
-                            href="/jobs"
-                            class="inline-block px-8 py-3 bg-tuio-navy text-white rounded-full font-bold hover:bg-tuio-pink transition-all"
-                        >
-                            Browse Jobs
-                        </a>
-                    </div>
-                </div>
+                <script>
+                    const nlForm = document.getElementById(
+                        "newsletter-form",
+                    ) as HTMLFormElement;
+                    const nlResponse = document.getElementById(
+                        "newsletter-response",
+                    );
+
+                    nlForm?.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const btn = nlForm.querySelector("button");
+                        if (btn) btn.disabled = true;
+
+                        try {
+                            const formData = new FormData(nlForm);
+                            const res = await fetch("/api/newsletter", {
+                                method: "POST",
+                                body: formData,
+                            });
+                            const data = await res.json();
+
+                            if (nlResponse) {
+                                nlResponse.classList.remove("hidden");
+                                nlResponse.textContent =
+                                    data.message || data.error;
+                                if (res.ok) {
+                                    nlForm.reset();
+                                }
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        } finally {
+                            if (btn) btn.disabled = false;
+                        }
+                    });
+                </script>
             </div>
         </section>
     </div>

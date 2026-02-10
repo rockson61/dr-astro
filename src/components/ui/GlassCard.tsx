@@ -10,8 +10,8 @@ const GlassCard = ({ children, className = '', hoverEffect = false }: GlassCardP
     return (
         <div
             className={`
-        bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl rounded-2xl p-6
-        ${hoverEffect ? 'hover:shadow-2xl hover:bg-white/80 transition-all duration-300 transform hover:-translate-y-1' : ''}
+        glass-card p-6
+        ${hoverEffect ? 'hover:shadow-xl hover:bg-white/90 transition-all duration-300 transform hover:-translate-y-1' : ''}
         ${className}
       `}
         >

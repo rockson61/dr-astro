@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ListingManagement from "../../components/admin/ListingManagement";
+
+const title = "Listing Management | Admin";
+---
+
+<BaseLayout title={title}>
+    {/* Mount the React component with hydration */}
+    <ListingManagement client:only="react" />
+</BaseLayout>

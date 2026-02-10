@@ -1,9 +1,10 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { createSupabaseServerClient } from '../../lib/supabase';
-import RichTextRenderer from '../../components/features/RichTextRenderer';
-import type { Article } from '../../types/database';
-import { format } from 'date-fns';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+import RichTextRenderer from "../../components/features/RichTextRenderer";
+import type { Article } from "../../types/database";
+import { format } from "date-fns";
+import LikeButton from "../../components/social/LikeButton";
 
 export const prerender = false; // Server-side rendering for dynamic slugs
 
@@ -11,13 +12,14 @@ const { slug } = Astro.params;
 const supabase = createSupabaseServerClient(Astro);
 
 if (!slug) {
-  return Astro.redirect('/404');
+    return Astro.redirect("/404");
 }
 
 // Fetch Article
 const { data: article, error } = await supabase
-  .from('articles')
-  .select(`
+    .from("articles")
+    .select(
+        `
     *,
     profiles:author_id (
       full_name,
@@ -29,14 +31,15 @@ const { data: article, error } = await supabase
       name,
       slug
     )
-  `)
-  .eq('slug', slug)
-  .single();
+  `,
+    )
+    .eq("slug", slug)
+    .single();
 
 if (error || !article) {
-  console.error('Article fetch error:', error);
-  // Optional: Check if it's a legacy URL and redirect logic here
-  return Astro.redirect('/404');
+    console.error("Article fetch error:", error);
+    // Optional: Check if it's a legacy URL and redirect logic here
+    return Astro.redirect("/404");
 }
 
 const typedArticle = article as Article;
@@ -47,120 +50,221 @@ const title = typedArticle.meta_title || typedArticle.title;
 const description = typedArticle.meta_description || typedArticle.excerpt;
 const image = typedArticle.image_url;
 
+// Fetch Likes
+const { count: likesCount } = await supabase
+    .from("article_likes")
+    .select("id", { count: "exact" })
+    .eq("article_id", typedArticle.id);
+
+let isLiked = false;
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (user) {
+    const { data: likeData } = await supabase
+        .from("article_likes")
+        .select("id")
+        .match({ user_id: user.id, article_id: typedArticle.id })
+        .single();
+    if (likeData) isLiked = true;
+}
 ---
 
 <BaseLayout title={title} description={description} image={image}>
-  <article class="bg-neutral-50 dark:bg-neutral-900 min-h-screen pb-20">
-    
-    <!-- Hero Section -->
-    <div class="relative w-full h-[50vh] min-h-[400px]">
-        {typedArticle.image_url && (
-            <div class="absolute inset-0">
-                <img 
-                    src={typedArticle.image_url} 
-                    alt={typedArticle.title} 
-                    class="w-full h-full object-cover"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-neutral-900/90 via-neutral-900/50 to-transparent"></div>
-            </div>
-        )}
-        <div class="container mx-auto px-4 relative h-full flex items-end pb-12 z-10">
-            <div class="max-w-4xl">
-                {typedArticle.categories && (
-                    <span class="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider uppercase bg-primary-600 text-white rounded-full">
-                        {typedArticle.categories.name}
-                    </span>
-                )}
-                <h1 class="text-4xl md:text-6xl text-white font-serif font-bold mb-4 leading-tight">
-                    {typedArticle.title}
-                </h1>
-                
-                <div class="flex items-center gap-4 text-gray-300 mb-6">
-                    {typedArticle.profiles && (
-                        <div class="flex items-center gap-2">
-                            {typedArticle.profiles.avatar_url && (
-                                <img src={typedArticle.profiles.avatar_url} alt={typedArticle.profiles.full_name} class="w-10 h-10 rounded-full border border-white/20" />
-                            )}
-                            <div>
-                                <span class="block font-medium text-white">{typedArticle.profiles.full_name}</span>
-                                <span class="text-xs opacity-75">{typedArticle.profiles.specialty}</span>
-                            </div>
+    <article class="bg-neutral-50 dark:bg-neutral-900 min-h-screen pb-20">
+        <!-- Hero Section -->
+        <div class="relative w-full h-[50vh] min-h-[400px]">
+            {
+                typedArticle.image_url && (
+                    <div class="absolute inset-0">
+                        <img
+                            src={typedArticle.image_url}
+                            alt={typedArticle.title}
+                            class="w-full h-full object-cover"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-neutral-900/90 via-neutral-900/50 to-transparent" />
+                    </div>
+                )
+            }
+            <div
+                class="container mx-auto px-4 relative h-full flex items-end pb-12 z-10"
+            >
+                <div class="max-w-4xl">
+                    {
+                        typedArticle.categories && (
+                            <span class="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider uppercase bg-primary-600 text-white rounded-full">
+                                {typedArticle.categories.name}
+                            </span>
+                        )
+                    }
+                    <h1
+                        class="text-4xl md:text-6xl text-white font-serif font-bold mb-4 leading-tight"
+                    >
+                        {typedArticle.title}
+                    </h1>
+
+                    <div class="flex items-center gap-4 text-gray-300 mb-6">
+                        {
+                            typedArticle.profiles && (
+                                <div class="flex items-center gap-2">
+                                    {typedArticle.profiles.avatar_url && (
+                                        <img
+                                            src={
+                                                typedArticle.profiles.avatar_url
+                                            }
+                                            alt={
+                                                typedArticle.profiles.full_name
+                                            }
+                                            class="w-10 h-10 rounded-full border border-white/20"
+                                        />
+                                    )}
+                                    <div>
+                                        <span class="block font-medium text-white">
+                                            {typedArticle.profiles.full_name}
+                                        </span>
+                                        <span class="text-xs opacity-75">
+                                            {typedArticle.profiles.specialty}
+                                        </span>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        <LikeButton
+                            client:load
+                            articleId={typedArticle.id.toString()}
+                            initialLikes={likesCount || 0}
+                            initialIsLiked={isLiked}
+                        />
+
+                        <div class="w-px h-8 bg-white/20"></div>
+                        <div>
+                            <span class="block text-sm"
+                                >{
+                                    format(
+                                        new Date(typedArticle.created_at),
+                                        "MMMM d, yyyy",
+                                    )
+                                }</span
+                            >
+                            <span class="text-xs opacity-75">5 min read</span>
                         </div>
-                    )}
-                    <div class="w-px h-8 bg-white/20"></div>
-                    <div>
-                        <span class="block text-sm">{format(new Date(typedArticle.created_at), 'MMMM d, yyyy')}</span>
-                        <span class="text-xs opacity-75">5 min read</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="container mx-auto px-4 -mt-10 relative z-20">
-        <div class="flex flex-col lg:flex-row gap-8">
-            
-            <!-- Sidebar (Metadata & Actions) -->
-            <aside class="hidden lg:block w-64 shrink-0 space-y-6">
-                 {isScholarly && (
-                    <div class="glass-card p-6 rounded-lg sticky top-24">
-                        <h3 class="font-bold text-primary-600 mb-4 uppercase text-xs tracking-wider">Citation</h3>
-                        {typedArticle.doi && (
-                             <p class="text-xs text-gray-500 mb-3">DOI: {typedArticle.doi}</p>
-                        )}
-                        <button class="w-full btn-gold text-xs py-2 mb-2">Cite Article</button>
-                        <button class="w-full btn-primary bg-neutral-900 text-xs py-2">Download PDF</button>
-                    </div>
-                 )}
-                 
-                 <div class="glass-card p-6 rounded-lg">
-                     <h3 class="font-bold text-gray-900 dark:text-white mb-2 text-sm">Review Status</h3>
-                     <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        <span class="text-sm">Peer Reviewed</span>
-                     </div>
-                 </div>
-            </aside>
+        <div class="container mx-auto px-4 -mt-10 relative z-20">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Sidebar (Metadata & Actions) -->
+                <aside class="hidden lg:block w-64 shrink-0 space-y-6">
+                    {
+                        isScholarly && (
+                            <div class="glass-card p-6 rounded-lg sticky top-24">
+                                <h3 class="font-bold text-primary-600 mb-4 uppercase text-xs tracking-wider">
+                                    Citation
+                                </h3>
+                                {typedArticle.doi && (
+                                    <p class="text-xs text-gray-500 mb-3">
+                                        DOI: {typedArticle.doi}
+                                    </p>
+                                )}
+                                <button class="w-full btn-gold text-xs py-2 mb-2">
+                                    Cite Article
+                                </button>
+                                <button class="w-full btn-primary bg-neutral-900 text-xs py-2">
+                                    Download PDF
+                                </button>
+                            </div>
+                        )
+                    }
 
-            <!-- Main Content -->
-            <div class="flex-grow max-w-4xl bg-white dark:bg-black/50 rounded-lg shadow-xl p-8 md:p-12">
-                
-                {isScholarly && typedArticle.excerpt && (
-                    <div class="bg-neutral-50 dark:bg-white/5 p-6 rounded-lg border-l-4 border-accent mb-8 italic text-lg text-gray-700 dark:text-gray-300">
-                        <strong>Abstract:</strong> {typedArticle.excerpt}
+                    <div class="glass-card p-6 rounded-lg">
+                        <h3
+                            class="font-bold text-gray-900 dark:text-white mb-2 text-sm"
+                        >
+                            Review Status
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"
+                            ></span>
+                            <span class="text-sm">Peer Reviewed</span>
+                        </div>
                     </div>
-                )}
-                
-                <div class="rich-text-content">
-                     <RichTextRenderer content={typedArticle.content} client:load />
+                </aside>
+
+                <!-- Main Content -->
+                <div
+                    class="flex-grow max-w-4xl bg-white dark:bg-black/50 rounded-lg shadow-xl p-8 md:p-12"
+                >
+                    {
+                        isScholarly && typedArticle.excerpt && (
+                            <div class="bg-neutral-50 dark:bg-white/5 p-6 rounded-lg border-l-4 border-accent mb-8 italic text-lg text-gray-700 dark:text-gray-300">
+                                <strong>Abstract:</strong>{" "}
+                                {typedArticle.excerpt}
+                            </div>
+                        )
+                    }
+
+                    <div class="rich-text-content">
+                        <RichTextRenderer
+                            content={typedArticle.content}
+                            client:load
+                        />
+                    </div>
+
+                    {/* References Section for Scholarly Articles */}
+                    {
+                        isScholarly && typedArticle.references && (
+                            <div class="mt-12 pt-8 border-t border-gray-200 dark:border-white/10">
+                                <h2 class="text-2xl font-serif font-bold mb-4">
+                                    References
+                                </h2>
+                                <ol class="list-decimal pl-5 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {Array.isArray(typedArticle.references) &&
+                                        typedArticle.references.map(
+                                            (ref: any, index: number) => (
+                                                <li>
+                                                    {ref.url ? (
+                                                        <a
+                                                            href={ref.url}
+                                                            target="_blank"
+                                                            class="hover:underline"
+                                                        >
+                                                            {ref.title}
+                                                        </a>
+                                                    ) : (
+                                                        ref.title
+                                                    )}
+                                                    {ref.year && (
+                                                        <span class="ml-1 text-gray-400">
+                                                            ({ref.year})
+                                                        </span>
+                                                    )}
+                                                </li>
+                                            ),
+                                        )}
+                                </ol>
+                            </div>
+                        )
+                    }
                 </div>
 
-                {/* References Section for Scholarly Articles */}
-                {isScholarly && typedArticle.references && (
-                    <div class="mt-12 pt-8 border-t border-gray-200 dark:border-white/10">
-                        <h2 class="text-2xl font-serif font-bold mb-4">References</h2>
-                        <ol class="list-decimal pl-5 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            {Array.isArray(typedArticle.references) && typedArticle.references.map((ref: any, index: number) => (
-                                <li key={index}>
-                                    {ref.url ? <a href={ref.url} target="_blank" class="hover:underline">{ref.title}</a> : ref.title}
-                                    {ref.year && <span class="ml-1 text-gray-400">({ref.year})</span>}
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-                )}
-            </div>
-            
-            <!-- Right Column (Ads/Related) -->
-            <div class="hidden xl:block w-72 shrink-0">
-                <div class="sticky top-24 space-y-6">
-                    <div class="bg-gray-100 dark:bg-white/5 h-[300px] flex items-center justify-center rounded-lg border border-gray-200 dark:border-white/10">
-                        <span class="text-xs uppercase tracking-widest text-gray-400">Ad Placement</span>
+                <!-- Right Column (Ads/Related) -->
+                <div class="hidden xl:block w-72 shrink-0">
+                    <div class="sticky top-24 space-y-6">
+                        <div
+                            class="bg-gray-100 dark:bg-white/5 h-[300px] flex items-center justify-center rounded-lg border border-gray-200 dark:border-white/10"
+                        >
+                            <span
+                                class="text-xs uppercase tracking-widest text-gray-400"
+                                >Ad Placement</span
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
-    </div>
-  </article>
+    </article>
 </BaseLayout>

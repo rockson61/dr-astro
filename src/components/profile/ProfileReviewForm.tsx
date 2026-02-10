@@ -66,7 +66,7 @@ const ProfileReviewForm: React.FC<ProfileReviewFormProps> = ({ profileId, raterI
                 ))}
             </div>
             <textarea
-                className="w-full border border-gray-200 rounded-[16px] p-3 mb-3 text-sm focus:ring-2 focus:ring-tuio-pink focus:outline-none"
+                className="w-full border border-gray-200 rounded-[16px] p-3 mb-3 text-sm focus:ring-2 focus:ring-tuio-red focus:outline-none"
                 rows={3}
                 placeholder="Write a comment (optional)"
                 value={comment}
@@ -77,7 +77,7 @@ const ProfileReviewForm: React.FC<ProfileReviewFormProps> = ({ profileId, raterI
             {success && <div className="text-green-600 text-sm mb-2">Thank you for your review!</div>}
             <button
                 type="submit"
-                className="bg-tuio-pink text-white px-6 py-2 rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-colors disabled:opacity-50"
+                className="bg-tuio-red text-white px-6 py-2 rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-colors disabled:opacity-50"
                 disabled={loading}
             >
                 {loading ? 'Submitting...' : 'Submit Review'}

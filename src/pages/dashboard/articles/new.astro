@@ -1,115 +1,290 @@
 ---
-import DashboardLayout from '../../../layouts/DashboardLayout.astro';
-import { createSupabaseServerClient } from '../../../lib/supabase';
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
 
 export const prerender = false;
 
 const supabase = createSupabaseServerClient(Astro);
-const { data: { user } } = await supabase.auth.getUser();
+const {
+    data: { user },
+} = await supabase.auth.getUser();
 
 if (!user) {
-  return Astro.redirect('/login');
+    return Astro.redirect("/login");
 }
 
 // Fetch categories for dropdown
 const { data: categories } = await supabase
-  .from('categories')
-  .select('id, name, slug')
-  .order('name');
+    .from("categories")
+    .select("id, name, slug")
+    .order("name");
 ---
 
 <DashboardLayout title="Write New Article">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex items-center justify-between mb-8">
+    <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-10">
             <div>
-                <h2 class="text-2xl font-bold dark:text-white">Write New Article</h2>
-                <p class="text-gray-500">Share your expertise with the dental community.</p>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                    Write New Article
+                </h2>
+                <p class="text-gray-500 mt-1">
+                    Share your expertise with the dental community.
+                </p>
             </div>
-            <a href="/dashboard/my-articles" class="text-gray-500 hover:text-tuio-pink transition-colors">
-                ← Back to My Articles
+            <a
+                href="/dashboard/my-articles"
+                class="text-gray-400 font-bold hover:text-tuio-red transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
+            >
+                <span>← Back to My Articles</span>
             </a>
         </div>
 
-        <form class="space-y-6">
+        <form class="space-y-8">
             <!-- Title -->
-            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Article Title</label>
-                <input 
-                    type="text" 
-                    name="title"
-                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none text-xl font-medium" 
-                    placeholder="Enter a compelling title..."
-                />
+            <div class="tuio-card">
+                <div
+                    class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
+                >
+                    <span class="text-2xl">✍️</span>
+                    <h3 class="font-tuio text-xl uppercase text-tuio-navy">
+                        Article Details
+                    </h3>
+                </div>
+                <div class="space-y-2">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1"
+                        >Article Title</label
+                    >
+                    <input
+                        type="text"
+                        name="title"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-bold text-lg focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all placeholder:font-normal"
+                        placeholder="Enter a compelling title..."
+                    />
+                </div>
             </div>
 
             <!-- Category & Type -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Category</label>
-                    <select name="category_id" class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none">
-                        <option value="">Select a category</option>
-                        {categories?.map((cat: any) => (
-                            <option value={cat.id}>{cat.name}</option>
-                        ))}
-                    </select>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="tuio-card">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Category</label
+                    >
+                    <div class="relative">
+                        <select
+                            name="category_id"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                        >
+                            <option value="">Select a category</option>
+                            {
+                                categories?.map((cat: any) => (
+                                    <option value={cat.id}>{cat.name}</option>
+                                ))
+                            }
+                        </select>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                        >
+                            ▼
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                    <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Article Type</label>
-                    <select name="type" class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none">
-                        <option value="article">Article</option>
-                        <option value="case_study">Case Study</option>
-                        <option value="research">Research</option>
-                        <option value="guide">How-To Guide</option>
-                        <option value="opinion">Opinion Piece</option>
-                    </select>
+                <div class="tuio-card">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Article Type</label
+                    >
+                    <div class="relative">
+                        <select
+                            name="type"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                        >
+                            <option value="article">Standard Article</option>
+                            <option value="case_study">Case Study</option>
+                            <option value="research">Research Paper</option>
+                            <option value="guide">How-To Guide</option>
+                            <option value="opinion">Opinion Piece</option>
+                        </select>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                        >
+                            ▼
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Excerpt -->
-            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Excerpt / Summary</label>
-                <textarea 
+            <div class="tuio-card">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Excerpt / Summary</label
+                >
+                <textarea
                     name="excerpt"
                     rows="3"
-                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none resize-none"
-                    placeholder="Write a brief summary (150-200 characters)..."
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none"
+                    placeholder="Write a brief summary to hook your readers (150-200 characters)..."
                 ></textarea>
             </div>
 
             <!-- Content -->
-            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Content</label>
-                <textarea 
-                    name="content"
-                    rows="15"
-                    class="w-full px-4 py-3 rounded-[16px] border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white focus:ring-2 focus:ring-tuio-pink focus:outline-none resize-none font-mono text-sm"
-                    placeholder="Write your article content here. You can use Markdown for formatting..."
-                ></textarea>
-                <p class="text-sm text-gray-400 mt-2">Supports Markdown formatting. Use **bold**, *italic*, ## headings, and more.</p>
+            <div class="tuio-card">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Content</label
+                >
+                <div class="relative">
+                    <textarea
+                        name="content"
+                        rows="20"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none font-mono text-sm leading-relaxed"
+                        placeholder="# Your Article Content
+
+Write your article here using Markdown..."
+                    ></textarea>
+                    <div
+                        class="absolute bottom-4 right-4 text-xs font-mono text-gray-400 bg-white/80 px-2 py-1 rounded"
+                    >
+                        Markdown Supported
+                    </div>
+                </div>
             </div>
 
             <!-- Featured Image -->
-            <div class="bg-white dark:bg-neutral-800 rounded-[24px] p-6 shadow-sm">
-                <label class="block text-sm font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2">Featured Image</label>
-                <div class="border-2 border-dashed border-gray-200 dark:border-neutral-700 rounded-[16px] p-8 text-center">
-                    <div class="text-4xl mb-4">🖼️</div>
-                    <p class="text-gray-500 mb-4">Drag and drop an image or click to upload</p>
-                    <input type="file" name="image" accept="image/*" class="hidden" id="image-upload" />
-                    <label for="image-upload" class="inline-block px-6 py-2 bg-tuio-bg text-tuio-navy rounded-full font-medium cursor-pointer hover:bg-tuio-pink hover:text-white transition-all">
-                        Choose File
-                    </label>
+            <div class="tuio-card">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Featured Image</label
+                >
+                <div
+                    class="border-2 border-dashed border-gray-200 rounded-3xl p-10 text-center hover:bg-gray-50 transition-colors group cursor-pointer relative overflow-hidden"
+                >
+                    <div class="relative z-10">
+                        <div
+                            class="w-20 h-20 bg-tuio-bg rounded-full flex items-center justify-center text-4xl mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm"
+                        >
+                            🖼️
+                        </div>
+                        <p class="text-tuio-navy font-medium mb-1">
+                            Drag and drop an image or click to upload
+                        </p>
+                        <p class="text-xs text-gray-400 mb-6">
+                            Recommended size: 1200x630px (JPG, PNG)
+                        </p>
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            class="hidden"
+                            id="image-upload"
+                        />
+                        <label
+                            for="image-upload"
+                            class="inline-block px-8 py-3 bg-white text-tuio-navy border border-gray-200 rounded-full font-bold uppercase tracking-wide text-xs cursor-pointer hover:bg-tuio-navy hover:text-white transition-all shadow-sm"
+                        >
+                            Choose File
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-4 justify-end">
-                <button type="button" class="px-8 py-3 border border-gray-200 dark:border-neutral-700 text-gray-600 dark:text-gray-300 rounded-full font-bold hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all">
-                    Save as Draft
+            <div
+                class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t border-gray-200 md:static md:bg-transparent md:border-none md:p-0 flex gap-4 justify-end z-40"
+            >
+                <button
+                    type="button"
+                    class="px-8 py-4 border-2 border-gray-200 text-gray-500 rounded-full font-bold uppercase tracking-wide hover:border-gray-400 hover:text-gray-700 transition-all bg-white"
+                >
+                    Save Draft
                 </button>
-                <button type="submit" class="px-8 py-3 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all">
-                    Submit for Review
+                <button
+                    type="submit"
+                    class="px-10 py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                >
+                    Publish Article
                 </button>
             </div>
         </form>
     </div>
 </DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+    const form = document.querySelector("form");
+    const submitBtn = form?.querySelector('button[type="submit"]');
+
+    function slugify(text: string) {
+        return text
+            .toString()
+            .toLowerCase()
+            .replace(/\s+/g, "-") // Replace spaces with -
+            .replace(/[^\w\-]+/g, "") // Remove all non-word chars
+            .replace(/\-\-+/g, "-") // Replace multiple - with single -
+            .replace(/^-+/, "") // Trim - from start of text
+            .replace(/-+$/, ""); // Trim - from end of text
+    }
+
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!submitBtn) return;
+
+        // Disabled State
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Publishing...";
+        (submitBtn as HTMLButtonElement).disabled = true;
+
+        const formData = new FormData(form);
+        const title = formData.get("title") as string;
+        const category_id = formData.get("category_id");
+        const type = formData.get("type") || "article"; // Default if missing
+        const excerpt = formData.get("excerpt");
+        const content = formData.get("content");
+
+        if (!title || !content || !category_id) {
+            alert(
+                "Please fill in all required fields (Title, Category, Content)",
+            );
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+            return;
+        }
+
+        try {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            // Generate unique slug
+            const slug = `${slugify(title)}-${Math.random().toString(36).substring(2, 7)}`;
+
+            const { error } = await supabase.from("articles").insert({
+                title,
+                slug,
+                category_id,
+                // category: 'legacy_col', // Optional if you still use text column
+                content,
+                excerpt,
+                author_id: user.id,
+                status: "published", // Or 'draft' depending on logic
+                is_approved: true, // Autoapprove for trusted users?
+                created_at: new Date().toISOString(),
+            });
+
+            if (error) throw error;
+
+            // Success
+            window.location.href = "/dashboard/my-articles";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error publishing article: " + err.message);
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+</script>

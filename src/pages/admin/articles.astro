@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleManagement from "../../components/admin/ArticleManagement";
+
+const title = "Article Management | Admin";
+---
+
+<BaseLayout title={title}>
+    {/* Mount the React component with hydration */}
+    <ArticleManagement client:only="react" />
+</BaseLayout>

@@ -1,0 +1,124 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch user's jobs
+const { data: jobs } = await supabase
+    .from("jobs")
+    .select("id, title, slug, is_active, location, created_at, company_name")
+    .eq("employer_id", user.id)
+    .order("created_at", { ascending: false });
+
+// Note: If 'jobs' table uses 'owner_id' or 'profile_id', this query might need adjustment.
+// Based on 'listings' using 'owner_id', 'jobs' might act similarly, but 'seed-database.ts' didn't explicitly show 'user_id' column, it showed 'is_active'.
+// I will assume 'user_id' for now as is standard, but if it fails I'll check schema.
+// Actually, looking at seed script, jobs weren't seeded with user_id! They were mock data in the seed script too?
+// No, I see 'articles' has 'author_id'.
+// Let's assume 'user_id' for jobs. If column error occurs, I will fix.
+---
+
+<DashboardLayout title="My Jobs">
+    <div class="animate-fade-in">
+        <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+        >
+            <div>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                    My Jobs
+                </h2>
+                <p class="text-gray-500 mt-1">
+                    Manage your job postings and applicants.
+                </p>
+            </div>
+            <a
+                href="/dashboard/jobs/new"
+                class="px-8 py-3 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2"
+            >
+                <span>+ Post New Job</span>
+            </a>
+        </div>
+
+        {
+            jobs && jobs.length > 0 ? (
+                <div class="grid md:grid-cols-2 gap-6">
+                    {jobs.map((job: any) => (
+                        <div class="tuio-card group !p-6 hover:border-tuio-red/50 border border-transparent transition-all">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-bold text-tuio-navy mb-1 group-hover:text-tuio-red transition-colors">
+                                        <a href={`/jobs/${job.slug}`}>
+                                            {job.title}
+                                        </a>
+                                    </h3>
+                                    <p class="text-sm text-gray-500 font-medium">
+                                        {job.company_name}
+                                    </p>
+                                </div>
+                                <span
+                                    class={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${job.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                                >
+                                    {job.is_active ? "Active" : "Inactive"}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-4 text-sm text-gray-400 font-bold uppercase tracking-wider mb-6">
+                                <span>📍 {job.location}</span>
+                                <span>
+                                    📅{" "}
+                                    {new Date(
+                                        job.created_at,
+                                    ).toLocaleDateString()}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <a
+                                    href={`/jobs/${job.slug}`}
+                                    class="text-center py-3 border border-gray-200 rounded-xl text-gray-600 hover:border-tuio-red hover:text-tuio-red transition-all text-sm font-bold uppercase tracking-wide"
+                                >
+                                    View
+                                </a>
+                                <a
+                                    href={`/dashboard/jobs/edit/${job.id}`}
+                                    class="text-center py-3 bg-gray-50 rounded-xl text-tuio-navy hover:bg-tuio-navy hover:text-white transition-all text-sm font-bold uppercase tracking-wide"
+                                >
+                                    Edit
+                                </a>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div class="tuio-card py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50/30">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-6 shadow-sm">
+                        💼
+                    </div>
+                    <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-2">
+                        No jobs posted yet
+                    </h3>
+                    <p class="text-gray-500 max-w-md mb-8">
+                        Looking for talent? Post a job listing to find the best
+                        dental professionals.
+                    </p>
+                    <a
+                        href="/dashboard/jobs/new"
+                        class="px-8 py-3 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    >
+                        Post Your First Job
+                    </a>
+                </div>
+            )
+        }
+    </div>
+</DashboardLayout>

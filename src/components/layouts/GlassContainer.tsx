@@ -7,7 +7,7 @@ interface GlassContainerProps {
 
 const GlassContainer = ({ children, className = '' }: GlassContainerProps) => {
     return (
-        <div className={`min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 ${className}`}>
+        <div className={`min-h-screen bg-gradient-to-br from-red-50 via-red-50 to-red-50 ${className}`}>
             {children}
         </div>
     );

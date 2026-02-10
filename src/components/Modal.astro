@@ -1,7 +1,7 @@
 ---
 /**
  * Modal - Reusable modal/dialog component
- * 
+ *
  * Props:
  * - id: string - Unique ID for the modal (required for JS targeting)
  * - title: string - Modal title
@@ -12,49 +12,61 @@
 interface Props {
     id: string;
     title?: string;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+    size?: "sm" | "md" | "lg" | "xl" | "full";
     closeOnOverlay?: boolean;
 }
 
-const { 
-    id, 
-    title = '', 
-    size = 'md',
-    closeOnOverlay = true 
-} = Astro.props;
+const { id, title = "", size = "md", closeOnOverlay = true } = Astro.props;
 
 const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-[95vw] h-[90vh]'
+    sm: "max-w-sm",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
+    full: "max-w-[95vw] h-[90vh]",
 };
 ---
 
-<div 
+<div
     id={id}
     class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     data-close-on-overlay={closeOnOverlay}
 >
-    <div class={`modal-content bg-white rounded-[32px] w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl transform scale-95 opacity-0 transition-all duration-300`}>
+    <div
+        class={`modal-content bg-white rounded-[32px] w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden shadow-2xl transform scale-95 opacity-0 transition-all duration-300`}
+    >
         <!-- Header -->
-        {title && (
-            <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
-                <h2 class="font-tuio text-2xl uppercase text-tuio-navy">{title}</h2>
-                <button class="modal-close w-10 h-10 rounded-full bg-tuio-bg hover:bg-tuio-pink hover:text-white text-gray-400 flex items-center justify-center transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        )}
-        
+        {
+            title && (
+                <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+                    <h2 class="font-tuio text-2xl uppercase text-tuio-navy">
+                        {title}
+                    </h2>
+                    <button class="modal-close w-10 h-10 rounded-full bg-tuio-bg hover:bg-tuio-red hover:text-white text-gray-400 flex items-center justify-center transition-all">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            )
+        }
+
         <!-- Body -->
         <div class="modal-body px-8 py-6 overflow-y-auto">
             <slot />
         </div>
-        
+
         <!-- Footer (optional slot) -->
         <slot name="footer" />
     </div>
@@ -73,55 +85,59 @@ const sizeClasses = {
 <script>
     // Modal functionality
     function initModals() {
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        document.querySelectorAll(".modal-overlay").forEach((overlay) => {
             const modalId = overlay.id;
-            const content = overlay.querySelector('.modal-content');
-            const closeButtons = overlay.querySelectorAll('.modal-close');
-            const closeOnOverlay = overlay.dataset.closeOnOverlay === 'true';
-            
+            const content = overlay.querySelector(".modal-content");
+            const closeButtons = overlay.querySelectorAll(".modal-close");
+            const closeOnOverlay =
+                (overlay as HTMLElement).dataset.closeOnOverlay === "true";
+
             // Close on button click
-            closeButtons.forEach(btn => {
-                btn.addEventListener('click', () => closeModal(modalId));
+            closeButtons.forEach((btn) => {
+                btn.addEventListener("click", () => closeModal(modalId));
             });
-            
+
             // Close on overlay click
             if (closeOnOverlay) {
-                overlay.addEventListener('click', (e) => {
+                overlay.addEventListener("click", (e) => {
                     if (e.target === overlay) closeModal(modalId);
                 });
             }
-            
+
             // Close on Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            document.addEventListener("keydown", (e) => {
+                if (
+                    e.key === "Escape" &&
+                    overlay.classList.contains("active")
+                ) {
                     closeModal(modalId);
                 }
             });
         });
     }
-    
+
     // Global functions for opening/closing modals
-    (window as any).openModal = function(id: string) {
+    (window as any).openModal = function (id: string) {
         const modal = document.getElementById(id);
         if (modal) {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            modal.classList.add("active");
+            document.body.style.overflow = "hidden";
         }
     };
-    
-    (window as any).closeModal = function(id: string) {
+
+    (window as any).closeModal = function (id: string) {
         const modal = document.getElementById(id);
         if (modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
+            modal.classList.remove("active");
+            document.body.style.overflow = "";
         }
     };
-    
+
     function closeModal(id: string) {
         (window as any).closeModal(id);
     }
-    
+
     // Initialize on load
     initModals();
-    document.addEventListener('astro:page-load', initModals);
+    document.addEventListener("astro:page-load", initModals);
 </script>

@@ -1,138 +1,278 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
 
 interface Props {
-	title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
 const currentPath = Astro.url.pathname;
 
 const sidebarLinks = [
-    { section: 'Overview', items: [
-        { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-    ]},
-    { section: 'My Content', items: [
-        { label: 'My Articles', href: '/dashboard/my-articles', icon: '📝' },
-        { label: 'My Listings', href: '/dashboard/my-listings', icon: '🏢' },
-        { label: 'My Awards', href: '/dashboard/my-awards', icon: '🏆' },
-    ]},
-    { section: 'Create', items: [
-        { label: 'New Article', href: '/dashboard/articles/new', icon: '✍️' },
-        { label: 'New Listing', href: '/dashboard/listings/new', icon: '➕' },
-    ]},
-    { section: 'Account', items: [
-        { label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
-    ]},
+    {
+        section: "Overview",
+        items: [{ label: "Dashboard", href: "/dashboard", icon: "📊" }],
+    },
+    {
+        section: "My Content",
+        items: [
+            {
+                label: "My Articles",
+                href: "/dashboard/my-articles",
+                icon: "📝",
+            },
+            {
+                label: "My Listings",
+                href: "/dashboard/my-listings",
+                icon: "🏢",
+            },
+            { label: "My Jobs", href: "/dashboard/my-jobs", icon: "💼" },
+            { label: "My Events", href: "/dashboard/my-events", icon: "📅" },
+            { label: "My Awards", href: "/dashboard/my-awards", icon: "🏆" },
+        ],
+    },
+    {
+        section: "Create",
+        items: [
+            {
+                label: "New Article",
+                href: "/dashboard/articles/new",
+                icon: "✍️",
+            },
+            {
+                label: "New Listing",
+                href: "/dashboard/listings/new",
+                icon: "➕",
+            },
+            {
+                label: "New Job",
+                href: "/dashboard/jobs/new",
+                icon: "briefcase",
+            },
+            {
+                label: "New Event",
+                href: "/dashboard/events/new",
+                icon: "calendar-plus",
+            },
+        ],
+    },
+    {
+        section: "Marketplace",
+        items: [
+            {
+                label: "My Products",
+                href: "/dashboard/my-products",
+                icon: "📦",
+            },
+            {
+                label: "Add Product",
+                href: "/dashboard/products/new",
+                icon: "➕",
+            },
+        ],
+    },
+    {
+        section: "Account",
+        items: [{ label: "Settings", href: "/dashboard/settings", icon: "⚙️" }],
+    },
 ];
 ---
 
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/png" href="/images/logo-mini.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Paytone+One&display=swap" rel="stylesheet">
-		<title>{title} | DR Dashboard</title>
-	</head>
-	<body class="bg-tuio-bg flex h-screen overflow-hidden text-gray-800">
-		
+<html lang="en" class="scroll-smooth">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/png" href="/images/logo-mini.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Paytone+One&display=swap"
+            rel="stylesheet"
+        />
+        <title>{title} | DR Dashboard</title>
+    </head>
+    <body
+        class="bg-gray-50 flex h-screen overflow-hidden text-primary-900 font-body"
+    >
         <!-- Sidebar -->
-        <aside class="w-72 bg-tuio-navy flex-shrink-0 flex flex-col hidden md:flex">
+        <aside
+            class="w-72 bg-primary-900 flex-shrink-0 flex flex-col hidden md:flex relative overflow-hidden"
+        >
+            <div
+                class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"
+            >
+            </div>
+
             <!-- Logo -->
-            <div class="h-20 flex items-center px-6 border-b border-white/10">
+            <div
+                class="h-24 flex items-center px-8 border-b border-white/10 relative z-10"
+            >
                 <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 bg-tuio-pink rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <span class="text-white font-tuio text-xl">D</span>
+                    <div
+                        class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-primary-600/20"
+                    >
+                        <span class="text-white font-heading text-xl">D</span>
                     </div>
-                    <span class="font-tuio text-xl uppercase text-white">Dashboard</span>
+                    <div>
+                        <span
+                            class="font-heading text-xl uppercase text-white tracking-wide block leading-none"
+                            >Dental</span
+                        >
+                        <span
+                            class="font-heading text-sm uppercase text-cyan-400 tracking-widest block leading-none"
+                            >Reach</span
+                        >
+                    </div>
                 </a>
             </div>
-            
+
             <!-- Navigation -->
-            <nav class="flex-grow p-6 space-y-6 overflow-y-auto">
-                {sidebarLinks.map(section => (
-                    <div>
-                        <div class="text-xs font-bold text-tuio-pink uppercase tracking-widest mb-3 px-3">{section.section}</div>
-                        <div class="space-y-1">
-                            {section.items.map(item => (
-                                <a 
-                                    href={item.href} 
-                                    class={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
-                                        currentPath === item.href 
-                                            ? 'bg-tuio-pink text-white' 
-                                            : 'text-white/70 hover:bg-white/10 hover:text-white'
-                                    }`}
-                                >
-                                    <span class="text-lg">{item.icon}</span>
-                                    {item.label}
-                                </a>
-                            ))}
+            <nav class="flex-grow p-6 space-y-8 overflow-y-auto relative z-10">
+                {
+                    sidebarLinks.map((section) => (
+                        <div>
+                            <div class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-4 px-4 font-heading opacity-80">
+                                {section.section}
+                            </div>
+                            <div class="space-y-2">
+                                {section.items.map((item) => (
+                                    <a
+                                        href={item.href}
+                                        class={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all duration-300 ${
+                                            currentPath === item.href
+                                                ? "bg-primary-600 text-white shadow-lg shadow-primary-600/30 translate-x-2"
+                                                : "text-white/60 hover:bg-white/10 hover:text-white hover:translate-x-1"
+                                        }`}
+                                    >
+                                        <span class="text-lg opacity-80">
+                                            {item.icon}
+                                        </span>
+                                        {item.label}
+                                    </a>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                }
             </nav>
-            
+
             <!-- Footer -->
-            <div class="p-6 border-t border-white/10">
-                <a href="/" class="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm mb-4">
+            <div
+                class="p-6 border-t border-white/10 relative z-10 bg-primary-900/50 backdrop-blur-sm"
+            >
+                <a
+                    href="/"
+                    class="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm mb-4 font-bold uppercase tracking-wide"
+                >
                     ← Back to Site
                 </a>
-                <button id="logout-btn" class="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                <button
+                    id="logout-btn"
+                    class="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-bold bg-white/5 px-4 py-3 rounded-xl w-full justify-center hover:bg-white/10 transition-all"
+                >
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        ></path></svg
+                    >
                     Sign Out
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-grow flex flex-col h-full overflow-hidden">
+        <main class="flex-grow flex flex-col h-full overflow-hidden relative">
             <!-- Header -->
-            <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 shadow-sm">
+            <header
+                class="h-24 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 shadow-sm z-20"
+            >
                 <div class="flex items-center gap-4">
                     <!-- Mobile Menu -->
-                    <button class="md:hidden w-10 h-10 bg-tuio-bg rounded-xl flex items-center justify-center">
-                        ☰
+                    <button
+                        class="md:hidden w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-primary-900"
+                    >
+                        <svg
+                            class="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path></svg
+                        >
                     </button>
-                    <h1 class="text-2xl font-tuio uppercase text-tuio-navy">{title}</h1>
+                    <h1
+                        class="text-3xl font-heading uppercase text-primary-900 tracking-tight"
+                    >
+                        {title}
+                    </h1>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
                     <!-- Notifications -->
-                    <button class="w-10 h-10 bg-tuio-bg rounded-xl flex items-center justify-center text-tuio-navy hover:bg-tuio-pink hover:text-white transition-colors relative">
-                        🔔
-                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-tuio-pink rounded-full text-white text-xs flex items-center justify-center">3</span>
-                    </button>
+                    <a
+                        href="/dashboard/notifications"
+                        class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-primary-900 hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-gray-100 group relative"
+                    >
+                        <span
+                            class="text-xl group-hover:scale-110 transition-transform"
+                            >🔔</span
+                        >
+                        <span
+                            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs font-bold flex items-center justify-center border-2 border-white"
+                            >3</span
+                        >
+                    </a>
                     <!-- Profile -->
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-tuio-pink text-white flex items-center justify-center font-tuio">
-                            DR
+                    <div
+                        class="flex items-center gap-3 pl-6 border-l border-gray-100"
+                    >
+                        <div class="text-right hidden sm:block">
+                            <div class="font-bold text-primary-900 text-sm">
+                                Dr. User
+                            </div>
+                            <div
+                                class="text-xs text-primary-600 font-bold uppercase tracking-wider"
+                            >
+                                Dentist
+                            </div>
                         </div>
-                        <div class="hidden sm:block">
-                            <div class="font-bold text-tuio-navy text-sm">Dr. User</div>
-                            <div class="text-xs text-gray-400">Dentist</div>
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-900 to-primary-800 text-white flex items-center justify-center font-heading text-lg shadow-lg shadow-primary-900/20 cursor-pointer hover:scale-105 transition-transform"
+                        >
+                            DR
                         </div>
                     </div>
                 </div>
             </header>
-            
+
             <!-- Content Area -->
-            <div class="flex-grow overflow-y-auto p-8">
+            <div
+                class="flex-grow overflow-y-auto p-6 md:p-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed"
+            >
                 <slot />
             </div>
         </main>
-
-	</body>
+    </body>
 </html>
 
 <script>
-    import { createSupabaseBrowserClient } from '../lib/supabase';
+    import { createSupabaseBrowserClient } from "../lib/supabase";
     const supabase = createSupabaseBrowserClient();
-    
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-    });
+
+    document
+        .getElementById("logout-btn")
+        ?.addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            window.location.href = "/login";
+        });
 </script>

@@ -1,0 +1,355 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-articles");
+}
+
+// Fetch article details
+const { data: article, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .eq("author_id", user.id)
+    .single();
+
+if (error || !article) {
+    console.error("Error fetching article or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-articles");
+}
+
+// Fetch categories for dropdown
+const { data: categories } = await supabase
+    .from("categories")
+    .select("id, name, slug")
+    .order("name");
+---
+
+<DashboardLayout title={`Edit: ${article.title}`}>
+    <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h2 class="text-3xl font-heading uppercase text-primary-900">
+                    Edit Article
+                </h2>
+                <p class="text-gray-500 mt-1">Update your content.</p>
+            </div>
+            <a
+                href="/dashboard/my-articles"
+                class="text-gray-400 font-bold hover:text-primary-600 transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
+            >
+                <span>← Back to My Articles</span>
+            </a>
+        </div>
+
+        <form class="space-y-8" id="edit-form" data-id={article.id}>
+            <!-- Title -->
+            <div class="glass-card bg-white p-8">
+                <div
+                    class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
+                >
+                    <span class="text-2xl">✍️</span>
+                    <h3 class="font-heading text-xl uppercase text-primary-900">
+                        Article Details
+                    </h3>
+                </div>
+                <div class="space-y-2">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1"
+                        >Article Title</label
+                    >
+                    <input
+                        type="text"
+                        name="title"
+                        value={article.title}
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-bold text-lg focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all placeholder:font-normal"
+                        placeholder="Enter a compelling title..."
+                    />
+                </div>
+            </div>
+
+            <!-- Category & Type -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Category</label
+                    >
+                    <div class="relative">
+                        <select
+                            name="category_id"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                        >
+                            <option value="">Select a category</option>
+                            {
+                                categories?.map((cat: any) => (
+                                    <option
+                                        value={cat.id}
+                                        selected={
+                                            article.category_id === cat.id
+                                        }
+                                    >
+                                        {cat.name}
+                                    </option>
+                                ))
+                            }
+                        </select>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                        >
+                            ▼
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Article Type</label
+                    >
+                    <div class="relative">
+                        <select
+                            name="type"
+                            Note:
+                            Check
+                            if
+                            'type'
+                            column
+                            exists,
+                            new.astro
+                            suggests
+                            it
+                            does
+                            implicitly
+                            or
+                            is
+                            handled.
+                            is
+                            handled.
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                        >
+                            <option
+                                value="article"
+                                selected={!article.type ||
+                                    article.type === "article"}
+                                >Standard Article</option
+                            >
+                            <option
+                                value="case_study"
+                                selected={article.type === "case_study"}
+                                >Case Study</option
+                            >
+                            <option
+                                value="research"
+                                selected={article.type === "research"}
+                                >Research Paper</option
+                            >
+                            <option
+                                value="guide"
+                                selected={article.type === "guide"}
+                                >How-To Guide</option
+                            >
+                            <option
+                                value="opinion"
+                                selected={article.type === "opinion"}
+                                >Opinion Piece</option
+                            >
+                        </select>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                        >
+                            ▼
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excerpt -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Excerpt / Summary</label
+                >
+                <textarea
+                    name="excerpt"
+                    rows="3"
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none resize-none"
+                    placeholder="Write a brief summary to hook your readers (150-200 characters)..."
+                    >{article.excerpt}</textarea
+                >
+            </div>
+
+            <!-- Content -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Content</label
+                >
+                <div class="relative">
+                    <textarea
+                        name="content"
+                        rows="20"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none resize-none font-mono text-sm leading-relaxed"
+                        placeholder="# Your Article Content..."
+                        >{article.content}</textarea
+                    >
+                    <div
+                        class="absolute bottom-4 right-4 text-xs font-mono text-gray-400 bg-white/80 px-2 py-1 rounded"
+                    >
+                        Markdown Supported
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Featured Image URL (Optional for now)</label
+                >
+                <!-- Simplified Image Input for Edit -->
+                <input
+                    type="text"
+                    name="image_url"
+                    value={article.image_url}
+                    placeholder="https://example.com/image.jpg"
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900"
+                />
+            </div>
+
+            <!-- Actions -->
+            <div
+                class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t border-gray-200 md:static md:bg-transparent md:border-none md:p-0 flex gap-4 justify-between z-40"
+            >
+                <button
+                    type="button"
+                    id="delete-btn"
+                    class="px-8 py-4 border-2 border-red-100 text-red-600 rounded-full font-bold uppercase tracking-wide hover:bg-red-50 transition-all bg-white"
+                >
+                    Delete Article
+                </button>
+
+                <div class="flex gap-4">
+                    <button
+                        type="button"
+                        class="px-8 py-4 border-2 border-gray-200 text-gray-500 rounded-full font-bold uppercase tracking-wide hover:border-gray-400 hover:text-gray-700 transition-all bg-white"
+                        onclick="history.back()"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-10 py-4 bg-primary-600 text-white rounded-full font-bold uppercase tracking-wide hover:bg-primary-900 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+    const form = document.getElementById("edit-form");
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    const deleteBtn = document.getElementById("delete-btn");
+    const articleId = form?.dataset.id;
+
+    // Handle Update
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!submitBtn) return;
+
+        // Disabled State
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Saving...";
+        (submitBtn as HTMLButtonElement).disabled = true;
+
+        const formData = new FormData(form as HTMLFormElement);
+        const title = formData.get("title") as string;
+        const category_id = formData.get("category_id");
+        // const type = formData.get("type"); // if needed
+        const excerpt = formData.get("excerpt");
+        const content = formData.get("content");
+        const image_url = formData.get("image_url"); // Simplistic handling
+
+        if (!title || !content || !category_id) {
+            alert(
+                "Please fill in all required fields (Title, Category, Content)",
+            );
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from("articles")
+                .update({
+                    title,
+                    category_id,
+                    content,
+                    excerpt,
+                    // image_url, // Update if using valid URL
+                    updated_at: new Date().toISOString(),
+                })
+                .eq("id", articleId);
+
+            if (error) throw error;
+
+            // Success
+            window.location.href = "/dashboard/my-articles";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error updating article: " + err.message);
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+
+    // Handle Delete
+    deleteBtn?.addEventListener("click", async () => {
+        if (
+            !confirm(
+                "Are you sure you want to delete this article? This action cannot be undone.",
+            )
+        ) {
+            return;
+        }
+
+        const originalText = deleteBtn.textContent;
+        deleteBtn.textContent = "Deleting...";
+        (deleteBtn as HTMLButtonElement).disabled = true;
+
+        try {
+            const { error } = await supabase
+                .from("articles")
+                .delete()
+                .eq("id", articleId);
+
+            if (error) throw error;
+
+            window.location.href = "/dashboard/my-articles";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error deleting article: " + err.message);
+            deleteBtn.textContent = originalText;
+            (deleteBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+</script>

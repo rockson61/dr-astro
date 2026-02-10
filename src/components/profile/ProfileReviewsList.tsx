@@ -9,6 +9,7 @@ interface ProfileReviewsListProps {
     onRatingDataUpdate?: (averageRating: number, reviewCount: number) => void;
     minimal?: boolean;
     initialReviews?: any[];
+    limit?: number;
 }
 
 type FilterType = 'recent' | 'highest' | 'lowest';
@@ -205,7 +206,7 @@ const ProfileReviewsList: React.FC<ProfileReviewsListProps> = ({ profileId, onRa
                                         className="w-12 h-12 rounded-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-tuio-pink flex items-center justify-center text-lg font-bold text-white">
+                                    <div className="w-12 h-12 rounded-full bg-tuio-red flex items-center justify-center text-lg font-bold text-white">
                                         {`${review.rater?.first_name || ''} ${review.rater?.last_name || ''}`.charAt(0) || '?'}
                                     </div>
                                 )}
@@ -239,7 +240,7 @@ const ProfileReviewsList: React.FC<ProfileReviewsListProps> = ({ profileId, onRa
                                 )}
 
                                 {/* Helpful Button */}
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-tuio-pink transition-colors">
+                                <button className="flex items-center gap-2 text-gray-500 hover:text-tuio-red transition-colors">
                                     <ThumbsUp className="w-4 h-4" />
                                     <span className="text-sm font-medium">Helpful</span>
                                 </button>

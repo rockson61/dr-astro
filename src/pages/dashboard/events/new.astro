@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import EventForm from "../../../components/dashboard/EventForm";
+
+export const prerender = false;
+---
+
+<DashboardLayout title="Create Event">
+    <div class="animate-fade-in-up">
+        {/* Mount React Component */}
+        <EventForm client:load />
+    </div>
+</DashboardLayout>

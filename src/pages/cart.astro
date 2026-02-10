@@ -38,12 +38,12 @@ const total = subtotal + shipping;
                                 </div>
                                 <div class="flex-grow">
                                     <h3 class="font-tuio text-lg uppercase text-tuio-navy mb-1">{item.name}</h3>
-                                    <p class="text-tuio-pink font-bold">${item.price.toLocaleString()}</p>
+                                    <p class="text-tuio-red font-bold">${item.price.toLocaleString()}</p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button class="w-8 h-8 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy hover:bg-tuio-pink hover:text-white transition-all">-</button>
+                                    <button class="w-8 h-8 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy hover:bg-tuio-red hover:text-white transition-all">-</button>
                                     <span class="font-bold w-8 text-center">{item.qty}</span>
-                                    <button class="w-8 h-8 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy hover:bg-tuio-pink hover:text-white transition-all">+</button>
+                                    <button class="w-8 h-8 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy hover:bg-tuio-red hover:text-white transition-all">+</button>
                                 </div>
                                 <div class="font-tuio text-xl text-tuio-navy w-28 text-right">
                                     ${(item.price * item.qty).toLocaleString()}
@@ -73,10 +73,10 @@ const total = subtotal + shipping;
                                     <span>${total.toLocaleString()}</span>
                                 </div>
                             </div>
-                            <button class="w-full py-4 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all mb-4">
+                            <button class="w-full py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all mb-4">
                                 Proceed to Checkout
                             </button>
-                            <a href="/products" class="block text-center text-gray-500 hover:text-tuio-pink transition-colors">
+                            <a href="/products" class="block text-center text-gray-500 hover:text-tuio-red transition-colors">
                                 ← Continue Shopping
                             </a>
                         </div>
@@ -87,7 +87,7 @@ const total = subtotal + shipping;
                     <div class="text-6xl mb-6">🛒</div>
                     <h2 class="font-tuio text-3xl uppercase text-tuio-navy mb-4">Your cart is empty</h2>
                     <p class="text-gray-500 mb-8">Browse our marketplace to find premium dental products.</p>
-                    <a href="/products" class="inline-block px-10 py-4 bg-tuio-pink text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all">
+                    <a href="/products" class="inline-block px-10 py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all">
                         Browse Products
                     </a>
                 </div>

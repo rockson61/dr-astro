@@ -1,0 +1,363 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-listings");
+}
+
+// Fetch listing details
+const { data: listing, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .single();
+
+if (error || !listing) {
+    console.error("Error fetching listing or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-listings");
+}
+
+const listingTypes = [
+    { value: "clinic", label: "Dental Clinic" },
+    { value: "lab", label: "Dental Laboratory" },
+    { value: "supplier", label: "Equipment Supplier" },
+    { value: "education", label: "Training Institute" },
+    { value: "other", label: "Other" },
+];
+
+const addressText = listing.address_json?.full_address || "";
+const cityText = listing.address_json?.city || "";
+---
+
+<DashboardLayout title={`Edit Listing: ${listing.business_name}`}>
+    <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h2 class="text-3xl font-heading uppercase text-primary-900">
+                    Edit Listing
+                </h2>
+                <p class="text-gray-500 mt-1">Update your business details.</p>
+            </div>
+            <a
+                href="/dashboard/my-listings"
+                class="text-gray-400 font-bold hover:text-primary-600 transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
+            >
+                <span>← Back to My Listings</span>
+            </a>
+        </div>
+
+        <form class="space-y-8" id="edit-form" data-id={listing.id}>
+            <!-- Business Name -->
+            <div class="glass-card bg-white p-8">
+                <div
+                    class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
+                >
+                    <span class="text-2xl">🏢</span>
+                    <h3 class="font-heading text-xl uppercase text-primary-900">
+                        Business Details
+                    </h3>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                            >Business Name</label
+                        >
+                        <input
+                            type="text"
+                            name="business_name"
+                            value={listing.business_name}
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-bold text-lg focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all placeholder:font-normal"
+                            placeholder="e.g. Smile Dental Clinic"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type & City -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Business Type</label
+                    >
+                    <div class="relative">
+                        <select
+                            name="type"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                        >
+                            {
+                                listingTypes.map((type) => (
+                                    <option
+                                        value={type.value}
+                                        selected={listing.type === type.value}
+                                    >
+                                        {type.label}
+                                    </option>
+                                ))
+                            }
+                        </select>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                        >
+                            ▼
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >City</label
+                    >
+                    <input
+                        type="text"
+                        name="city"
+                        value={cityText}
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all"
+                        placeholder="e.g. Mumbai"
+                    />
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Full Address</label
+                >
+                <textarea
+                    name="address"
+                    rows="2"
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none resize-none"
+                    placeholder="123 Main Street...">{addressText}</textarea
+                >
+            </div>
+
+            <!-- Contact -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Phone Number</label
+                    >
+                    <input
+                        type="tel"
+                        name="phone"
+                        value={listing.contact_phone}
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all"
+                        placeholder="+91 98765 43210"
+                    />
+                </div>
+                <div class="glass-card bg-white p-8">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Website</label
+                    >
+                    <input
+                        type="url"
+                        name="website"
+                        value={listing.website}
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all"
+                        placeholder="https://smiledental.com"
+                    />
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Description</label
+                >
+                <textarea
+                    name="description"
+                    rows="5"
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none resize-none"
+                    placeholder="Describe your services..."
+                    >{listing.description}</textarea
+                >
+            </div>
+
+            <!-- Services -->
+            <div class="glass-card bg-white p-8">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-4"
+                    >Services Offered</label
+                >
+                <div class="flex flex-wrap gap-3">
+                    {
+                        [
+                            "General Dentistry",
+                            "Orthodontics",
+                            "Implants",
+                            "Cosmetic",
+                            "Pediatric",
+                            "Oral Surgery",
+                            "Periodontics",
+                            "Endodontics",
+                            "Prosthodontics",
+                        ].map((service) => (
+                            <label class="cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    name="services"
+                                    value={service
+                                        .toLowerCase()
+                                        .replace(" ", "-")}
+                                    class="peer sr-only"
+                                />
+                                <span class="inline-block px-5 py-2 bg-gray-50 rounded-full text-sm font-bold text-gray-500 border border-transparent peer-checked:bg-primary-600 peer-checked:text-white peer-checked:shadow-md transition-all group-hover:bg-gray-100">
+                                    {service}
+                                </span>
+                            </label>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div
+                class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t border-gray-200 md:static md:bg-transparent md:border-none md:p-0 flex gap-4 justify-between z-40"
+            >
+                <button
+                    type="button"
+                    id="delete-btn"
+                    class="px-8 py-4 border-2 border-red-100 text-red-600 rounded-full font-bold uppercase tracking-wide hover:bg-red-50 transition-all bg-white"
+                >
+                    Delete Listing
+                </button>
+
+                <div class="flex gap-4">
+                    <button
+                        type="button"
+                        class="px-8 py-4 border-2 border-gray-200 text-gray-500 rounded-full font-bold uppercase tracking-wide hover:border-gray-400 hover:text-gray-700 transition-all bg-white"
+                        onclick="history.back()"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-10 py-4 bg-primary-600 text-white rounded-full font-bold uppercase tracking-wide hover:bg-primary-900 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+    const form = document.getElementById("edit-form");
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    const deleteBtn = document.getElementById("delete-btn"); // Add if implemented
+    const listingId = form?.dataset.id;
+
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!submitBtn) return;
+
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Saving...";
+        (submitBtn as HTMLButtonElement).disabled = true;
+
+        const formData = new FormData(form as HTMLFormElement);
+        const business_name = formData.get("business_name") as string;
+        const type = formData.get("type");
+        const city = formData.get("city");
+        const address = formData.get("address");
+        const phone = formData.get("phone");
+        const website = formData.get("website");
+        const description = formData.get("description");
+
+        if (!business_name || !city || !description) {
+            alert("Please fill in required fields");
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+            return;
+        }
+
+        try {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            const addressJson = {
+                full_address: address,
+                city: city,
+                country: "India",
+            };
+
+            const { error } = await supabase
+                .from("listings")
+                .update({
+                    business_name,
+                    type,
+                    description,
+                    contact_phone: phone,
+                    website,
+                    address_json: addressJson,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq("id", listingId);
+
+            if (error) throw error;
+
+            window.location.href = "/dashboard/my-listings";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error updating listing: " + err.message);
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+
+    // Handle Delete
+    deleteBtn?.addEventListener("click", async () => {
+        if (
+            !confirm(
+                "Are you sure you want to delete this listing? This action cannot be undone.",
+            )
+        ) {
+            return;
+        }
+
+        const originalText = deleteBtn.textContent;
+        deleteBtn.textContent = "Deleting...";
+        (deleteBtn as HTMLButtonElement).disabled = true;
+
+        try {
+            const { error } = await supabase
+                .from("listings")
+                .delete()
+                .eq("id", listingId);
+
+            if (error) throw error;
+
+            window.location.href = "/dashboard/my-listings";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error deleting listing: " + err.message);
+            deleteBtn.textContent = originalText;
+            (deleteBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+</script>

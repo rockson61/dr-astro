@@ -222,8 +222,8 @@ export default function UserManagement() {
                     </GlassCard>
                     <GlassCard hoverEffect className="p-6">
                         <div className="flex justify-between">
-                            <div><p className="text-sm text-slate-600">Verified</p><p className="text-2xl font-bold text-purple-600">{stats.verified}</p></div>
-                            <CheckCircle className="text-purple-600" />
+                            <div><p className="text-sm text-slate-600">Verified</p><p className="text-2xl font-bold text-red-600">{stats.verified}</p></div>
+                            <CheckCircle className="text-red-600" />
                         </div>
                     </GlassCard>
                 </div>

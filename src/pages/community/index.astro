@@ -26,14 +26,14 @@ const { data: threads } = await supabase
 
 <BaseLayout title="Community Forums">
      <!-- Hero -->
-    <section class="bg-tuio-pink py-20 text-center text-white relative overflow-hidden rounded-b-[40px]">
+    <section class="bg-tuio-red py-20 text-center text-white relative overflow-hidden rounded-b-[40px]">
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div class="container mx-auto px-4 relative z-10">
             <h1 class="text-5xl md:text-7xl font-tuio uppercase mb-6 leading-tight">
                 DentalReach<br/>Community
             </h1>
             <p class="text-white/80 max-w-2xl mx-auto mb-10 text-lg font-light">Join the conversation with thousands of dental professionals worldwide.</p>
-            <a href="/community/new" class="px-10 py-4 bg-white text-tuio-pink rounded-full font-bold hover:bg-tuio-navy hover:text-white transition-all shadow-xl uppercase tracking-wide">Start New Discussion</a>
+            <a href="/community/new" class="px-10 py-4 bg-white text-tuio-red rounded-full font-bold hover:bg-tuio-navy hover:text-white transition-all shadow-xl uppercase tracking-wide">Start New Discussion</a>
         </div>
     </section>
 
@@ -46,15 +46,15 @@ const { data: threads } = await supabase
                      <h2 class="text-3xl font-tuio uppercase text-tuio-navy mb-6">Discussion Categories</h2>
                      <div class="grid md:grid-cols-2 gap-6">
                          {categories.map(cat => (
-                             <a href={`/community/c/${cat.id}`} class="bg-white p-8 rounded-[32px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group border border-transparent hover:border-tuio-pink">
+                             <a href={`/community/c/${cat.id}`} class="bg-white p-8 rounded-[32px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group border border-transparent hover:border-tuio-red">
                                  <div class="flex items-start gap-6">
                                      <div class="text-4xl bg-tuio-bg w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                                          {cat.icon}
                                      </div>
                                      <div>
-                                         <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-2 group-hover:text-tuio-pink transition-colors">{cat.title}</h3>
+                                         <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-2 group-hover:text-tuio-red transition-colors">{cat.title}</h3>
                                          <p class="text-sm text-gray-500 mb-3 font-light">{cat.description}</p>
-                                         <span class="text-xs font-bold text-tuio-pink bg-tuio-pink/10 px-3 py-1 rounded-full">{cat.count} threads</span>
+                                         <span class="text-xs font-bold text-tuio-red bg-tuio-red/10 px-3 py-1 rounded-full">{cat.count} threads</span>
                                      </div>
                                  </div>
                              </a>
@@ -77,7 +77,7 @@ const { data: threads } = await supabase
                                             />
                                             <div class="flex-grow">
                                                 <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-2">
-                                                    <a href={`/community/t/${thread.slug}`} class="hover:text-tuio-pink transition-colors">
+                                                    <a href={`/community/t/${thread.slug}`} class="hover:text-tuio-red transition-colors">
                                                         {thread.title}
                                                     </a>
                                                 </h3>
@@ -85,7 +85,7 @@ const { data: threads } = await supabase
                                                 <div class="flex items-center gap-4 text-xs text-gray-400 font-bold uppercase tracking-wider">
                                                     <span>By {thread.profiles?.full_name}</span>
                                                     <span>• {formatDistanceToNow(new Date(thread.created_at))} ago</span>
-                                                    <span class="text-tuio-pink">• {thread.category}</span>
+                                                    <span class="text-tuio-red">• {thread.category}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -108,9 +108,9 @@ const { data: threads } = await supabase
                  <div class="bg-tuio-navy text-white p-8 rounded-[32px]">
                      <h3 class="font-tuio text-xl uppercase mb-6">Community Rules</h3>
                      <ul class="space-y-4 text-sm text-gray-300 font-light">
-                         <li class="flex items-start gap-3"><span class="text-tuio-pink">✓</span> Be respectful to colleagues.</li>
-                         <li class="flex items-start gap-3"><span class="text-tuio-pink">✓</span> Patient anonymity is mandatory (HIPAA).</li>
-                         <li class="flex items-start gap-3"><span class="text-tuio-pink">✓</span> No self-promotion in clinical threads.</li>
+                         <li class="flex items-start gap-3"><span class="text-tuio-red">✓</span> Be respectful to colleagues.</li>
+                         <li class="flex items-start gap-3"><span class="text-tuio-red">✓</span> Patient anonymity is mandatory (HIPAA).</li>
+                         <li class="flex items-start gap-3"><span class="text-tuio-red">✓</span> No self-promotion in clinical threads.</li>
                      </ul>
                  </div>
             </aside>

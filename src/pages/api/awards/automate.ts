@@ -1,17 +1,27 @@
-import type { APIRoute } from 'astro';
+import { createSupabaseServerClient } from '../../../lib/supabase';
 import { AutomationService } from '../../../services/awardsAutomationService';
 import { ScoringService } from '../../../services/awardsScoringService';
 
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
     try {
         const body = await request.json();
         const { action, awardId, categoryId } = body;
 
-        // TODO: Add admin authentication check
-        // const supabase = createSupabaseServerClient({ cookies: request.headers });
-        // const { data: { user } } = await supabase.auth.getUser();
-        // if (!user || user.role !== 'admin') { ... }
+        // Admin authentication check
+        const supabase = createSupabaseServerClient({ cookies });
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // Fetch user profile to check role
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        }
+
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+        if (!profile || profile.role !== 'admin') {
+            return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), { status: 403 });
+        }
 
         switch (action) {
             case 'auto_nominate':

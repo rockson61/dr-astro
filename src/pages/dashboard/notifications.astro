@@ -1,0 +1,48 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+
+export const prerender = false;
+---
+
+<DashboardLayout title="Notifications">
+    <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="mb-10">
+            <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                Notifications
+            </h2>
+            <p class="text-gray-500 mt-1">
+                Stay updated with your latest activity.
+            </p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Mock Notifications -->
+            <div
+                class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm flex gap-4"
+            >
+                <div
+                    class="w-12 h-12 bg-tuio-bg rounded-full flex items-center justify-center text-xl shrink-0"
+                >
+                    ℹ️
+                </div>
+                <div>
+                    <h3 class="font-bold text-tuio-navy text-lg">
+                        Welcome to DentalReach!
+                    </h3>
+                    <p class="text-gray-600">
+                        You have successfully created your account. Complete
+                        your profile to get started.
+                    </p>
+                    <span
+                        class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 block"
+                        >Just now</span
+                    >
+                </div>
+            </div>
+
+            <div class="p-10 text-center text-gray-400">
+                <p>No older notifications.</p>
+            </div>
+        </div>
+    </div>
+</DashboardLayout>

@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import EventManagement from "../../components/admin/EventManagement";
+
+const title = "Event Management | Admin";
+---
+
+<BaseLayout title={title}>
+    {/* Mount the React component with hydration */}
+    <EventManagement client:only="react" />
+</BaseLayout>

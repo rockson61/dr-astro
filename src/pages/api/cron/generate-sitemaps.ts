@@ -75,7 +75,7 @@ export const GET: APIRoute = async ({ request }) => {
         const allArticles: any[] = [];
         let from = 0;
         while (true) {
-            const { data } = await supabase.from('articles').select('id, title')
+            const { data } = await supabase.from('articles').select('id, title, slug')
                 .eq('is_approved', true).order('created_at', { ascending: false }).range(from, from + 999);
             if (!data || data.length === 0) break;
             allArticles.push(...data);
@@ -85,7 +85,7 @@ export const GET: APIRoute = async ({ request }) => {
 
         if (allArticles.length > 0) {
             const articleUrls = allArticles.map((a) => ({
-                loc: `${BASE_URL}/articles/${slugify(a.title) || a.id}`,
+                loc: `${BASE_URL}/articles/${a.slug || a.id}`,
                 changefreq: 'daily',
                 priority: 0.8,
             }));
@@ -98,11 +98,11 @@ export const GET: APIRoute = async ({ request }) => {
         }
 
         // Podcasts
-        const { data: podcasts } = await supabase.from('podcasts').select('id, title')
+        const { data: podcasts } = await supabase.from('podcasts').select('id, title, slug')
             .eq('is_approved', true).order('created_at', { ascending: false });
         if (podcasts && podcasts.length > 0) {
             const urls = podcasts.map((p: any) => ({
-                loc: `${BASE_URL}/podcasts/${slugify(p.title) || p.id}-${p.id}`,
+                loc: `${BASE_URL}/podcasts/${p.slug || p.id}`,
                 changefreq: 'daily',
                 priority: 0.6,
             }));
@@ -111,11 +111,11 @@ export const GET: APIRoute = async ({ request }) => {
         }
 
         // Products
-        const { data: products } = await supabase.from('products').select('id, name')
+        const { data: products } = await supabase.from('products').select('id, name, slug')
             .order('created_at', { ascending: false });
         if (products && products.length > 0) {
             const urls = products.map((p: any) => ({
-                loc: `${BASE_URL}/products/${slugify(p.name) || p.id}-${p.id}`,
+                loc: `${BASE_URL}/products/${p.slug || p.id}`,
                 changefreq: 'daily',
                 priority: 0.6,
             }));

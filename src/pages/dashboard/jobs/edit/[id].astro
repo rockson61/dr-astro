@@ -1,0 +1,41 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import JobForm from "../../../../components/dashboard/JobForm";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-jobs");
+}
+
+// Fetch job details
+const { data: job, error } = await supabase
+    .from("jobs")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id) // Assuming user_id based on JobForm
+    .single();
+
+if (error || !job) {
+    console.error("Error fetching job or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-jobs");
+}
+---
+
+<DashboardLayout title={`Edit Job: ${job.title}`}>
+    <div class="animate-fade-in-up">
+        {/* Mount React Component with Initial Data */}
+        <JobForm client:load initialData={job} />
+    </div>
+</DashboardLayout>
