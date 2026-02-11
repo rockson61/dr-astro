@@ -1,0 +1,89 @@
+---
+/**
+ * VideoEmbed Component
+ * Renders responsive embedded videos from YouTube, Vimeo, or direct URLs.
+ * Usage in Markdown/Content:
+ *   <VideoEmbed url="https://www.youtube.com/watch?v=..." />
+ *   <VideoEmbed url="https://vimeo.com/..." />
+ *   <VideoEmbed url="https://example.com/video.mp4" title="My Video" />
+ */
+interface Props {
+    url: string;
+    title?: string;
+    caption?: string;
+}
+
+const { url, title = "Embedded Video", caption } = Astro.props;
+
+// Parse video source
+function getEmbedUrl(rawUrl: string): { type: string; src: string } {
+    // YouTube
+    const ytMatch = rawUrl.match(
+        /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    );
+    if (ytMatch) {
+        return {
+            type: "youtube",
+            src: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`,
+        };
+    }
+
+    // Vimeo
+    const vimeoMatch = rawUrl.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+        return {
+            type: "vimeo",
+            src: `https://player.vimeo.com/video/${vimeoMatch[1]}?dnt=1`,
+        };
+    }
+
+    // Direct video file
+    return { type: "direct", src: rawUrl };
+}
+
+const embed = getEmbedUrl(url);
+---
+
+<div class="video-embed-wrapper my-8">
+    <div
+        class="relative w-full rounded-2xl overflow-hidden shadow-lg border border-gray-100 bg-black"
+    >
+        {
+            embed.type === "direct" ? (
+                <video
+                    controls
+                    preload="metadata"
+                    class="w-full aspect-video"
+                    title={title}
+                >
+                    <source src={embed.src} type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            ) : (
+                <div class="relative w-full aspect-video">
+                    <iframe
+                        src={embed.src}
+                        title={title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                        loading="lazy"
+                        class="absolute inset-0 w-full h-full border-0"
+                    />
+                </div>
+            )
+        }
+    </div>
+    {
+        caption && (
+            <p class="text-center text-sm text-gray-500 mt-3 italic">
+                {caption}
+            </p>
+        )
+    }
+</div>
+
+<style>
+    .video-embed-wrapper {
+        container-type: inline-size;
+    }
+</style>

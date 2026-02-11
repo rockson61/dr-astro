@@ -5,3 +5,4 @@ Disallow: /api/
 Disallow: /_image
 
 Sitemap: https://dentalreach.today/sitemap-index.xml
+Sitemap: https://dentalreach.today/news-sitemap.xml

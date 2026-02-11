@@ -1,0 +1,158 @@
+---
+import { createSupabaseServerClient } from "../../lib/supabase";
+import { formatDistanceToNow } from "date-fns";
+
+const { articleId } = Astro.props;
+
+const supabase = createSupabaseServerClient(Astro);
+
+// Fetch comments
+const { data: comments } = await supabase
+    .from("comments")
+    .select("*, profile:profiles(full_name, avatar_url)")
+    .eq("article_id", articleId)
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false });
+
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+---
+
+<div class="bg-gray-50 rounded-[32px] p-8 md:p-12 mb-12" id="comments-section">
+    <h3 class="font-tuio text-2xl uppercase text-tuio-navy mb-8 flex items-center gap-3">
+        Comments <span class="text-gray-400 text-lg">({comments?.length || 0})</span>
+    </h3>
+
+    <!-- Comment Form -->
+    <div class="mb-12">
+        {
+            user ? (
+                <form id="comment-form" class="flex gap-4">
+                    <img
+                        src={user.user_metadata?.avatar_url || "/images/avatar-placeholder.png"}
+                        alt="User"
+                        class="w-10 h-10 rounded-full object-cover hidden md:block"
+                    />
+                    <div class="flex-grow">
+                        <textarea
+                            name="content"
+                            rows="3"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-tuio-navy focus:ring-4 focus:ring-tuio-red/10 focus:border-tuio-red focus:outline-none resize-none transition-all placeholder:text-gray-400"
+                            placeholder="Share your thoughts..."
+                            required
+                        ></textarea>
+                        <div class="flex justify-end mt-3">
+                            <button
+                                type="submit"
+                                class="px-8 py-3 bg-tuio-navy text-white rounded-full font-bold uppercase tracking-wide text-sm hover:bg-tuio-red transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                            >
+                                Post Comment
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="article_id" value={articleId} />
+                </form>
+            ) : (
+                <div class="bg-white rounded-2xl p-6 text-center border border-dashed border-gray-300">
+                    <p class="text-gray-500 mb-4">Please log in to join the conversation.</p>
+                    <a
+                        href="/login"
+                        class="px-6 py-2 bg-tuio-red/10 text-tuio-red rounded-full font-bold uppercase tracking-wide text-sm hover:bg-tuio-red hover:text-white transition-all inline-block"
+                    >
+                        Log In / Sign Up
+                    </a>
+                </div>
+            )
+        }
+    </div>
+
+    <!-- Comments List -->
+    <div class="space-y-8">
+        {
+            comments && comments.length > 0 ? (
+                comments.map((comment: any) => (
+                    <div class="flex gap-4 group">
+                        <div class="shrink-0">
+                            {comment.profile?.avatar_url ? (
+                                <img
+                                    src={comment.profile.avatar_url}
+                                    alt={comment.profile.full_name}
+                                    class="w-10 h-10 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">
+                                    {comment.profile?.full_name?.charAt(0) || "?"}
+                                </div>
+                            )}
+                        </div>
+                        <div class="flex-grow">
+                            <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 group-hover:border-gray-200 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-tuio-navy">
+                                        {comment.profile?.full_name || "Anonymous"}
+                                    </span>
+                                    <span class="text-xs text-gray-400">
+                                        {formatDistanceToNow(new Date(comment.created_at), {
+                                            addSuffix: true,
+                                        })}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 leading-relaxed text-sm">
+                                    {comment.content}
+                                </p>
+                            </div>
+                            <!-- Future: Reaction buttons or Reply -->
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div class="text-center py-10 opacity-50">
+                    <div class="text-4xl mb-2">💭</div>
+                    <p>Be the first to comment!</p>
+                </div>
+            )
+        }
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("comment-form");
+    
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const startText = form.querySelector("button")!.innerText;
+        form.querySelector("button")!.innerText = "Posting...";
+        form.querySelector("button")!.setAttribute("disabled", "true");
+
+        const formData = new FormData(form as HTMLFormElement);
+        const content = formData.get("content");
+        const article_id = formData.get("article_id");
+
+        try {
+            const res = await fetch("/api/comments", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    content,
+                    article_id,
+                }),
+            });
+
+            if (res.ok) {
+                // Determine layout or refresh
+               window.location.reload();
+            } else {
+                alert("Failed to post comment. Please try again.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred.");
+        } finally {
+            form.querySelector("button")!.innerText = startText;
+            form.querySelector("button")!.removeAttribute("disabled");
+        }
+    });
+</script>

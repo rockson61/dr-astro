@@ -18,6 +18,12 @@ const { data: categories } = await supabase
     .from("categories")
     .select("id, name, slug")
     .order("name");
+
+// Fetch active issues
+const { data: issues } = await supabase
+    .from("issues")
+    .select("id, title, volume, issue_number")
+    .order("published_at", { ascending: false });
 ---
 
 <DashboardLayout title="Write New Article">
@@ -115,6 +121,35 @@ const { data: categories } = await supabase
                 </div>
             </div>
 
+            <!-- Issue Assignment -->
+            <div class="tuio-card">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Assign to Issue (Optional)</label
+                >
+                <div class="relative">
+                    <select
+                        name="issue_id"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                    >
+                        <option value="">None (Standalone Article)</option>
+                        {
+                            issues?.map((issue: any) => (
+                                <option value={issue.id}>
+                                    Vol {issue.volume}, Issue{" "}
+                                    {issue.issue_number}: {issue.title}
+                                </option>
+                            ))
+                        }
+                    </select>
+                    <div
+                        class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                    >
+                        ▼
+                    </div>
+                </div>
+            </div>
+
             <!-- Excerpt -->
             <div class="tuio-card">
                 <label
@@ -127,6 +162,20 @@ const { data: categories } = await supabase
                     class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none"
                     placeholder="Write a brief summary to hook your readers (150-200 characters)..."
                 ></textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="tuio-card">
+                <label
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >Tags (Comma Separated)</label
+                >
+                <input
+                    type="text"
+                    name="tags"
+                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none placeholder:font-normal"
+                    placeholder="e.g., Digital Dentistry, AI, Case Study"
+                />
             </div>
 
             <!-- Content -->
@@ -190,6 +239,49 @@ Write your article here using Markdown..."
                 </div>
             </div>
 
+            <!-- Metadata -->
+            <div class="tuio-card">
+                <div class="space-y-6">
+                    <div
+                        class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100"
+                    >
+                        <span class="text-2xl">📚</span>
+                        <h3 class="font-tuio text-xl uppercase text-tuio-navy">
+                            Academic Metadata
+                        </h3>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                            >DOI</label
+                        >
+                        <input
+                            type="text"
+                            name="doi"
+                            placeholder="10.1000/xyz123"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all placeholder:font-normal"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                            >References</label
+                        >
+                        <textarea
+                            name="references"
+                            rows="5"
+                            placeholder='["Smith, J. (2020)...", "Doe, A. (2021)..."]'
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all font-mono text-sm placeholder:font-normal"
+                        ></textarea>
+                        <p class="text-xs text-gray-400 mt-2">
+                            Enter references as a JSON array of strings or
+                            simple text.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div
                 class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t border-gray-200 md:static md:bg-transparent md:border-none md:p-0 flex gap-4 justify-end z-40"
@@ -244,6 +336,27 @@ Write your article here using Markdown..."
         const type = formData.get("type") || "article"; // Default if missing
         const excerpt = formData.get("excerpt");
         const content = formData.get("content");
+        const tagsInput = formData.get("tags") as string;
+        const issue_id = formData.get("issue_id") || null;
+
+        // Parse tags
+        const tags = tagsInput
+            ? tagsInput
+                  .split(",")
+                  .map((tag) => tag.trim())
+                  .filter((tag) => tag.length > 0)
+            : [];
+
+        const doi = formData.get("doi");
+        const referencesStr = formData.get("references") as string;
+        let references = [];
+        try {
+            references = referencesStr ? JSON.parse(referencesStr) : [];
+        } catch (e) {
+            references = referencesStr
+                ? referencesStr.split("\n").filter(Boolean)
+                : [];
+        }
 
         if (!title || !content || !category_id) {
             alert(
@@ -270,6 +383,12 @@ Write your article here using Markdown..."
                 // category: 'legacy_col', // Optional if you still use text column
                 content,
                 excerpt,
+                tags,
+                tags,
+                doi,
+                references,
+                issue_id,
+                author_id: user.id,
                 author_id: user.id,
                 status: "published", // Or 'draft' depending on logic
                 is_approved: true, // Autoapprove for trusted users?

@@ -1,0 +1,216 @@
+---
+/**
+ * ImageGallery Component
+ * Renders a responsive, interactive lightbox image gallery.
+ * Usage:
+ *   <ImageGallery images={[
+ *     { src: "/path/to/img1.jpg", alt: "Description 1", caption: "Caption 1" },
+ *     { src: "/path/to/img2.jpg", alt: "Description 2" },
+ *   ]} />
+ */
+interface GalleryImage {
+    src: string;
+    alt: string;
+    caption?: string;
+}
+
+interface Props {
+    images: GalleryImage[];
+    columns?: 2 | 3 | 4;
+}
+
+const { images, columns = 3 } = Astro.props;
+const galleryId = `gallery-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div class="image-gallery my-10" id={galleryId}>
+    <!-- Grid -->
+    <div
+        class={`grid gap-4 ${columns === 2 ? "grid-cols-1 sm:grid-cols-2" : columns === 4 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"}`}
+    >
+        {
+            images.map((img, index) => (
+                <button
+                    type="button"
+                    class="gallery-thumb group relative rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-zoom-in bg-gray-50 focus:outline-none focus:ring-4 focus:ring-tuio-red/30"
+                    data-index={index}
+                    aria-label={`View ${img.alt}`}
+                >
+                    <div class="aspect-[4/3] overflow-hidden">
+                        <img
+                            src={img.src}
+                            alt={img.alt}
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {img.caption && (
+                        <div class="absolute bottom-0 left-0 right-0 p-3 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+                            {img.caption}
+                        </div>
+                    )}
+                    <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-tuio-navy">
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                            />
+                        </svg>
+                    </div>
+                </button>
+            ))
+        }
+    </div>
+
+    <!-- Lightbox Overlay -->
+    <div
+        class="lightbox-overlay fixed inset-0 z-[9999] hidden bg-black/95 backdrop-blur-md"
+        id={`${galleryId}-lightbox`}
+    >
+        <!-- Close Button -->
+        <button
+            class="lightbox-close absolute top-6 right-6 z-[10001] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors backdrop-blur-sm"
+            aria-label="Close lightbox"
+        >
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- Navigation -->
+        <button
+            class="lightbox-prev absolute left-4 top-1/2 -translate-y-1/2 z-[10001] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors backdrop-blur-sm"
+            aria-label="Previous image"
+        >
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+        <button
+            class="lightbox-next absolute right-4 top-1/2 -translate-y-1/2 z-[10001] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors backdrop-blur-sm"
+            aria-label="Next image"
+        >
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+
+        <!-- Image Container -->
+        <div class="flex items-center justify-center w-full h-full p-16">
+            <div class="relative max-w-5xl w-full text-center">
+                <img
+                    class="lightbox-img max-h-[80vh] mx-auto rounded-lg shadow-2xl object-contain"
+                    src=""
+                    alt=""
+                />
+                <p
+                    class="lightbox-caption text-white/80 text-sm mt-4 font-light"
+                >
+                </p>
+                <p
+                    class="lightbox-counter text-white/40 text-xs mt-2 font-mono"
+                >
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script define:vars={{ galleryId, images }}>
+    const gallery = document.getElementById(galleryId);
+    const lightbox = document.getElementById(`${galleryId}-lightbox`);
+    if (!gallery || !lightbox) throw new Error("Gallery elements not found");
+
+    const thumbs = gallery.querySelectorAll(".gallery-thumb");
+    const closeBtn = lightbox.querySelector(".lightbox-close");
+    const prevBtn = lightbox.querySelector(".lightbox-prev");
+    const nextBtn = lightbox.querySelector(".lightbox-next");
+    const img = lightbox.querySelector(".lightbox-img");
+    const caption = lightbox.querySelector(".lightbox-caption");
+    const counter = lightbox.querySelector(".lightbox-counter");
+
+    let currentIndex = 0;
+
+    function showImage(index) {
+        currentIndex = (index + images.length) % images.length;
+        const item = images[currentIndex];
+        img.src = item.src;
+        img.alt = item.alt;
+        caption.textContent = item.caption || "";
+        counter.textContent = `${currentIndex + 1} / ${images.length}`;
+    }
+
+    function openLightbox(index) {
+        showImage(index);
+        lightbox.classList.remove("hidden");
+        lightbox.classList.add("flex");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox() {
+        lightbox.classList.add("hidden");
+        lightbox.classList.remove("flex");
+        document.body.style.overflow = "";
+    }
+
+    thumbs.forEach((thumb) => {
+        thumb.addEventListener("click", () => {
+            openLightbox(parseInt(thumb.dataset.index));
+        });
+    });
+
+    closeBtn.addEventListener("click", closeLightbox);
+    prevBtn.addEventListener("click", () => showImage(currentIndex - 1));
+    nextBtn.addEventListener("click", () => showImage(currentIndex + 1));
+
+    lightbox.addEventListener("click", (e) => {
+        if (
+            e.target === lightbox ||
+            e.target.closest(".flex.items-center.justify-center") === e.target
+        ) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (lightbox.classList.contains("hidden")) return;
+        if (e.key === "Escape") closeLightbox();
+        if (e.key === "ArrowLeft") showImage(currentIndex - 1);
+        if (e.key === "ArrowRight") showImage(currentIndex + 1);
+    });
+</script>

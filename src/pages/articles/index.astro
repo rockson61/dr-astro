@@ -8,18 +8,42 @@ export const prerender = false;
 let articles: any[] = [];
 let categories: any[] = [];
 
-try {
+    const url = new URL(Astro.request.url);
+    const categoryFilter = url.searchParams.get("category");
+    const tagFilter = url.searchParams.get("tag");
+
     const supabase = createSupabaseServerClient(Astro);
 
-    // Fetch articles
-    const { data: articleData } = await supabase
+    // Build query
+    let query = supabase
         .from("articles")
         .select(
             "*, author:profiles(full_name, avatar_url), category:categories(name, slug)",
         )
         .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(20);
+        .order("created_at", { ascending: false });
+
+    // Apply Category Filter
+    if (categoryFilter) {
+        // We need to filter by the joined category table's slug
+        // Using !inner to ensure we only get articles that match the category
+        query = supabase
+            .from("articles")
+            .select(
+                "*, author:profiles(full_name, avatar_url), category:categories!inner(name, slug)",
+            )
+            .eq("status", "published")
+            .eq("category.slug", categoryFilter)
+            .order("created_at", { ascending: false });
+    }
+
+    // Apply Tag Filter
+    if (tagFilter) {
+        query = query.contains("tags", [tagFilter]);
+    }
+
+    const { data: articleData } = await query.limit(20);
+    
     if (articleData) articles = articleData;
 
     // Fetch categories for filtering
@@ -103,10 +127,6 @@ const mockArticles = [
 
 const displayArticles =
     articles && articles.length > 0 ? articles : mockArticles;
-
-// Get category from URL params
-const url = new URL(Astro.request.url);
-const categoryFilter = url.searchParams.get("category");
 ---
 
 <BaseLayout title="Articles | DentalReach">
@@ -184,6 +204,20 @@ const categoryFilter = url.searchParams.get("category");
                     )
                 }
             </div>
+
+            <!-- Active Filters -->
+            {
+                tagFilter && (
+                    <div class="flex justify-center mb-8">
+                        <div class="inline-flex items-center gap-2 bg-tuio-navy text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                            <span>Tag: #{tagFilter}</span>
+                            <a href="/articles" class="hover:text-tuio-red transition-colors ml-2" aria-label="Remove filter">
+                                ✕
+                            </a>
+                        </div>
+                    </div>
+                )
+            }
 
             <!-- Articles Grid -->
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

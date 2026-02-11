@@ -1,0 +1,74 @@
+---
+interface Props {
+    headings: { depth: number; slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+
+const filteredHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<nav
+    class="toc-container sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto hidden lg:block pr-4"
+>
+    <h3
+        class="font-tuio text-sm font-bold uppercase text-gray-400 mb-4 tracking-wider"
+    >
+        Table of Contents
+    </h3>
+    <ul class="space-y-2 text-sm border-l-2 border-gray-100">
+        {
+            filteredHeadings.map((heading) => (
+                <li
+                    class={`pl-4 transition-colors hover:border-l-2 hover:-ml-[2px] ${
+                        heading.depth === 3 ? "pl-8 text-xs" : ""
+                    }`}
+                >
+                    <a
+                        href={`#${heading.slug}`}
+                        class="text-gray-500 hover:text-tuio-red block py-1"
+                    >
+                        {heading.text}
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+</nav>
+
+<script>
+    // Active link highlighting
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                const id = entry.target.getAttribute("id");
+                if (entry.intersectionRatio > 0) {
+                    document
+                        .querySelector(`.toc-container a[href="#${id}"]`)
+                        ?.parentElement?.classList.add(
+                            "border-tuio-red",
+                            "-ml-[2px]",
+                        );
+                    document
+                        .querySelector(`.toc-container a[href="#${id}"]`)
+                        ?.classList.add("text-tuio-navy", "font-medium");
+                } else {
+                    document
+                        .querySelector(`.toc-container a[href="#${id}"]`)
+                        ?.parentElement?.classList.remove(
+                            "border-tuio-red",
+                            "-ml-[2px]",
+                        );
+                    document
+                        .querySelector(`.toc-container a[href="#${id}"]`)
+                        ?.classList.remove("text-tuio-navy", "font-medium");
+                }
+            });
+        },
+        { rootMargin: "0px 0px -80% 0px" }, // Trigger when element is near top
+    );
+
+    document.querySelectorAll("article h2, article h3").forEach((section) => {
+        observer.observe(section);
+    });
+</script>
