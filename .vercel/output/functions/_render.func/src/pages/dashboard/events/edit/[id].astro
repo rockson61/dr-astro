@@ -1,0 +1,41 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import EventForm from "../../../../components/dashboard/EventForm";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-events");
+}
+
+// Fetch event details
+const { data: event, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("id", id)
+    .eq("organizer_id", user.id)
+    .single();
+
+if (error || !event) {
+    console.error("Error fetching event or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-events");
+}
+---
+
+<DashboardLayout title={`Edit Event: ${event.title}`}>
+    <div class="animate-fade-in-up">
+        {/* Mount React Component with Initial Data */}
+        <EventForm client:load initialData={event} />
+    </div>
+</DashboardLayout>

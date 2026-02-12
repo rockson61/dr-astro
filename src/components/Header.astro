@@ -108,7 +108,7 @@ const navLinks = [
                                     class={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
                                         currentPath === link.href
                                             ? "bg-primary-100 text-primary-700 font-bold"
-                                            : "text-gray-600 hover:text-primary-600 hover:bg-cyan-50"
+                                            : "text-gray-600 hover:text-primary-600 hover:bg-primary-50"
                                     }`}
                                 >
                                     {link.label}
@@ -144,7 +144,7 @@ const navLinks = [
                                                                     href={
                                                                         item.href
                                                                     }
-                                                                    class="flex items-start gap-3 p-3 rounded-xl hover:bg-cyan-50 transition-colors group/item"
+                                                                    class="flex items-start gap-3 p-3 rounded-xl hover:bg-primary-50 transition-colors group/item"
                                                                 >
                                                                     <span class="text-xl">
                                                                         {
@@ -245,6 +245,9 @@ const navLinks = [
     </div>
 
     <!-- Mobile Menu -->
+    /* Wait, I already did this in Footer above, but this seems to be Header? No,
+    this is Footer context? */ /* Ah, I am replacing multiple files. */ /* Header
+    mobile menu */
     <div
         id="mobile-menu"
         class="lg:hidden hidden bg-white border-t border-gray-100 h-screen"
@@ -263,7 +266,7 @@ const navLinks = [
                                         section.items.map((item) => (
                                             <a
                                                 href={item.href}
-                                                class="flex items-center gap-2 p-3 rounded-xl bg-gray-50 hover:bg-cyan-50 text-gray-700 hover:text-primary-600 transition-colors"
+                                                class="flex items-center gap-2 p-3 rounded-xl bg-gray-50 hover:bg-primary-50 text-gray-700 hover:text-primary-600 transition-colors"
                                             >
                                                 <span>{item.icon}</span>
                                                 <span class="text-sm font-medium">

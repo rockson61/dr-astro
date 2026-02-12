@@ -1,0 +1,280 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+import { Award, Download, CheckCircle, XCircle } from "lucide-react";
+import { format } from "date-fns";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch user credits
+const { data: credits, error } = await supabase
+    .from("user_ce_credits")
+    .select("*, quiz:quizzes(title, ce_credits)")
+    .eq("user_id", user.id)
+    .order("completed_at", { ascending: false });
+
+const totalCredits =
+    credits?.reduce(
+        (acc, curr) => (curr.passed ? acc + curr.credits_earned : acc),
+        0,
+    ) || 0;
+---
+
+<DashboardLayout title="My CE Credits">
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div
+            class="bg-gradient-to-br from-tuio-navy to-blue-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden"
+        >
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <Award size={100} />
+            </div>
+            <div class="relative z-10">
+                <p
+                    class="text-xs font-bold uppercase tracking-widest opacity-70 mb-1"
+                >
+                    Total Credits Earned
+                </p>
+                <h2 class="text-5xl font-tuio">{totalCredits.toFixed(1)}</h2>
+                <div
+                    class="mt-4 flex items-center gap-2 text-sm bg-white/10 px-3 py-1 rounded-full w-fit"
+                >
+                    <CheckCircle size={14} className="text-green-400" />
+                    <span>Valid for Generic Requirement</span>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center"
+        >
+            <h3
+                class="font-bold text-gray-400 uppercase text-xs tracking-widest mb-2"
+            >
+                Quizzes Attempted
+            </h3>
+            <div class="text-3xl font-tuio text-tuio-navy">
+                {credits?.length || 0}
+            </div>
+        </div>
+
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center"
+        >
+            <h3
+                class="font-bold text-gray-400 uppercase text-xs tracking-widest mb-2"
+            >
+                Completion Rate
+            </h3>
+            <div class="text-3xl font-tuio text-tuio-navy">
+                {
+                    credits?.length
+                        ? Math.round(
+                              (credits.filter((c) => c.passed).length /
+                                  credits.length) *
+                                  100,
+                          )
+                        : 0
+                }%
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+    >
+        <div
+            class="p-6 border-b border-gray-100 flex justify-between items-center"
+        >
+            <h3 class="font-tuio uppercase text-lg text-tuio-navy">
+                Activity Log
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead
+                    class="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-widest text-left"
+                >
+                    <tr>
+                        <th class="p-6">Activity / Quiz</th>
+                        <th class="p-6">Date</th>
+                        <th class="p-6">Score</th>
+                        <th class="p-6">Credits</th>
+                        <th class="p-6 text-right">Certificate</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {
+                        credits?.map((credit) => (
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-6 font-medium text-tuio-navy">
+                                    {credit.quiz?.title || "Unknown Quiz"}
+                                    {!credit.passed && (
+                                        <span class="ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">
+                                            Failed
+                                        </span>
+                                    )}
+                                </td>
+                                <td class="p-6 text-gray-500 text-sm">
+                                    {format(
+                                        new Date(credit.completed_at),
+                                        "MMM d, yyyy",
+                                    )}
+                                </td>
+                                <td class="p-6 font-bold">
+                                    <span
+                                        class={
+                                            credit.passed
+                                                ? "text-green-600"
+                                                : "text-red-500"
+                                        }
+                                    >
+                                        {credit.score}%
+                                    </span>
+                                </td>
+                                <td class="p-6 font-bold text-tuio-navy">
+                                    {credit.passed ? credit.credits_earned : 0}
+                                </td>
+                                <td class="p-6 text-right">
+                                    {credit.passed && (
+                                        <button
+                                            onclick={`downloadCertificate('${credit.certificate_id}', '${credit.quiz?.title}', '${format(new Date(credit.completed_at), "MMM d, yyyy")}')`}
+                                            class="text-tuio-red hover:text-tuio-navy font-bold text-xs uppercase tracking-wide flex items-center gap-2 ml-auto"
+                                        >
+                                            <Download size={16} /> Download
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))
+                    }
+                    {
+                        (!credits || credits.length === 0) && (
+                            <tr>
+                                <td
+                                    colspan="5"
+                                    class="p-12 text-center text-gray-400"
+                                >
+                                    No CE activity found. Take quizzes on
+                                    articles to earn credits.
+                                </td>
+                            </tr>
+                        )
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {/* Certificate Template (Hidden) */}
+    <div
+        id="certificate-template"
+        class="hidden fixed inset-0 z-[9999] bg-white p-20 flex items-center justify-center"
+    >
+        <div
+            class="w-[800px] h-[600px] border-[20px] border-tuio-navy p-10 relative bg-white text-center flex flex-col items-center justify-center"
+        >
+            <div
+                class="absolute top-0 left-0 w-32 h-32 bg-tuio-red/20 rounded-br-[100px]"
+            >
+            </div>
+            <div
+                class="absolute bottom-0 right-0 w-32 h-32 bg-tuio-red/20 rounded-tl-[100px]"
+            >
+            </div>
+
+            <img src="/logo.png" class="h-16 mb-8" />
+            {/* Placeholder for logo */}
+
+            <h1 class="text-5xl font-tuio uppercase text-tuio-navy mb-4">
+                Certificate of Completion
+            </h1>
+            <p class="text-gray-500 uppercase tracking-widest text-sm mb-12">
+                This certifies that
+            </p>
+
+            <h2
+                class="text-4xl font-bold text-tuio-red mb-8 border-b-2 border-gray-200 pb-4 px-12 min-w-[400px]"
+            >
+                {user.email}
+                {/* Ideally Name */}
+            </h2>
+
+            <p class="text-gray-600 mb-2">
+                Has successfully completed the educational activity:
+            </p>
+            <h3
+                class="text-2xl font-bold text-tuio-navy mb-8"
+                id="cert-quiz-title"
+            >
+                [Quiz Title]
+            </h3>
+
+            <div class="flex justify-between w-full max-w-lg mt-8 text-left">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">
+                        Date
+                    </p>
+                    <p class="font-bold text-tuio-navy" id="cert-date">
+                        [Date]
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">
+                        Certificate ID
+                    </p>
+                    <p class="font-bold text-tuio-navy" id="cert-id">[ID]</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest">
+                        Provider
+                    </p>
+                    <p class="font-bold text-tuio-navy">DentalReach</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script
+        is:inline
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    ></script>
+    <script is:inline>
+        function downloadCertificate(id, title, date) {
+            const element = document.getElementById("certificate-template");
+            const quizTitleEl = document.getElementById("cert-quiz-title");
+            const dateEl = document.getElementById("cert-date");
+            const idEl = document.getElementById("cert-id");
+
+            if (element && quizTitleEl && dateEl && idEl) {
+                quizTitleEl.innerText = title;
+                dateEl.innerText = date;
+                idEl.innerText = id;
+
+                element.classList.remove("hidden"); // Show for PDF generation
+
+                html2pdf(element, {
+                    margin: 0,
+                    filename: `Certificate-${id}.pdf`,
+                    image: { type: "jpeg", quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: {
+                        unit: "in",
+                        format: "letter",
+                        orientation: "landscape",
+                    },
+                }).then(() => {
+                    element.classList.add("hidden"); // Hide again
+                });
+            }
+        }
+    </script>
+</DashboardLayout>

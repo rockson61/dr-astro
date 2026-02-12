@@ -40,12 +40,12 @@ export default function NewsletterForm() {
                     placeholder="Enter your email"
                     required
                     disabled={status === 'loading' || status === 'success'}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-tuio-gold disabled:opacity-50"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
                 />
                 <button
                     type="submit"
                     disabled={status === 'loading' || status === 'success'}
-                    className="absolute right-1 top-1 bottom-1 bg-tuio-gold text-tuio-navy px-3 rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 flex items-center justify-center"
+                    className="absolute right-1 top-1 bottom-1 bg-primary-500 text-white px-3 rounded-md hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
                     {status === 'loading' ? (
                         <div className="w-4 h-4 border-2 border-tuio-navy border-t-transparent rounded-full animate-spin" />

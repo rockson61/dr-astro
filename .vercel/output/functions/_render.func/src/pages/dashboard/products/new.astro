@@ -1,0 +1,234 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+const categories = [
+    "Equipment",
+    "Instruments",
+    "Materials",
+    "Software",
+    "Services",
+    "Other",
+];
+---
+
+<DashboardLayout title="List New Product">
+    <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="mb-10 flex items-center justify-between">
+            <div>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                    List New Product
+                </h2>
+                <p class="text-gray-500 mt-1">
+                    Add a new item to your marketplace store.
+                </p>
+            </div>
+            <a
+                href="/dashboard/my-products"
+                class="text-gray-400 font-bold hover:text-tuio-red transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
+            >
+                ← Back to My Products
+            </a>
+        </div>
+
+        <form class="space-y-8">
+            <!-- Basic Info -->
+            <div class="tuio-card">
+                <div
+                    class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
+                >
+                    <span class="text-2xl">📦</span>
+                    <h3 class="font-tuio text-xl uppercase text-tuio-navy">
+                        Product Details
+                    </h3>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                            >Product Name</label
+                        >
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-bold text-lg focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all placeholder:font-normal"
+                            placeholder="e.g. Ultra-Light Curing Light"
+                        />
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                                >Category</label
+                            >
+                            <div class="relative">
+                                <select
+                                    name="category"
+                                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    {
+                                        categories.map((cat) => (
+                                            <option value={cat}>{cat}</option>
+                                        ))
+                                    }
+                                </select>
+                                <div
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                                >
+                                    ▼
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                                >Price ($)</label
+                            >
+                            <input
+                                type="number"
+                                name="price"
+                                min="0"
+                                step="0.01"
+                                required
+                                class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-bold focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                            >Description</label
+                        >
+                        <textarea
+                            name="description"
+                            rows="5"
+                            required
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none"
+                            placeholder="Describe your product features and specifications..."
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Upload (Simple URL for now, could be improved with storage upload) -->
+            <div class="tuio-card">
+                <div
+                    class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
+                >
+                    <span class="text-2xl">📸</span>
+                    <h3 class="font-tuio text-xl uppercase text-tuio-navy">
+                        Product Image
+                    </h3>
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                        >Image URL</label
+                    >
+                    <input
+                        type="url"
+                        name="image_url"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all"
+                        placeholder="https://example.com/image.jpg"
+                    />
+                    <p class="text-xs text-gray-400 mt-2 pl-1">
+                        For this demo, please provide a direct image URL.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div
+                class="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-md border-t border-gray-200 md:static md:bg-transparent md:border-none md:p-0 flex justify-end z-40"
+            >
+                <button
+                    type="submit"
+                    class="px-10 py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                >
+                    Create Product
+                </button>
+            </div>
+        </form>
+    </div>
+</DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+    const form = document.querySelector("form");
+    const submitBtn = form?.querySelector('button[type="submit"]');
+
+    function slugify(text: string) {
+        return text
+            .toString()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^\w\-]+/g, "")
+            .replace(/\-\-+/g, "-")
+            .replace(/^-+/, "")
+            .replace(/-+$/, "");
+    }
+
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!submitBtn) return;
+
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Creating...";
+        (submitBtn as HTMLButtonElement).disabled = true;
+
+        const formData = new FormData(form);
+        const name = formData.get("name") as string;
+        const price = formData.get("price");
+        const description = formData.get("description");
+        const category = formData.get("category");
+        const imageUrl = formData.get("image_url") as string;
+
+        try {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            const slug = `${slugify(name)}-${Math.random().toString(36).substring(2, 7)}`;
+            const images = imageUrl ? [imageUrl] : [];
+
+            const { error } = await supabase.from("products").insert({
+                name,
+                slug,
+                price,
+                description,
+                category,
+                images,
+                seller_id: user.id,
+                status: "active",
+            });
+
+            if (error) throw error;
+
+            window.location.href = "/dashboard/my-products";
+        } catch (err: any) {
+            console.error(err);
+            alert("Error creating product: " + err.message);
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+</script>

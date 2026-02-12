@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import JobManagement from "../../components/admin/JobManagement";
+
+const title = "Job Management | Admin";
+---
+
+<BaseLayout title={title}>
+    {/* Mount the React component with hydration */}
+    <JobManagement client:only="react" />
+</BaseLayout>

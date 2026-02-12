@@ -150,7 +150,7 @@ const Carousel: React.FC<CarouselProps> = ({ title, viewAllLink, items, variant 
                                     ▶
                                 </span>
                             </div>
-                            <span className="text-cyan-200 text-xs font-bold uppercase tracking-widest mb-2 block">Episode {item.episode}</span>
+                            <span className="text-primary-200 text-xs font-bold uppercase tracking-widest mb-2 block">Episode {item.episode}</span>
                             <h3 className="font-heading text-xl text-white mb-2 line-clamp-2 leading-tight">{item.title}</h3>
                             <p className="text-white/50 text-xs mb-4">with {item.guest}</p>
                             <div className="flex items-center gap-3 text-white/40 text-xs font-mono border-t border-white/10 pt-4">
@@ -167,7 +167,7 @@ const Carousel: React.FC<CarouselProps> = ({ title, viewAllLink, items, variant 
                         href={`/guides/${item.slug}`}
                         className="block w-64 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 group"
                     >
-                        <div className="h-32 bg-cyan-50 relative overflow-hidden">
+                        <div className="h-32 bg-primary-50 relative overflow-hidden">
                             <div className="absolute inset-0 bg-primary-600/5"></div>
                             {item.image && <img src={item.image} className="absolute right-0 bottom-0 w-32 h-32 object-contain opacity-80 group-hover:scale-110 transition-transform duration-500 delay-75" alt="" />}
                             <div className="absolute top-4 left-4">

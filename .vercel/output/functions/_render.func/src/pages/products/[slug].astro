@@ -1,0 +1,346 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+
+// Fetch current user
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+// Fetch product
+const { data: product } = await supabase
+    .from("products")
+    .select("*, seller:profiles(full_name, id)")
+    .eq("slug", slug)
+    .single();
+
+// Mock fallback logic preserved for demo/resilience
+const mockProduct = {
+    id: "mock-id",
+    title: "Dental Chair X3000",
+    name: "Dental Chair X3000", // Fallback for name/title
+    category: "Equipment",
+    price: 4500,
+    rating: "4.8",
+    description: `Experience the future of dental ergonomics...`,
+    features: ["Ergonomic Design", "Silent Operation"],
+    image_url:
+        "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
+    seller: { full_name: "Apex Dental Supplies", id: "mock-seller" },
+    seller_rating: "4.9",
+    specs: {
+        Weight: "150kg",
+        Power: "110V/220V",
+    },
+};
+
+const displayProduct = product || mockProduct;
+const isOwnProduct = user && displayProduct.seller_id === user.id;
+
+// Handle edge case where title/name might vary in schema vs mock
+const productName = displayProduct.name || displayProduct.title;
+---
+
+<BaseLayout title={`${productName} | DentalReach Marketplace`}>
+    <div class="bg-gray-50 py-12">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <!-- Breadcrumb -->
+            <div class="mb-6 text-sm text-gray-500">
+                <a href="/" class="hover:text-tuio-red">Home</a> &gt;
+                <a href="/products" class="hover:text-tuio-red">Marketplace</a> &gt;
+                <span class="text-tuio-navy font-bold">{productName}</span>
+            </div>
+
+            <div
+                class="grid md:grid-cols-2 gap-12 bg-white rounded-[32px] p-8 shadow-sm"
+            >
+                <!-- Image Gallery -->
+                <div class="space-y-4">
+                    <div
+                        class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 p-8 flex items-center justify-center relative group"
+                    >
+                        <img
+                            src={Array.isArray(displayProduct.images) &&
+                            displayProduct.images.length > 0
+                                ? displayProduct.images[0]
+                                : displayProduct.image_url ||
+                                  "/images/pattern.png"}
+                            alt={productName}
+                            class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div
+                            class="absolute top-4 left-4 bg-tuio-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider"
+                        >
+                            {displayProduct.category}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2 text-yellow-500">
+                            {
+                                "★".repeat(
+                                    Math.round(
+                                        Number(displayProduct.rating || 4.8),
+                                    ),
+                                )
+                            }
+                            <span class="text-gray-400 text-sm"
+                                >({displayProduct.rating || "New"})</span
+                            >
+                        </div>
+                        <span
+                            class="text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                            >{
+                                displayProduct.status === "draft"
+                                    ? "Draft"
+                                    : "In Stock"
+                            }</span
+                        >
+                    </div>
+
+                    <h1 class="font-tuio text-4xl text-tuio-navy mb-4">
+                        {productName}
+                    </h1>
+                    <div class="text-3xl font-bold text-tuio-red mb-6">
+                        ${Number(displayProduct.price).toLocaleString()}
+                    </div>
+
+                    <div
+                        class="prose prose-sm text-gray-600 mb-8"
+                        set:html={displayProduct.description?.replace(
+                            /\n/g,
+                            "<br/>",
+                        )}
+                    />
+
+                    <div
+                        class="flex gap-4 mb-8 border-t border-b border-gray-100 py-6"
+                    >
+                        <div class="flex-1">
+                            <!-- Placeholder for Cart (Future Phase) -->
+                            <button
+                                class="w-full py-4 bg-tuio-navy text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-red transition-all opacity-50 cursor-not-allowed"
+                                disabled
+                                title="Cart feature coming soon"
+                            >
+                                Add to Cart
+                            </button>
+                        </div>
+                        <div class="flex-1">
+                            {
+                                isOwnProduct ? (
+                                    <a
+                                        href={`/dashboard/products/edit/${displayProduct.id}`}
+                                        class="w-full block text-center py-4 border-2 border-tuio-navy text-tuio-navy rounded-full font-bold uppercase tracking-wide hover:bg-gray-50 transition-all"
+                                    >
+                                        Edit Product
+                                    </a>
+                                ) : (
+                                    <button
+                                        id="contact-seller-btn"
+                                        class="w-full py-4 border-2 border-tuio-navy text-tuio-navy rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy hover:text-white transition-all"
+                                    >
+                                        Contact Seller
+                                    </button>
+                                )
+                            }
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-tuio-navy mb-3">
+                            Specifications
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            {
+                                displayProduct.specs &&
+                                    Object.entries(displayProduct.specs).map(
+                                        ([key, value]) => (
+                                            <div class="flex justify-between border-b border-gray-100 pb-2">
+                                                <span class="text-gray-500">
+                                                    {key}
+                                                </span>
+                                                <span class="font-bold text-gray-900">
+                                                    {String(value)}
+                                                </span>
+                                            </div>
+                                        ),
+                                    )
+                            }
+                            <div
+                                class="flex justify-between border-b border-gray-100 pb-2"
+                            >
+                                <span class="text-gray-500">Seller</span>
+                                <span class="font-bold text-gray-900">
+                                    {
+                                        displayProduct.seller?.full_name ||
+                                            "Verified Seller"
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Seller Modal -->
+    <dialog
+        id="contact-modal"
+        class="backdrop:bg-black/50 rounded-3xl p-0 w-full max-w-lg shadow-2xl open:animate-fade-in"
+    >
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-tuio text-2xl uppercase text-tuio-navy">
+                    Contact Seller
+                </h3>
+                <button
+                    id="close-modal-btn"
+                    class="text-gray-400 hover:text-tuio-red text-2xl"
+                    >&times;</button
+                >
+            </div>
+
+            <form id="inquiry-form" class="space-y-6">
+                <input
+                    type="hidden"
+                    name="product_id"
+                    value={displayProduct.id}
+                />
+                <input
+                    type="hidden"
+                    name="seller_id"
+                    value={displayProduct.seller_id ||
+                        displayProduct.seller?.id}
+                />
+
+                <div>
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >
+                        Product
+                    </label>
+                    <div
+                        class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
+                    >
+                        <img
+                            src={Array.isArray(displayProduct.images) &&
+                            displayProduct.images.length > 0
+                                ? displayProduct.images[0]
+                                : displayProduct.image_url ||
+                                  "/images/pattern.png"}
+                            class="w-10 h-10 rounded-lg object-cover"
+                        />
+                        <span class="font-bold text-tuio-navy"
+                            >{productName}</span
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 mb-2"
+                    >
+                        Your Message
+                    </label>
+                    <textarea
+                        name="message"
+                        required
+                        rows="4"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none"
+                        placeholder="Hi, I'm interested in this item. Is it still available?"
+                    ></textarea>
+                </div>
+
+                <div class="pt-2">
+                    <button
+                        type="submit"
+                        class="w-full py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl transform active:scale-95"
+                    >
+                        Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+</BaseLayout>
+
+<script>
+    const contactBtn = document.getElementById("contact-seller-btn");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const modal = document.getElementById("contact-modal") as HTMLDialogElement;
+    const form = document.getElementById("inquiry-form") as HTMLFormElement;
+
+    contactBtn?.addEventListener("click", () => {
+        // user check handled by logic below, but strictly we might want to verify auth state here too
+        // For now, if button exists, we assume we can try.
+        // If user is NOT logged in, we should redirect.
+        // We can check cookie or rely on the API response (401).
+
+        // Simpler: Redirect to login if cookie missing?
+        // Or let API return 401 and handle it.
+        // Best UX: Check upfront.
+        const isLoggedIn = document.cookie.includes("sb-access-token");
+        if (!isLoggedIn) {
+            window.location.href = `/login?redirect=${window.location.pathname}`;
+            return;
+        }
+
+        modal?.showModal();
+    });
+
+    closeModalBtn?.addEventListener("click", () => {
+        modal?.close();
+    });
+
+    modal?.addEventListener("click", (e) => {
+        if (e.target === modal) modal.close();
+    });
+
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (!submitBtn) return;
+
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = "Sending...";
+        (submitBtn as HTMLButtonElement).disabled = true;
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const res = await fetch("/api/inquiries", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                throw new Error(result.error || "Failed to send inquiry");
+            }
+
+            alert(
+                "Message sent successfully! The seller will contact you shortly.",
+            );
+            form.reset();
+            modal?.close();
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            submitBtn.textContent = originalText;
+            (submitBtn as HTMLButtonElement).disabled = false;
+        }
+    });
+</script>

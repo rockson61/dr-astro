@@ -1,0 +1,40 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import CaseStudyForm from "../../../../components/dashboard/CaseStudyForm";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-articles"); // Or my-cases if implemented
+}
+
+// Fetch case details
+const { data: caseStudy, error } = await supabase
+    .from("clinical_cases")
+    .select("*")
+    .eq("id", id)
+    .eq("author_id", user.id)
+    .single();
+
+if (error || !caseStudy) {
+    console.error("Error fetching case or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-articles");
+}
+---
+
+<DashboardLayout title={`Edit Case: ${caseStudy.title}`}>
+    <div class="animate-fade-in-up">
+        <CaseStudyForm client:load initialData={caseStudy} />
+    </div>
+</DashboardLayout>

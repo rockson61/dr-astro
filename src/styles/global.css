@@ -26,31 +26,35 @@
 @import "tailwindcss";
 
 @theme {
-    /* International Standard Medical Palette (Cyan/Teal) */
-    --color-primary-50: #ECFEFF;
-    --color-primary-100: #CFFAFE;
-    --color-primary-200: #A5F3FC;
-    --color-primary-300: #67E8F9;
-    --color-primary-400: #22D3EE;
-    --color-primary-500: #06B6D4;
-    --color-primary-600: #0891B2;
-    --color-primary-700: #0E7490;
-    --color-primary-800: #155E75;
-    --color-primary-900: #164E63;
+    /* Pink & Red Gradient Palette (Rose/Pink) */
+    --color-primary-50: #fff1f2;
+    --color-primary-100: #ffe4e6;
+    --color-primary-200: #fecdd3;
+    --color-primary-300: #fda4af;
+    --color-primary-400: #fb7185;
+    --color-primary-500: #f43f5e;
+    --color-primary-600: #e11d48;
+    --color-primary-700: #be123c;
+    --color-primary-800: #9f1239;
+    --color-primary-900: #881337;
 
-    --color-accent: #059669;
-    --color-accent-dark: #047857;
+    --color-accent: #db2777;
+    /* Pink 600 */
+    --color-accent-dark: #be185d;
 
-    --color-neutral-50: #F8FAFC;
-    --color-neutral-900: #0F172A;
+    --color-neutral-50: #fff0f5;
+    /* Lavender Blush */
+    --color-neutral-900: #4a0416;
+    /* Deep Burgundy */
 
     --font-heading: "Be Vietnam Pro", sans-serif;
     --font-body: "Noto Sans", system-ui, sans-serif;
 
-    /* Legacy compatibility (Remapped) */
-    --color-tuio-red: #0891B2;
-    --color-tuio-navy: #164E63;
-    --color-tuio-bg: #ECFEFF;
+    /* Legacy compatibility (Remapped to new theme) */
+    --color-tuio-red: #e11d48;
+    --color-tuio-navy: #881337;
+    /* Burgundy instead of Navy */
+    --color-tuio-bg: #fff1f2;
 }
 
 
@@ -58,7 +62,7 @@
 /* Component Styles */
 @layer base {
     body {
-        @apply font-body antialiased text-slate-700 bg-cyan-50 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300;
+        @apply font-body antialiased text-slate-800 bg-gradient-to-br from-white via-primary-50 to-white dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300;
     }
 
     h1,
@@ -67,7 +71,7 @@
     h4,
     h5,
     h6 {
-        @apply font-heading font-bold text-cyan-900;
+        @apply font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-700 to-accent;
     }
 }
 
@@ -75,41 +79,41 @@
 
     /* Glassmorphism Utilities (Refined) */
     .glass-card {
-        @apply backdrop-blur-lg bg-white/80 border border-white/60 shadow-md dark:bg-black/40 dark:border-white/10 rounded-2xl;
+        @apply backdrop-blur-lg bg-white/70 border border-white/60 shadow-md dark:bg-black/40 dark:border-white/10 rounded-2xl;
     }
 
     .glass-nav {
-        @apply backdrop-blur-md bg-white/90 border-b border-cyan-100/50 dark:bg-slate-900/90 dark:border-white/5;
+        @apply backdrop-blur-md bg-white/80 border-b border-primary-100/50 dark:bg-slate-900/90 dark:border-white/5;
     }
 
-    /* Primary Button (Medical Standard) & Legacy Mapping */
+    /* Primary Button (Gradient) */
     .btn-primary,
     .btn-tuio-primary {
-        @apply px-5 py-2.5 rounded-xl bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer;
+        @apply px-6 py-2.5 rounded-full bg-gradient-to-r from-primary-500 to-accent text-white font-bold shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer border border-transparent;
     }
 
-    /* Secondary Button (Medical Standard) & Legacy Mapping */
+    /* Secondary Button */
     .btn-secondary,
     .btn-tuio-secondary {
-        @apply px-5 py-2.5 rounded-xl bg-white text-primary-700 font-semibold border-2 border-primary-100 hover:border-primary-600 hover:text-primary-800 transition-all duration-200 cursor-pointer;
+        @apply px-6 py-2.5 rounded-full bg-white text-primary-600 font-semibold border-2 border-primary-100 hover:border-primary-400 hover:text-primary-700 transition-all duration-200 cursor-pointer;
     }
 
 
     .btn-tuio-ghost {
-        @apply px-6 py-3 bg-transparent text-primary-700 rounded-full font-medium hover:bg-primary-50 transition-all;
+        @apply px-6 py-3 bg-transparent text-primary-700 rounded-full font-medium hover:bg-primary-50/50 transition-all;
     }
 
     /* Card Standards */
     .tuio-card {
-        @apply bg-white rounded-2xl p-8 shadow-md border border-cyan-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+        @apply bg-white rounded-2xl p-8 shadow-md border border-primary-50 hover:shadow-xl hover:shadow-primary-100/50 hover:-translate-y-1 transition-all duration-300;
     }
 
     .tuio-card-red {
-        @apply bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg;
+        @apply bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-primary-500/20;
     }
 
     .tuio-card-navy {
-        @apply bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg;
+        @apply bg-gradient-to-br from-primary-800 to-neutral-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg;
     }
 }
 
@@ -128,7 +132,11 @@
     }
 
     .text-gradient {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent;
+    }
+
+    .bg-gradient-primary {
+        @apply bg-gradient-to-r from-primary-500 to-accent;
     }
 }
 

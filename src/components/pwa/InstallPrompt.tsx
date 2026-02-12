@@ -30,9 +30,9 @@ export default function InstallPrompt() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-tuio-navy text-white p-4 rounded-xl shadow-2xl z-50 flex items-center gap-4 animate-fade-in-up border border-tuio-gold/20">
+        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-primary-900 text-white p-4 rounded-xl shadow-2xl z-50 flex items-center gap-4 animate-fade-in-up border border-primary-500/20">
             <div className="bg-white/10 p-2 rounded-lg">
-                <Download className="w-6 h-6 text-tuio-gold" />
+                <Download className="w-6 h-6 text-primary-500" />
             </div>
             <div className="flex-grow">
                 <h3 className="font-bold text-sm">Install DentalReach</h3>
@@ -41,7 +41,7 @@ export default function InstallPrompt() {
             <div className="flex items-center gap-2">
                 <button
                     onClick={handleInstall}
-                    className="px-3 py-1.5 bg-tuio-gold text-tuio-navy text-xs font-bold rounded-lg hover:bg-yellow-400 transition-colors"
+                    className="px-3 py-1.5 bg-primary-500 text-white text-xs font-bold rounded-lg hover:bg-primary-600 transition-colors"
                 >
                     Install
                 </button>

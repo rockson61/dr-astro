@@ -1,0 +1,35 @@
+import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_DcquF9um.mjs';
+import 'piccolore';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_C_IiUpen.mjs';
+export { renderers } from '../renderers.mjs';
+
+const $$Privacy = createComponent(($$result, $$props, $$slots) => {
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": "Privacy Policy | DentalReach" }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<section class="bg-tuio-navy text-white py-20 relative overflow-hidden rounded-b-[40px]"> <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div> <div class="container mx-auto px-4 relative z-10 text-center"> <h1 class="text-5xl md:text-7xl font-tuio uppercase mb-6">
+Privacy<br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-red to-red-500">Policy</span> </h1> <p class="text-gray-400 font-light">Last updated: January 2026</p> </div> </section> <div class="bg-tuio-bg py-16"> <div class="container mx-auto px-4"> <div class="max-w-4xl mx-auto bg-white rounded-[32px] p-8 md:p-12 shadow-sm"> <div class="prose prose-lg max-w-none"> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">1. Information We Collect</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+We collect information you provide directly to us, such as when you create an account, submit content, participate in forums, or contact us for support. This includes your name, email address, professional credentials, and profile information.
+</p> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">2. How We Use Your Information</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+We use the information we collect to provide, maintain, and improve our services, communicate with you about products, services, and events, and personalize your experience on the platform.
+</p> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">3. Information Sharing</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties except to provide services you've requested or as required by law. Your professional profile information may be visible to other members based on your privacy settings.
+</p> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">4. Data Security</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+We implement industry-standard security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+</p> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">5. Your Rights</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+You have the right to access, correct, or delete your personal information at any time. You may also opt out of marketing communications. Contact us at privacy@dentalreach.today to exercise these rights.
+</p> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-4">6. Contact Us</h2> <p class="text-gray-600 mb-6 font-light leading-relaxed">
+If you have questions about this Privacy Policy, please contact us at <a href="mailto:privacy@dentalreach.today" class="text-tuio-red hover:underline">privacy@dentalreach.today</a>.
+</p> </div> </div> </div> </div> ` })}`;
+}, "/Users/rockson61/Downloads/DR Astro/src/pages/privacy.astro", void 0);
+
+const $$file = "/Users/rockson61/Downloads/DR Astro/src/pages/privacy.astro";
+const $$url = "/privacy";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+    __proto__: null,
+    default: $$Privacy,
+    file: $$file,
+    url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

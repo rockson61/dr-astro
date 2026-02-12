@@ -1,0 +1,70 @@
+import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute, ah as unescapeHTML } from '../../chunks/astro/server_DcquF9um.mjs';
+import 'piccolore';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_C_IiUpen.mjs';
+import { s as supabase } from '../../chunks/supabase_CFYPoMlB.mjs';
+import { format } from 'date-fns';
+export { renderers } from '../../renderers.mjs';
+
+const $$Astro = createAstro("https://dentalreach.today");
+const prerender = false;
+const $$slug = createComponent(async ($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  Astro2.self = $$slug;
+  const { slug } = Astro2.params;
+  const { data: event } = await supabase.from("events").select("*").eq("slug", slug).single();
+  const mockEvent = {
+    title: "DentalReach Summit 2026",
+    start_date: "2026-03-15T09:00:00Z",
+    end_date: "2026-03-17T18:00:00Z",
+    location: "Mumbai Convention Center, India",
+    description: `Join us for the biggest dental conference of the year! The DentalReach Summit brings together 500+ dental professionals from across the globe for three days of learning, networking, and innovation.
+
+**What to expect:**
+- Keynote sessions from world-renowned speakers
+- Hands-on workshops and master classes
+- Exhibition hall with 100+ vendors
+- Networking events and gala dinner
+- CME credits available`,
+    image_url: "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    type: "conference",
+    is_virtual: false,
+    ticket_price: 299,
+    capacity: 500,
+    registered_count: 342
+  };
+  const displayEvent = event || mockEvent;
+  const startDate = new Date(displayEvent.start_date);
+  const endDate = displayEvent.end_date ? new Date(displayEvent.end_date) : null;
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${displayEvent.title} | DentalReach Events` }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<section class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden"> <img${addAttribute(displayEvent.image_url || "/images/pattern.png", "src")}${addAttribute(displayEvent.title, "alt")} class="w-full h-full object-cover opacity-50"> <div class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/60 to-transparent"></div> <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16"> <div class="container mx-auto"> <span class="inline-block px-4 py-1 bg-tuio-red text-white rounded-full text-sm font-bold uppercase tracking-wider mb-4"> ${displayEvent.type || "Event"} </span> <h1 class="text-4xl md:text-6xl font-tuio uppercase text-white leading-tight max-w-4xl mb-4"> ${displayEvent.title} </h1> <div class="flex flex-wrap gap-6 text-white/80"> <span class="flex items-center gap-2">
+📅 ${format(startDate, "MMM d, yyyy")} ${endDate && ` - ${format(endDate, "MMM d, yyyy")}`} </span> <span class="flex items-center gap-2">
+📍 ${displayEvent.location} </span> ${displayEvent.is_virtual && renderTemplate`<span class="flex items-center gap-2">
+💻 Virtual Event
+</span>`} </div> </div> </div> </section> <div class="bg-tuio-bg py-12"> <div class="container mx-auto px-4"> <div class="grid lg:grid-cols-3 gap-8"> <!-- Main Content --> <div class="lg:col-span-2"> <div class="bg-white rounded-[32px] p-8 shadow-sm mb-8"> <h2 class="font-tuio text-2xl uppercase text-tuio-navy mb-6">
+About This Event
+</h2> <div class="prose prose-lg max-w-none text-gray-600 font-light">${unescapeHTML(displayEvent.description?.replace(
+    /\n/g,
+    "<br/>"
+  ))}</div> </div> </div> <!-- Sidebar --> <div class="lg:col-span-1"> <div class="bg-white rounded-[32px] p-8 shadow-sm sticky top-8"> <div class="text-center mb-6"> <div class="text-4xl font-tuio text-tuio-red mb-2">
+$${displayEvent.ticket_price || "Free"} </div> <p class="text-gray-500 text-sm">per attendee</p> </div> ${displayEvent.capacity && renderTemplate`<div class="mb-6"> <div class="flex justify-between text-sm mb-2"> <span class="text-gray-500">
+Spots Filled
+</span> <span class="font-bold text-tuio-navy"> ${displayEvent.registered_count}/
+${displayEvent.capacity} </span> </div> <div class="h-2 bg-gray-100 rounded-full overflow-hidden"> <div class="h-full bg-tuio-red rounded-full"${addAttribute(`width: ${displayEvent.registered_count / displayEvent.capacity * 100}%`, "style")}></div> </div> </div>`} <a${addAttribute(displayEvent.registration_url || `mailto:events@dentalreach.com?subject=Registration for ${displayEvent.title}&body=I would like to register for ${displayEvent.title}.%0D%0A%0D%0APlease send me the registration details.%0D%0A%0D%0AThank you.`, "href")}${addAttribute(displayEvent.registration_url ? "_blank" : "_self", "target")} class="w-full py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all mb-4 block text-center">
+Register Now
+</a> <div class="space-y-4 text-sm text-gray-600"> <div class="flex items-start gap-3"> <span class="text-lg">📅</span> <div> <strong class="block text-tuio-navy">Date</strong> ${format(startDate, "EEEE, MMMM d, yyyy")} <br> ${format(startDate, "h:mm a")} onwards
+</div> </div> <div class="flex items-start gap-3"> <span class="text-lg">📍</span> <div> <strong class="block text-tuio-navy">Location</strong> ${displayEvent.location} </div> </div> </div> </div> </div> </div> </div> </div> ` })}`;
+}, "/Users/rockson61/Downloads/DR Astro/src/pages/events/[slug].astro", void 0);
+
+const $$file = "/Users/rockson61/Downloads/DR Astro/src/pages/events/[slug].astro";
+const $$url = "/events/[slug]";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+    __proto__: null,
+    default: $$slug,
+    file: $$file,
+    prerender,
+    url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

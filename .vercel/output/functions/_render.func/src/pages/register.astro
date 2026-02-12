@@ -1,0 +1,321 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Create Account | DentalReach">
+    <div class="flex min-h-screen bg-white">
+        <!-- Left: Image & Branding -->
+        <div class="hidden lg:relative lg:block lg:w-1/2 overflow-hidden">
+            <div
+                class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+                style="background-image: url('https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=1200')"
+            >
+            </div>
+            <div
+                class="absolute inset-0 bg-gradient-to-tr from-tuio-navy via-tuio-navy/80 to-transparent"
+            >
+            </div>
+
+            <div class="absolute bottom-0 left-0 p-16 text-white z-10">
+                <div
+                    class="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20"
+                >
+                    <span class="font-tuio text-3xl">D</span>
+                </div>
+                <h2 class="font-tuio text-5xl uppercase leading-tight mb-6">
+                    Join the<br />Community
+                </h2>
+                <div class="space-y-4 max-w-lg">
+                    <div class="flex items-center gap-4 text-white/90">
+                        <div
+                            class="w-8 h-8 rounded-full bg-tuio-red flex items-center justify-center text-white shrink-0"
+                        >
+                            ✓
+                        </div>
+                        <span class="text-lg font-light"
+                            >Access exclusive articles and research</span
+                        >
+                    </div>
+                    <div class="flex items-center gap-4 text-white/90">
+                        <div
+                            class="w-8 h-8 rounded-full bg-tuio-red flex items-center justify-center text-white shrink-0"
+                        >
+                            ✓
+                        </div>
+                        <span class="text-lg font-light"
+                            >Find jobs tailored to your specialty</span
+                        >
+                    </div>
+                    <div class="flex items-center gap-4 text-white/90">
+                        <div
+                            class="w-8 h-8 rounded-full bg-tuio-red flex items-center justify-center text-white shrink-0"
+                        >
+                            ✓
+                        </div>
+                        <span class="text-lg font-light"
+                            >Network with peers globally</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Registration Form -->
+        <div
+            class="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-20 xl:px-24 bg-white relative py-12"
+        >
+            <!-- Mobile decorative -->
+            <div
+                class="lg:hidden absolute top-0 right-0 w-64 h-64 bg-tuio-red/5 rounded-bl-full -z-10"
+            >
+            </div>
+
+            <div class="w-full max-w-md mx-auto">
+                <div class="mb-8">
+                    <h1
+                        class="font-tuio text-4xl uppercase text-tuio-navy mb-2"
+                    >
+                        Get Started
+                    </h1>
+                    <p class="text-gray-500">
+                        Create your free account in seconds.
+                    </p>
+                </div>
+
+                <!-- Social Sign Up -->
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <button
+                        class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all bg-white text-sm font-medium text-gray-600 gap-2"
+                    >
+                        <svg class="h-5 w-5" viewBox="0 0 24 24"
+                            ><path
+                                fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            ></path><path
+                                fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            ></path><path
+                                fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                            ></path><path
+                                fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                            ></path></svg
+                        >
+                        Google
+                    </button>
+                    <button
+                        class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all bg-white text-sm font-medium text-gray-600 gap-2"
+                    >
+                        <svg class="h-5 w-5 fill-[#0077b5]" viewBox="0 0 24 24"
+                            ><path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                            ></path></svg
+                        >
+                        LinkedIn
+                    </button>
+                </div>
+
+                <div class="relative mb-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-100"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span
+                            class="px-4 bg-white text-gray-400 font-medium uppercase tracking-widest text-xs"
+                            >or register with email</span
+                        >
+                    </div>
+                </div>
+
+                <form class="space-y-5" id="register-form">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                class="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2"
+                                >First Name</label
+                            >
+                            <input
+                                type="text"
+                                name="first_name"
+                                required
+                                class="block w-full px-4 py-4 border-2 border-gray-100 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-tuio-red focus:ring-4 focus:ring-tuio-red/10 transition-all duration-200"
+                                placeholder="John"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2"
+                                >Last Name</label
+                            >
+                            <input
+                                type="text"
+                                name="last_name"
+                                required
+                                class="block w-full px-4 py-4 border-2 border-gray-100 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-tuio-red focus:ring-4 focus:ring-tuio-red/10 transition-all duration-200"
+                                placeholder="Doe"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2"
+                            >Email</label
+                        >
+                        <input
+                            type="email"
+                            name="email"
+                            required
+                            class="block w-full px-4 py-4 border-2 border-gray-100 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-tuio-red focus:ring-4 focus:ring-tuio-red/10 transition-all duration-200"
+                            placeholder="you@example.com"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2"
+                            >Password</label
+                        >
+                        <div class="relative">
+                            <input
+                                type="password"
+                                name="password"
+                                required
+                                minlength="8"
+                                id="password-input"
+                                class="block w-full px-4 py-4 border-2 border-gray-100 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-tuio-red focus:ring-4 focus:ring-tuio-red/10 transition-all duration-200 pr-12"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                id="toggle-password"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-tuio-red transition-colors"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    ></path>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2"
+                            >I am a...</label
+                        >
+                        <select
+                            name="role"
+                            class="block w-full px-4 py-4 border-2 border-gray-100 rounded-2xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-tuio-red focus:ring-4 focus:ring-tuio-red/10 transition-all duration-200 appearance-none cursor-pointer"
+                        >
+                            <option value="dentist">Dentist</option>
+                            <option value="hygienist">Dental Hygienist</option>
+                            <option value="assistant">Dental Assistant</option>
+                            <option value="lab_tech">Lab Technician</option>
+                            <option value="student">Dental Student</option>
+                            <option value="practice_owner"
+                                >Practice Owner</option
+                            >
+                            <option value="manufacturer"
+                                >Manufacturer/Supplier</option
+                            >
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            required
+                            class="mt-1 w-5 h-5 rounded border-gray-300 text-tuio-red focus:ring-tuio-red cursor-pointer"
+                        />
+                        <label for="terms" class="text-sm text-gray-500">
+                            I agree to the <a
+                                href="/terms"
+                                class="text-tuio-red hover:underline font-bold"
+                                >Terms of Service</a
+                            > and <a
+                                href="/privacy"
+                                class="text-tuio-red hover:underline font-bold"
+                                >Privacy Policy</a
+                            >
+                        </label>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full py-4 bg-tuio-red text-white rounded-2xl font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg shadow-tuio-red/30 hover:shadow-tuio-navy/30 hover:-translate-y-1"
+                    >
+                        Create Account
+                    </button>
+                </form>
+
+                <p class="text-center text-gray-500 mt-8 text-sm">
+                    Already have an account?
+                    <a
+                        href="/login"
+                        class="text-tuio-red font-bold hover:text-tuio-navy transition-colors"
+                        >Sign in</a
+                    >
+                </p>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<script>
+    // Password toggle
+    const toggleBtn = document.getElementById("toggle-password");
+    const passwordInput = document.getElementById(
+        "password-input",
+    ) as HTMLInputElement;
+
+    toggleBtn?.addEventListener("click", () => {
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleBtn.classList.add("text-tuio-red");
+        } else {
+            passwordInput.type = "password";
+            toggleBtn.classList.remove("text-tuio-red");
+        }
+    });
+
+    // Form submission (demo)
+    const form = document.getElementById("register-form");
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form as HTMLFormElement);
+        console.log("Registration data:", Object.fromEntries(formData));
+
+        // Show success toast
+        if ((window as any).showToast) {
+            (window as any).showToast(
+                "Account created! Redirecting...",
+                "success",
+            );
+        }
+
+        // Redirect after delay
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 1500);
+    });
+</script>

@@ -1,0 +1,93 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch user's award nominations
+const { data: nominations } = await supabase
+    .from("award_nominations")
+    .select("*, award:awards(title, year)")
+    .eq("nominee_id", user.id)
+    .order("created_at", { ascending: false });
+
+const statusColors: Record<string, string> = {
+    nominated: "bg-blue-100 text-blue-700",
+    shortlisted: "bg-red-100 text-red-700",
+    winner: "bg-yellow-100 text-yellow-700",
+    finalist: "bg-green-100 text-green-700",
+};
+---
+
+<DashboardLayout title="My Awards">
+    <div class="animate-fade-in max-w-4xl">
+        <div class="mb-10">
+            <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                My Awards & Nominations
+            </h2>
+            <p class="text-gray-500 mt-1">
+                Track your recognition in the DentalReach Awards program.
+            </p>
+        </div>
+
+        {
+            nominations && nominations.length > 0 ? (
+                <div class="space-y-6">
+                    {nominations.map((nom: any) => (
+                        <div class="tuio-card !p-6 flex flex-col md:flex-row items-center gap-6 hover:shadow-lg transition-all border border-transparent hover:border-yellow-200">
+                            <div class="w-20 h-20 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-yellow-200">
+                                <span class="text-4xl drop-shadow-md">🏆</span>
+                            </div>
+                            <div class="flex-grow text-center md:text-left">
+                                <h3 class="text-xl font-tuio text-tuio-navy mb-1 uppercase tracking-wide">
+                                    {nom.award?.title || "DentalReach Award"}
+                                </h3>
+                                <p class="text-gray-500 font-bold">
+                                    {nom.award?.year || "2026"}
+                                </p>
+                            </div>
+                            <div class="text-center">
+                                <span
+                                    class={`text-xs font-bold uppercase px-6 py-2 rounded-full tracking-widest block mb-2 shadow-sm ${statusColors[nom.status] || "bg-gray-100 text-gray-700"}`}
+                                >
+                                    {nom.status}
+                                </span>
+                                <span class="text-xs text-gray-400 font-medium">
+                                    Status
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div class="tuio-card py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50/30">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-6 shadow-sm">
+                        🎖️
+                    </div>
+                    <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-2">
+                        No nominations yet
+                    </h3>
+                    <p class="text-gray-500 max-w-md mb-8">
+                        Participate in the DentalReach Awards to get recognized
+                        for your contributions to the field.
+                    </p>
+                    <a
+                        href="/awards"
+                        class="px-8 py-3 bg-tuio-navy text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-red transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    >
+                        Explore Awards
+                    </a>
+                </div>
+            )
+        }
+    </div>
+</DashboardLayout>

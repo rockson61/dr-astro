@@ -1,0 +1,1 @@
+import{j as s}from"./jsx-runtime.D_zvdyIk.js";import"./index.JXKNaeUN.js";const a=({children:r,className:e=""})=>s.jsx("div",{className:`min-h-screen bg-gradient-to-br from-red-50 via-red-50 to-red-50 ${e}`,children:r});export{a as G};

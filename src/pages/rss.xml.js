@@ -1,6 +1,6 @@
 
 import rss from '@astrojs/rss';
-import { createSupabaseClient } from '../lib/supabase';
+
 
 // Helper to create a client (we can't use the server client helper here easily as context is different, or we can assume env vars are present)
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;

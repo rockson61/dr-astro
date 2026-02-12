@@ -1,0 +1,779 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ShareButtons from "../../components/ShareButtons.astro";
+import LikeButton from "../../components/social/LikeButton";
+import CommentSection from "../../components/comments/CommentSection.astro";
+import BookmarkButton from "../../components/actions/BookmarkButton";
+import TableOfContents from "../../components/article/TableOfContents.astro";
+import ArticleActions from "../../components/article/ArticleActions";
+import FollowButton from "../../components/social/FollowButton";
+import PremiumLock from "../../components/monetization/PremiumLock.tsx";
+import AnalyticsTracker from "../../components/analytics/AnalyticsTracker.tsx";
+import { createSupabaseServerClient } from "../../lib/supabase";
+import { format } from "date-fns";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+// Initialize Supabase client
+let article = null;
+let relatedArticles: any[] = [];
+let likesCount: number | null = 0;
+let isLiked = false;
+let isSaved = false;
+let isPro = false;
+
+try {
+    const supabase = createSupabaseServerClient(Astro);
+
+    // Fetch the article
+    const { data } = await supabase
+        .from("articles")
+        .select(
+            "*, author:profiles(id, full_name, avatar_url, bio, slug), category:categories(name, slug)",
+        )
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
+
+    article = data;
+
+    // Check subscription if premium
+    if (article?.is_premium && user) {
+        const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("status")
+            .eq("user_id", user.id)
+            .single();
+        isPro = sub?.status === "active" || sub?.status === "trialing";
+    }
+
+    // Fetch related articles
+    // Strategy: Try to find articles with matching tags first, then fallback to category
+    if (article?.tags && article.tags.length > 0) {
+        const { data: relatedByTags } = await supabase
+            .from("articles")
+            .select("title, slug, image_url, published_at")
+            .eq("status", "published")
+            .overlaps("tags", article.tags)
+            .neq("slug", slug)
+            .limit(3);
+
+        if (relatedByTags && relatedByTags.length > 0) {
+            relatedArticles = relatedByTags;
+        }
+    }
+
+    // If not enough related articles by tags, fill up with category matches
+    if (relatedArticles.length < 3 && article?.category?.slug) {
+        const needed = 3 - relatedArticles.length;
+        const currentSlugs = relatedArticles.map((a) => a.slug);
+        currentSlugs.push(slug); // Exclude current article
+
+        const { data: relatedByCategory } = await supabase
+            .from("articles")
+            .select("title, slug, image_url, published_at")
+            .eq("status", "published")
+            .eq("category.slug", article.category.slug)
+            .not(
+                "slug",
+                "in",
+                `(${currentSlugs.map((s) => `"${s}"`).join(",")})`,
+            ) // Exclude already found
+            .limit(needed);
+
+        if (relatedByCategory) {
+            relatedArticles = [...relatedArticles, ...relatedByCategory];
+        }
+    }
+
+    // Fetch likes count
+    const { count } = await supabase
+        .from("article_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("article_id", article.id);
+    likesCount = count;
+
+    // Check if user liked
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+        const { data: likeData } = await supabase
+            .from("article_likes")
+            .select("id")
+            .match({ user_id: user.id, article_id: article.id })
+            .single();
+        if (likeData) isLiked = true;
+
+        // Check if saved
+        const { data: savedData } = await supabase
+            .from("saved_articles")
+            .select("id")
+            .match({ user_id: user.id, article_id: article.id })
+            .single();
+        if (savedData) isSaved = true;
+    }
+} catch (error) {
+    console.log("Using mock data - Supabase not configured");
+}
+
+// Mock fallback for design preview
+const mockArticle = {
+    title: "The Future of Digital Dentistry",
+    excerpt:
+        "Exploring how AI and 3D printing are revolutionizing modern dental practices.",
+    content: `<p>Digital dentistry is rapidly transforming how dental professionals diagnose, plan, and execute treatments. From intraoral scanners to AI-powered diagnostics, the landscape of modern dentistry is evolving at an unprecedented pace.</p>
+  <h2>The Rise of Intraoral Scanning</h2>
+  <p>Intraoral scanners have become increasingly accessible, allowing for precise digital impressions that eliminate the discomfort of traditional methods. These digital workflows improve accuracy and reduce turnaround times for restorations.</p>
+  <h2>AI in Diagnosis</h2>
+  <p>Artificial intelligence is being integrated into radiograph analysis, helping dentists identify pathologies with greater accuracy. Machine learning algorithms can detect early signs of decay, periodontal disease, and even oral cancers.</p>
+  <h2>3D Printing Revolution</h2>
+  <p>From surgical guides to temporary crowns, 3D printing is enabling same-day treatments that were previously impossible. This technology is reducing costs and improving patient outcomes.</p>
+  <h2>The Connected Practice</h2>
+  <p>Cloud-based practice management systems are enabling real-time collaboration between dental professionals across the globe. Teledentistry is expanding access to care in underserved communities.</p>`,
+    image_url:
+        "https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    published_at: "2026-01-20T10:00:00Z",
+    author: {
+        full_name: "Dr. Sarah Chen",
+        bio: "Digital dentistry specialist with 15 years of experience in implantology and CAD/CAM technologies.",
+        avatar_url: null,
+    },
+    category: { name: "Technology", slug: "technology" },
+    is_premium: false,
+};
+
+const displayArticle = article || mockArticle;
+
+// Calculate reading time (average 200 words per minute)
+const wordCount = (
+    displayArticle.content ||
+    displayArticle.excerpt ||
+    ""
+).split(/\s+/).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
+// Page URL for sharing
+const pageUrl = Astro.url.href;
+---
+
+<BaseLayout title={`${displayArticle.title} | DentalReach`}>
+    <Fragment slot="head">
+        <!-- Highwire Press Tags (Google Scholar) -->
+        <meta name="citation_title" content={displayArticle.title} />
+        <meta
+            name="citation_author"
+            content={displayArticle.author?.full_name || "DentalReach Team"}
+        />
+        <meta
+            name="citation_publication_date"
+            content={format(
+                new Date(displayArticle.published_at),
+                "yyyy/MM/dd",
+            )}
+        />
+        <meta name="citation_journal_title" content="DentalReach Magazine" />
+        <meta name="citation_language" content="en" />
+        {
+            displayArticle.doi && (
+                <meta name="citation_doi" content={displayArticle.doi} />
+            )
+        }
+        {
+            displayArticle.pdf_url && (
+                <meta
+                    name="citation_pdf_url"
+                    content={displayArticle.pdf_url}
+                />
+            )
+        }
+
+        <!-- Dublin Core Tags (Zotero, Mendeley) -->
+        <meta name="DC.title" content={displayArticle.title} />
+        <meta
+            name="DC.creator"
+            content={displayArticle.author?.full_name || "DentalReach Team"}
+        />
+        <meta
+            name="DC.date"
+            content={new Date(displayArticle.published_at).toISOString()}
+        />
+        <meta name="DC.publisher" content="DentalReach" />
+        <meta name="DC.identifier" content={displayArticle.slug} />
+        <meta name="DC.language" content="en" />
+        <meta name="DC.type" content="Text" />
+        <meta name="DC.format" content="text/html" />
+        {
+            displayArticle.excerpt && (
+                <meta name="DC.description" content={displayArticle.excerpt} />
+            )
+        }
+        {
+            displayArticle.doi && (
+                <meta
+                    name="DC.identifier"
+                    content={`doi:${displayArticle.doi}`}
+                />
+            )
+        }
+
+        <!-- PRISM Tags (Scopus / CrossRef) -->
+        <meta name="prism.publicationName" content="DentalReach Magazine" />
+        <meta
+            name="prism.publicationDate"
+            content={format(
+                new Date(displayArticle.published_at),
+                "yyyy-MM-dd",
+            )}
+        />
+        {
+            displayArticle.doi && (
+                <meta name="prism.doi" content={displayArticle.doi} />
+            )
+        }
+        {
+            displayArticle.issue_number && (
+                <meta
+                    name="prism.issueIdentifier"
+                    content={displayArticle.issue_number}
+                />
+            )
+        }
+        {
+            displayArticle.volume && (
+                <meta name="prism.volume" content={displayArticle.volume} />
+            )
+        }
+        <meta
+            name="prism.section"
+            content={displayArticle.category?.name || "Dentistry"}
+        />
+        <meta name="prism.url" content={pageUrl} />
+
+        <!-- Additional Highwire Press Tags (Google Scholar Extended) -->
+        {
+            displayArticle.excerpt && (
+                <meta
+                    name="citation_abstract"
+                    content={displayArticle.excerpt}
+                />
+            )
+        }
+        <meta name="citation_publisher" content="DentalReach" />
+        <meta
+            name="citation_online_date"
+            content={format(
+                new Date(displayArticle.published_at),
+                "yyyy/MM/dd",
+            )}
+        />
+        <meta name="citation_fulltext_html_url" content={pageUrl} />
+
+        <!-- Open Graph / Scientific -->
+        <meta property="og:type" content="article" />
+        <meta
+            property="article:published_time"
+            content={new Date(displayArticle.published_at).toISOString()}
+        />
+        <meta
+            property="article:section"
+            content={displayArticle.category?.name || "Dentistry"}
+        />
+        {
+            displayArticle.tags?.map((tag: string) => (
+                <meta property="article:tag" content={tag} />
+            ))
+        }
+
+        <!-- Schema.org JSON-LD -->
+        <script
+            type="application/ld+json"
+            set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "ScholarlyArticle",
+                headline: displayArticle.title,
+                image: [displayArticle.image_url],
+                datePublished: new Date(
+                    displayArticle.published_at,
+                ).toISOString(),
+                dateModified: new Date(
+                    displayArticle.updated_at || displayArticle.published_at,
+                ).toISOString(),
+                author: [
+                    {
+                        "@type": "Person",
+                        name:
+                            displayArticle.author?.full_name ||
+                            "DentalReach Team",
+                        url: new URL(
+                            `/profile/${displayArticle.author?.slug || displayArticle.author?.id}`,
+                            Astro.site,
+                        ).href,
+                    },
+                ],
+                publisher: {
+                    "@type": "Organization",
+                    name: "DentalReach",
+                    logo: {
+                        "@type": "ImageObject",
+                        url: new URL("/images/logo-full.png", Astro.site).href,
+                    },
+                },
+                description: displayArticle.excerpt,
+                ...(displayArticle.doi && {
+                    identifier: {
+                        "@type": "PropertyValue",
+                        propertyID: "doi",
+                        value: displayArticle.doi,
+                    },
+                }),
+                isPartOf: {
+                    "@type": "Periodical",
+                    name: "DentalReach Magazine",
+                    issn: "XXXX-XXXX",
+                },
+                articleBody: displayArticle.content
+                    ?.replace(/<[^>]*>?/gm, "")
+                    .substring(0, 5000),
+            })}
+        />
+    </Fragment>
+    <article>
+        <!-- Hero Image -->
+        <div class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden">
+            <img
+                src={displayArticle.image_url || "/images/pattern.png"}
+                alt={displayArticle.title}
+                class="w-full h-full object-cover opacity-60"
+            />
+            <div
+                class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/50 to-transparent"
+            >
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16">
+                <div class="container mx-auto">
+                    <!-- Breadcrumbs -->
+                    <Breadcrumbs
+                        items={[
+                            { label: "Articles", href: "/articles" },
+                            {
+                                label:
+                                    displayArticle.category?.name || "Article",
+                                href: `/articles?category=${displayArticle.category?.slug}`,
+                            },
+                            { label: displayArticle.title },
+                        ]}
+                        class="text-white/60 mb-6"
+                    />
+
+                    <span
+                        class="inline-block px-4 py-1 bg-tuio-red text-white rounded-full text-sm font-bold uppercase tracking-wider mb-4"
+                    >
+                        {displayArticle.category?.name || "Article"}
+                    </span>
+                    <h1
+                        class="text-4xl md:text-6xl font-tuio uppercase text-white leading-tight max-w-4xl"
+                    >
+                        {displayArticle.title}
+                    </h1>
+                    <div
+                        class="flex flex-wrap items-center gap-4 md:gap-6 mt-6 text-white/80"
+                    >
+                        <span class="font-medium"
+                            >{
+                                displayArticle.author?.full_name ||
+                                    "DentalReach Team"
+                            }</span
+                        >
+                        <span class="hidden md:inline">•</span>
+                        <span
+                            >{
+                                format(
+                                    new Date(displayArticle.published_at),
+                                    "MMMM d, yyyy",
+                                )
+                            }</span
+                        >
+                        <span class="hidden md:inline">•</span>
+                        <span class="flex items-center gap-1">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                            {readingTime} min read
+                        </span>
+                    </div>
+
+                    <div class="mt-8 flex gap-4">
+                        <ArticleActions client:load article={displayArticle} />
+                    </div>
+                    {
+                        article?.id && (
+                            <AnalyticsTracker
+                                client:load
+                                articleId={article.id}
+                            />
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-tuio-bg py-16">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col lg:flex-row gap-12">
+                    <!-- Sidebar (ToC) -->
+                    <aside class="hidden lg:block w-64 shrink-0 order-2">
+                        <TableOfContents
+                            headings={displayArticle.headings || []}
+                        />
+                    </aside>
+
+                    <div
+                        class="max-w-4xl mx-auto lg:mx-0 lg:w-full lg:max-w-none order-1"
+                    >
+                        <!-- Share Buttons (Sticky Sidebar on Desktop) -->
+                        <div
+                            class="hidden xl:block fixed left-8 top-1/2 -translate-y-1/2 z-40"
+                        >
+                            <div
+                                class="flex flex-col items-center gap-3 bg-white rounded-full p-3 shadow-lg"
+                            >
+                                <span
+                                    class="text-xs font-bold text-gray-400 uppercase tracking-wider -rotate-90 mb-2 w-16 text-center"
+                                    >Share</span
+                                >
+                                <a
+                                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(displayArticle.title)}`}
+                                    target="_blank"
+                                    class="w-10 h-10 rounded-full bg-tuio-bg hover:bg-tuio-navy text-gray-500 hover:text-white flex items-center justify-center transition-all text-sm"
+                                    >𝕏</a
+                                >
+                                <a
+                                    href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(pageUrl)}`}
+                                    target="_blank"
+                                    class="w-10 h-10 rounded-full bg-tuio-bg hover:bg-[#0077B5] text-gray-500 hover:text-white flex items-center justify-center transition-all text-sm"
+                                    >in</a
+                                >
+                                <a
+                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`}
+                                    target="_blank"
+                                    class="w-10 h-10 rounded-full bg-tuio-bg hover:bg-[#1877F2] text-gray-500 hover:text-white flex items-center justify-center transition-all text-sm"
+                                    >f</a
+                                >
+                                <button
+                                    id="copy-link-sidebar"
+                                    data-url={pageUrl}
+                                    class="w-10 h-10 rounded-full bg-tuio-bg hover:bg-tuio-red text-gray-500 hover:text-white flex items-center justify-center transition-all"
+                                    >🔗</button
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Article Body -->
+                        <div
+                            class="bg-white rounded-[32px] p-8 md:p-12 shadow-sm mb-12"
+                        >
+                            <div class="flex justify-end mb-6 gap-2">
+                                <BookmarkButton
+                                    client:load
+                                    articleId={article?.id || 0}
+                                    initialIsSaved={isSaved}
+                                />
+                                <LikeButton
+                                    client:load
+                                    articleId={article?.id || ""}
+                                    initialLikes={likesCount || 0}
+                                    initialIsLiked={isLiked}
+                                />
+                            </div>
+
+                            {
+                                displayArticle.is_premium && !isPro ? (
+                                    <PremiumLock client:load />
+                                ) : (
+                                    <div
+                                        class="prose prose-lg max-w-none prose-headings:font-tuio prose-headings:uppercase prose-headings:text-tuio-navy prose-a:text-tuio-red prose-img:rounded-2xl"
+                                        set:html={
+                                            displayArticle.content ||
+                                            `<p>${displayArticle.excerpt}</p>`
+                                        }
+                                    />
+                                )
+                            }
+
+                            <!-- Mobile Share Buttons -->
+                            <div
+                                class="lg:hidden mt-12 pt-8 border-t border-gray-100"
+                            >
+                                <ShareButtons
+                                    url={pageUrl}
+                                    title={displayArticle.title}
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        {
+                            displayArticle.tags &&
+                                displayArticle.tags.length > 0 && (
+                                    <div class="flex flex-wrap gap-2 mb-12">
+                                        {displayArticle.tags.map(
+                                            (tag: string) => (
+                                                <a
+                                                    href={`/articles?tag=${encodeURIComponent(tag)}`}
+                                                    class="px-4 py-2 bg-tuio-red/10 text-tuio-red rounded-full text-sm font-medium hover:bg-tuio-red hover:text-white transition-colors"
+                                                >
+                                                    #{tag}
+                                                </a>
+                                            ),
+                                        )}
+                                    </div>
+                                )
+                        }
+
+                        <!-- Author Box -->
+                        <div
+                            class="bg-white rounded-[32px] p-8 shadow-sm flex flex-col md:flex-row items-center gap-8"
+                        >
+                            <div
+                                class="w-24 h-24 bg-gradient-to-br from-tuio-red to-red-600 rounded-full flex items-center justify-center shrink-0"
+                            >
+                                {
+                                    displayArticle.author?.avatar_url ? (
+                                        <img
+                                            src={
+                                                displayArticle.author.avatar_url
+                                            }
+                                            alt={
+                                                displayArticle.author.full_name
+                                            }
+                                            class="w-full h-full object-cover rounded-full"
+                                        />
+                                    ) : (
+                                        <span class="text-4xl text-white">
+                                            👩‍⚕️
+                                        </span>
+                                    )
+                                }
+                            </div>
+                            <div class="text-center md:text-left flex-grow">
+                                <span
+                                    class="text-sm text-tuio-red font-bold uppercase tracking-wider"
+                                    >Written by</span
+                                >
+                                <h3
+                                    class="font-tuio text-2xl uppercase text-tuio-navy mb-2"
+                                >
+                                    {
+                                        displayArticle.author?.full_name ||
+                                            "DentalReach Team"
+                                    }
+                                </h3>
+                                <p class="text-gray-500 font-light">
+                                    {
+                                        displayArticle.author?.bio ||
+                                            "Contributing writer at DentalReach."
+                                    }
+                                </p>
+                            </div>
+                            <div class="flex flex-col gap-2 shrink-0">
+                                <a
+                                    href={`/profile/${displayArticle.author?.slug || displayArticle.author?.id || "1"}`}
+                                    class="px-6 py-3 bg-tuio-bg hover:bg-tuio-navy hover:text-white text-tuio-navy rounded-full font-bold transition-all text-center"
+                                >
+                                    View Profile
+                                </a>
+                                {
+                                    displayArticle.author?.id && (
+                                        <div class="flex justify-center">
+                                            <FollowButton
+                                                client:load
+                                                targetUserId={
+                                                    displayArticle.author.id
+                                                }
+                                                targetUserName={
+                                                    displayArticle.author
+                                                        .full_name
+                                                }
+                                            />
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        {
+                            article?.id && (
+                                <CommentSection articleId={article.id} />
+                            )
+                        }
+
+                        <!-- References Section -->
+                        {
+                            displayArticle.references &&
+                                displayArticle.references.length > 0 && (
+                                    <div class="mt-12 pt-8 border-t border-gray-200">
+                                        <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-4">
+                                            References
+                                        </h3>
+                                        <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                            {typeof displayArticle.references ===
+                                            "string" ? (
+                                                JSON.parse(
+                                                    displayArticle.references,
+                                                ).map((ref: any) => (
+                                                    <li>{ref}</li>
+                                                ))
+                                            ) : Array.isArray(
+                                                  displayArticle.references,
+                                              ) ? (
+                                                displayArticle.references.map(
+                                                    (ref: any) => (
+                                                        <li>
+                                                            {typeof ref ===
+                                                            "string"
+                                                                ? ref
+                                                                : ref.text ||
+                                                                  JSON.stringify(
+                                                                      ref,
+                                                                  )}
+                                                        </li>
+                                                    ),
+                                                )
+                                            ) : (
+                                                <li>
+                                                    No references available.
+                                                </li>
+                                            )}
+                                        </ol>
+                                    </div>
+                                )
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Articles -->
+            <section class="bg-white py-16">
+                <div class="container mx-auto px-4">
+                    <h2
+                        class="text-3xl font-tuio uppercase text-tuio-navy mb-8 text-center"
+                    >
+                        Related Articles
+                    </h2>
+                    <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        {
+                            (relatedArticles.length > 0
+                                ? relatedArticles
+                                : [
+                                      {
+                                          title: "CAD/CAM Workflow Best Practices",
+                                          slug: "cad-cam-workflow",
+                                          image_url:
+                                              "https://images.pexels.com/photos/3845126/pexels-photo-3845126.jpeg?auto=compress&cs=tinysrgb&w=800",
+                                      },
+                                      {
+                                          title: "AI in Dental Diagnostics",
+                                          slug: "ai-dental-diagnostics",
+                                          image_url:
+                                              "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
+                                      },
+                                      {
+                                          title: "Teledentistry: A Complete Guide",
+                                          slug: "teledentistry-guide",
+                                          image_url:
+                                              "https://images.pexels.com/photos/3845806/pexels-photo-3845806.jpeg?auto=compress&cs=tinysrgb&w=800",
+                                      },
+                                  ]
+                            ).map((related: any) => (
+                                <a
+                                    href={`/articles/${related.slug}`}
+                                    class="bg-tuio-bg rounded-[32px] overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all group"
+                                >
+                                    <div class="h-48 overflow-hidden">
+                                        <img
+                                            src={
+                                                related.image_url ||
+                                                "/images/pattern.png"
+                                            }
+                                            alt={related.title}
+                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        />
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="font-tuio text-lg uppercase text-tuio-navy group-hover:text-tuio-red transition-colors">
+                                            {related.title}
+                                        </h3>
+                                    </div>
+                                </a>
+                            ))
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- Newsletter CTA -->
+            <section class="bg-tuio-navy py-16">
+                <div class="container mx-auto px-4 text-center">
+                    <h2
+                        class="font-tuio text-3xl md:text-4xl uppercase text-white mb-4"
+                    >
+                        Enjoyed this article?
+                    </h2>
+                    <p class="text-white/70 mb-8 max-w-xl mx-auto">
+                        Subscribe to get more insights like this delivered to
+                        your inbox.
+                    </p>
+                    <form
+                        class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
+                    >
+                        <input
+                            type="email"
+                            placeholder="Your email address"
+                            class="flex-grow px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:ring-2 focus:ring-tuio-red focus:outline-none"
+                        />
+                        <button
+                            type="submit"
+                            class="px-8 py-4 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-white hover:text-tuio-red transition-all shrink-0"
+                        >
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </article>
+
+    <script>
+        // Copy link functionality for sidebar button
+        const copyBtn = document.getElementById("copy-link-sidebar");
+        copyBtn?.addEventListener("click", async () => {
+            const url =
+                copyBtn.getAttribute("data-url") || window.location.href;
+            await navigator.clipboard.writeText(url);
+            if ((window as any).showToast) {
+                (window as any).showToast(
+                    "Link copied to clipboard!",
+                    "success",
+                );
+            }
+        });
+    </script>
+</BaseLayout>

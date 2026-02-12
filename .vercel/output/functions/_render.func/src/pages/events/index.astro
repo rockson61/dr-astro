@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createSupabaseServerClient } from '../../lib/supabase';
+import type { Event } from '../../types/database';
+import { format } from 'date-fns';
+
+export const prerender = false;
+
+let events: any[] = [];
+try {
+  const supabase = createSupabaseServerClient(Astro);
+  const { data } = await supabase
+    .from('events')
+    .select('*')
+    .eq('status', 'upcoming')
+    .order('start_date', { ascending: true });
+  if (data) events = data;
+} catch (error) {
+  console.log('Using mock events - Supabase not configured');
+}
+
+// Mock Events for Design Fallback
+const mockEvents = [
+    { title: 'IDS 2026 - Cologne', slug: 'ids-2026', type: 'Conference', start_date: '2026-03-24', location_name: 'Cologne, Germany', is_virtual: false, image_url: 'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { title: 'Digital Dentistry Summit', slug: 'digital-summit', type: 'Webinar', start_date: '2026-05-10', location_name: null, is_virtual: true, image_url: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { title: 'Asia Pacific Dental Congress', slug: 'apdc-2026', type: 'Congress', start_date: '2026-07-15', location_name: 'Singapore', is_virtual: false, image_url: 'https://images.pexels.com/photos/2608517/pexels-photo-2608517.jpeg?auto=compress&cs=tinysrgb&w=800' },
+];
+
+const displayEvents = events && events.length > 0 ? events : mockEvents;
+---
+
+<BaseLayout title="Dental Events & Conferences">
+    <section class="bg-tuio-navy py-20 text-center text-white relative overflow-hidden rounded-b-[40px]">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <h1 class="text-5xl md:text-7xl font-tuio uppercase mb-6 leading-tight">
+                Global Dental<br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-tuio-red to-red-500">Events</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto text-lg font-light">Discover conferences, webinars, and workshops to advance your career.</p>
+        </div>
+    </section>
+
+    <div class="bg-tuio-bg min-h-screen container mx-auto px-4 py-12">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayEvents.map((event: any) => (
+                <div class="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all group border border-transparent hover:border-tuio-red">
+                    <div class="h-56 bg-gray-200 relative overflow-hidden">
+                         {event.image_url ? (
+                            <img src={event.image_url} alt={event.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                         ) : (
+                            <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-tuio text-xl uppercase">Event</div>
+                         )}
+                         <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-tuio-red">
+                             {event.type}
+                         </div>
+                    </div>
+                    <div class="p-8">
+                        <div class="text-sm text-tuio-red mb-3 uppercase tracking-widest font-bold">
+                            {format(new Date(event.start_date), 'MMM d, yyyy')}
+                        </div>
+                        <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-4 group-hover:text-tuio-red transition-colors">
+                            <a href={`/events/${event.slug}`}>{event.title}</a>
+                        </h3>
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            {event.is_virtual ? 'Virtual Event' : event.location_name || 'TBA'}
+                        </div>
+                        <a href={event.registration_url || '#'} target="_blank" class="block w-full text-center py-3 bg-tuio-navy text-white rounded-full font-bold hover:bg-tuio-red transition-all shadow-md uppercase tracking-wide">
+                            Register Now
+                        </a>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+</BaseLayout>

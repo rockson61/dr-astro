@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import UserManagement from "../../components/admin/UserManagement";
+
+const title = "User Management | Admin";
+---
+
+<BaseLayout title={title}>
+    {/* Mount the React component with hydration */}
+    <UserManagement client:only="react" />
+</BaseLayout>

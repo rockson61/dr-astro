@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import JobForm from "../../../components/dashboard/JobForm";
+
+export const prerender = false;
+---
+
+<DashboardLayout title="Create Job">
+    <div class="animate-fade-in-up">
+        {/* Mount React Component */}
+        <JobForm client:load />
+    </div>
+</DashboardLayout>

@@ -1,0 +1,61 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import PricingTable from "../../components/monetization/PricingTable.tsx";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+let subscription = null;
+const { data: subData } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
+
+if (subData) {
+    subscription = subData;
+}
+---
+
+<DashboardLayout title="Billing & Subscription">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-12 text-center">
+            <h2 class="text-3xl font-heading uppercase text-primary-900 mb-4">
+                Manage Subscription
+            </h2>
+            <p class="text-gray-600">
+                Upgrade to access premium content and features.
+            </p>
+        </div>
+
+        {
+            subscription && subscription.status === "active" && (
+                <div class="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-green-800 font-bold text-lg mb-1">
+                            Pro Membership Active
+                        </h3>
+                        <p class="text-green-600 text-sm">
+                            Renews on{" "}
+                            {new Date(
+                                subscription.current_period_end,
+                            ).toLocaleDateString()}
+                        </p>
+                    </div>
+                    <button class="text-green-700 font-bold underline text-sm hover:text-green-900">
+                        Manage on Stripe
+                    </button>
+                </div>
+            )
+        }
+
+        <PricingTable client:load user={user} subscription={subscription} />
+    </div>
+</DashboardLayout>

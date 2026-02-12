@@ -1,0 +1,208 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch user's products
+const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .eq("seller_id", user.id)
+    .order("created_at", { ascending: false });
+
+const statusColors: Record<string, string> = {
+    active: "bg-green-100 text-green-700",
+    draft: "bg-yellow-100 text-yellow-700",
+    archived: "bg-gray-100 text-gray-700",
+};
+---
+
+<DashboardLayout title="My Products">
+    <div class="animate-fade-in">
+        <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+        >
+            <div>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
+                    My Products
+                </h2>
+                <p class="text-gray-500 mt-1">
+                    Manage your marketplace listings and inventory.
+                </p>
+            </div>
+            <a
+                href="/dashboard/products/new"
+                class="px-8 py-3 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2"
+            >
+                <span>+ List new item</span>
+            </a>
+        </div>
+
+        {
+            products && products.length > 0 ? (
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50/50 border-b border-gray-100">
+                                <tr>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Product
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Category
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Price
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Status
+                                    </th>
+                                    <th class="text-right px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {products.map((product: any) => (
+                                    <tr class="hover:bg-gray-50 transition-colors group">
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                                                    <img
+                                                        src={
+                                                            (product.images &&
+                                                                product
+                                                                    .images[0]) ||
+                                                            "/images/pattern.png"
+                                                        }
+                                                        alt={product.name}
+                                                        class="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <a
+                                                        href={`/products/${product.slug}`}
+                                                        class="font-bold text-lg text-tuio-navy group-hover:text-tuio-red transition-colors block"
+                                                    >
+                                                        {product.name}
+                                                    </a>
+                                                    <span class="text-xs text-gray-400">
+                                                        Added{" "}
+                                                        {new Date(
+                                                            product.created_at,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <span class="text-sm font-medium text-gray-600">
+                                                {product.category}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <span class="text-sm font-bold text-tuio-navy">
+                                                $
+                                                {product.price?.toLocaleString()}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <span
+                                                class={`text-xs font-bold uppercase px-3 py-1.5 rounded-full tracking-wide ${statusColors[product.status] || "bg-gray-100 text-gray-700"}`}
+                                            >
+                                                {product.status}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5 text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <a
+                                                    href={`/dashboard/products/edit/${product.id}`}
+                                                    class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:border-tuio-red hover:text-tuio-red transition-all bg-white"
+                                                >
+                                                    Edit
+                                                </a>
+                                                <button
+                                                    data-delete-btn
+                                                    data-id={product.id}
+                                                    class="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-red-400 hover:bg-red-50 hover:border-red-200 transition-all bg-white"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : (
+                <div class="bg-white rounded-3xl py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50/30">
+                    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-6 shadow-sm">
+                        🛍️
+                    </div>
+                    <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-2">
+                        No products listed
+                    </h3>
+                    <p class="text-gray-500 max-w-md mb-8">
+                        You haven't listed any products yet. Start selling your
+                        equipment and supplies today.
+                    </p>
+                    <a
+                        href="/dashboard/products/new"
+                        class="px-8 py-3 bg-tuio-red text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-navy transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    >
+                        List Your First Item
+                    </a>
+                </div>
+            )
+        }
+    </div>
+</DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+    const deleteBtns = document.querySelectorAll("[data-delete-btn]");
+
+    deleteBtns.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            if (!confirm("Are you sure you want to delete this product?"))
+                return;
+
+            const id = (btn as HTMLButtonElement).dataset.id;
+            const row = btn.closest("tr");
+
+            try {
+                const { error } = await supabase
+                    .from("products")
+                    .delete()
+                    .eq("id", id);
+
+                if (error) throw error;
+
+                // Remove row from UI
+                row?.remove();
+
+                // If no rows left, reload to show empty state (optional optimization)
+                if (document.querySelectorAll("tbody tr").length === 0) {
+                    window.location.reload();
+                }
+            } catch (err: any) {
+                alert("Error deleting product: " + err.message);
+                console.error(err);
+            }
+        });
+    });
+</script>

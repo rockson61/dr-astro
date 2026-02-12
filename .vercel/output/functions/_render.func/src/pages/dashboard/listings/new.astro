@@ -1,0 +1,12 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import ListingForm from "../../../components/dashboard/ListingForm";
+
+export const prerender = false;
+---
+
+<DashboardLayout title="Add New Listing">
+    <div class="animate-fade-in-up">
+        <ListingForm client:load />
+    </div>
+</DashboardLayout>

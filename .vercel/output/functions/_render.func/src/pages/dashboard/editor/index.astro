@@ -1,0 +1,215 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) return Astro.redirect("/login");
+
+// Check Editor Role
+const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+if (
+    profile?.role !== "editor" &&
+    profile?.role !== "admin" &&
+    profile?.role !== "super_admin"
+) {
+    return Astro.redirect("/dashboard");
+}
+
+// Params
+const status = Astro.url.searchParams.get("status") || "under_review";
+
+// Fetch Articles
+let query = supabase
+    .from("articles")
+    .select("*, author:profiles(full_name)")
+    .order("updated_at", { ascending: false });
+
+if (status !== "all") {
+    query = query.eq("status", status);
+}
+
+const { data: articles } = await query;
+
+const tabs = [
+    { id: "under_review", label: "Pending Review" },
+    { id: "published", label: "Published" },
+    { id: "draft", label: "Drafts" },
+    { id: "rejected", label: "Rejected" },
+];
+---
+
+<DashboardLayout title="Editorial Desk">
+    <div class="animate-fade-in space-y-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy mb-2">
+                    Editorial Desk
+                </h2>
+                <p class="text-gray-500">
+                    Review submissions and manage publication schedule.
+                </p>
+            </div>
+        </div>
+
+        {/* Tabs */}
+        <div class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-100">
+            {
+                tabs.map((tab) => (
+                    <a
+                        href={`?status=${tab.id}`}
+                        class={`px-6 py-3 rounded-t-2xl font-bold text-sm transition-all whitespace-nowrap ${
+                            status === tab.id
+                                ? "bg-white text-tuio-navy border-t border-x border-gray-100 shadow-sm translate-y-[1px]"
+                                : "text-gray-400 hover:text-tuio-navy hover:bg-gray-100/50"
+                        }`}
+                    >
+                        {tab.label}
+                    </a>
+                ))
+            }
+        </div>
+
+        {/* Article List */}
+        <div
+            class="bg-white rounded-b-3xl rounded-tr-3xl shadow-sm border border-gray-100 min-h-[400px]"
+        >
+            {
+                articles && articles.length > 0 ? (
+                    <ul class="divide-y divide-gray-50">
+                        {articles.map((article: any) => (
+                            <li class="p-6 hover:bg-gray-50 transition-colors group">
+                                <div class="flex flex-col md:flex-row gap-4 justify-between">
+                                    <div class="flex-grow">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span
+                                                class={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+                                                    article.status ===
+                                                    "published"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : article.status ===
+                                                            "under_review"
+                                                          ? "bg-orange-100 text-orange-700"
+                                                          : "bg-gray-100 text-gray-500"
+                                                }`}
+                                            >
+                                                {article.status.replace(
+                                                    "_",
+                                                    " ",
+                                                )}
+                                            </span>
+                                            <span class="text-xs text-gray-400">
+                                                By{" "}
+                                                {article.author?.full_name ||
+                                                    "Unknown"}
+                                            </span>
+                                            <span class="text-xs text-gray-400">
+                                                •{" "}
+                                                {new Date(
+                                                    article.updated_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-tuio-navy group-hover:text-tuio-red transition-colors mb-2">
+                                            <a
+                                                href={`/articles/${article.slug}`}
+                                            >
+                                                {article.title}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-500 line-clamp-2 max-w-3xl">
+                                            {article.excerpt}
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <a
+                                            href={`/articles/${article.slug}`}
+                                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-bold transition-colors"
+                                            target="_blank"
+                                        >
+                                            Preview
+                                        </a>
+
+                                        {status === "under_review" && (
+                                            <>
+                                                <button
+                                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-green-200"
+                                                    onclick={`updateStatus('${article.id}', 'published')`}
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-500 rounded-xl text-xs font-bold transition-colors"
+                                                    onclick={`updateStatus('${article.id}', 'rejected')`}
+                                                >
+                                                    Reject
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {status === "published" && (
+                                            <button
+                                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-xl text-xs font-bold transition-colors"
+                                                onclick={`updateStatus('${article.id}', 'draft')`}
+                                            >
+                                                Unpublish
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+                        <span class="text-4xl mb-4">📭</span>
+                        <p>No articles found in this queue.</p>
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</DashboardLayout>
+
+<script is:inline>
+    // Simple inline script for now, ideally verified with Supabase client
+    async function updateStatus(id, status) {
+        if (!confirm(`Mark article as ${status}?`)) return;
+
+        // This needs client-side Supabase.
+        // We'll use a fetch to an API route in real app, but for now let's assume client-side lib is available globally
+        // or re-import it.
+        // Since `is:inline` limits import, we'll use a hidden API endpoint or just reload (simulated).
+        // Best approach: create a small script tag that imports the library.
+    }
+</script>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../lib/supabase";
+    const supabase = createSupabaseBrowserClient();
+
+    window.updateStatus = async (id, status) => {
+        try {
+            const { error } = await supabase
+                .from("articles")
+                .update({ status: status })
+                .eq("id", id);
+
+            if (error) throw error;
+            window.location.reload();
+        } catch (e) {
+            alert("Error updating status: " + e.message);
+        }
+    };
+</script>

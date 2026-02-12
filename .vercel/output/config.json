@@ -1,0 +1,464 @@
+{
+	"version": 3,
+	"routes": [
+		{
+			"handle": "filesystem"
+		},
+		{
+			"src": "^/_astro/(.*)$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable"
+			},
+			"continue": true
+		},
+		{
+			"src": "^/_server-islands/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/_image/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/about/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/account-banned/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/articles/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/awards/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/events/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/jobs/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/listings/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/users/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/admin/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/analytics/track/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/articles/create/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/articles/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/awards/automate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/awards/recalculate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/bookmarks/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/checkout/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/comments/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/contact/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/cron/generate-sitemaps/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/inquiries/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/newsletter/subscribe/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/newsletter/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/search/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/sitemap/regenerate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/social/follow/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/social/like/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/supaproxy(?:/(.*?))?/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/webhooks/stripe/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/articles/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/articles/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/articles(?:/(.*?))?/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/articles-feed\\.xml/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/awards/nominate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/awards/past-winners/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/awards/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/awards/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/become-seller/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/brand-ambassador/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/cart/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/cases/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/community/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/community/topic/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/community/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/contact/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/admin/logs/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/admin/settings/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/admin/users/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/admin/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/analytics/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/articles/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/articles/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/billing/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/cases/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/cases/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/editor/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/events/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/events/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/inquiries/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/issues/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/issues/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/issues/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/jobs/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/jobs/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/listings/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/listings/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/moderator/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-articles/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-awards/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-ce/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-events/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-jobs/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-listings/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/my-products/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/notifications/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/products/edit/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/products/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/quizzes/new/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/saved-articles/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/settings/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/dashboard/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/directory/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/directory/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/directory(?:/(.*?))?/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/events/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/events/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/faq/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/guides/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/guides/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/issues/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/issues/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/jobs/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/jobs/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/leaderboard/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/login/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/marketplace/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/news/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/news-sitemap\\.xml/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/podcasts/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/podcasts/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/pricing/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/privacy/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/products/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/products/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/profile/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/register/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/rss\\.xml/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/search/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/terms/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/.*$",
+			"dest": "/404.html",
+			"status": 404
+		}
+	]
+}

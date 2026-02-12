@@ -1,0 +1,40 @@
+---
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import ListingForm from "../../../../components/dashboard/ListingForm";
+import { createSupabaseServerClient } from "../../../../lib/supabase";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+if (!id) {
+    return Astro.redirect("/dashboard/my-listings");
+}
+
+// Fetch listing details
+const { data: listing, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .single();
+
+if (error || !listing) {
+    console.error("Error fetching listing or unauthorized:", error);
+    return Astro.redirect("/dashboard/my-listings");
+}
+---
+
+<DashboardLayout title={`Edit: ${listing.business_name}`}>
+    <div class="animate-fade-in-up">
+        <ListingForm client:load initialData={listing} />
+    </div>
+</DashboardLayout>

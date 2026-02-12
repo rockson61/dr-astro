@@ -219,9 +219,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ initialLeaders = [] }) => {
                 transition={{ duration: 0.6 }}
                 className="text-center mb-12 relative z-10"
             >
-                <span className="text-cyan-300 font-bold uppercase tracking-widest mb-2 block text-sm">Community</span>
+                <span className="text-primary-300 font-bold uppercase tracking-widest mb-2 block text-sm">Community</span>
                 <h2 className="text-4xl md:text-5xl font-heading uppercase text-white mb-4">
-                    Reputation <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-primary-400">Leaders</span>
+                    Reputation <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-300 to-white">Leaders</span>
                 </h2>
             </motion.div>
 
@@ -271,7 +271,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ initialLeaders = [] }) => {
                                 {/* User Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="text-lg font-bold text-white truncate group-hover:text-cyan-300 transition-colors">
+                                        <h3 className="text-lg font-bold text-white truncate group-hover:text-primary-300 transition-colors">
                                             {leader.first_name} {leader.last_name}
                                         </h3>
                                         {leader.is_verified && (
@@ -283,7 +283,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ initialLeaders = [] }) => {
                                         )}
                                     </div>
                                     {leader.specialty && (
-                                        <p className="text-sm text-cyan-100/60 truncate">
+                                        <p className="text-sm text-primary-100/60 truncate">
                                             {leader.specialty}
                                         </p>
                                     )}

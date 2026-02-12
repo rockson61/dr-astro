@@ -1,0 +1,41 @@
+import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
+import 'piccolore';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_C_IiUpen.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
+export { renderers } from '../../renderers.mjs';
+
+const $$Astro = createAstro("https://dentalreach.today");
+const prerender = false;
+const $$ = createComponent(async ($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  Astro2.self = $$;
+  const { slug } = Astro2.params;
+  const supabase = createSupabaseServerClient(Astro2);
+  if (!slug) {
+    return Astro2.redirect("/404");
+  }
+  const { data: listing, error } = await supabase.from("listings").select("*").eq("slug", slug).single();
+  if (error || !listing) {
+    return Astro2.redirect("/404");
+  }
+  const typedListing = listing;
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${typedListing.business_name} | Dental Directory`, "description": typedListing.description || `Book an appointment with ${typedListing.business_name}`, "image": typedListing.gallery?.[0] }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<div class="bg-neutral-900 text-white pt-10 pb-20"> <div class="container mx-auto px-4"> <div class="flex flex-col md:flex-row gap-6 items-start"> <div class="h-32 w-32 md:h-40 md:w-40 rounded-xl overflow-hidden bg-white shrink-0 border-4 border-white/20"> ${typedListing.gallery && typedListing.gallery[0] ? renderTemplate`<img${addAttribute(typedListing.gallery[0], "src")}${addAttribute(typedListing.business_name, "alt")} class="w-full h-full object-cover">` : renderTemplate`<div class="w-full h-full flex items-center justify-center text-gray-500 bg-gray-100">Logo</div>`} </div> <div class="flex-grow pt-2"> <div class="flex items-center gap-2 mb-2"> <span class="bg-white/20 px-2 py-0.5 rounded text-xs uppercase tracking-wider">${typedListing.type}</span> ${typedListing.is_verified && renderTemplate`<span class="bg-accent text-neutral-900 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider flex items-center gap-1"> <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+Verified
+</span>`} </div> <h1 class="text-3xl md:text-5xl font-serif font-bold mb-2">${typedListing.business_name}</h1> <div class="flex items-center gap-4 text-sm text-gray-300"> <span class="flex items-center gap-1"> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${typedListing.address_json?.city}, ${typedListing.address_json?.country} </span> <span class="flex items-center gap-1 text-yellow-400">
+★ ${typedListing.rating_avg} </span> </div> </div> <div class="shrink-0 flex gap-3"> <button class="btn-gold">Book Appointment</button> <button class="btn-primary border border-white/20 bg-white/10 hover:bg-white/20">Write Review</button> </div> </div> </div> </div> <div class="container mx-auto px-4 -mt-10 relative z-10 pb-20"> <div class="grid lg:grid-cols-3 gap-8"> <!-- Main Info --> <div class="lg:col-span-2 space-y-8"> <!-- Overview --> <div class="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-white/10 rounded-lg p-8 shadow-sm"> <h2 class="text-2xl font-bold mb-4 font-serif">About</h2> <div class="prose dark:prose-invert max-w-none"> <p>${typedListing.description}</p> </div> ${typedListing.amenities && renderTemplate`<div class="mt-8"> <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500 mb-4">Amenities</h3> <div class="flex flex-wrap gap-2"> ${typedListing.amenities.map((amenity) => renderTemplate`<span class="bg-gray-100 dark:bg-white/10 px-3 py-1 rounded-full text-sm">${amenity}</span>`)} </div> </div>`} </div> <!-- Gallery --> ${typedListing.gallery && typedListing.gallery.length > 0 && renderTemplate`<div class="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-white/10 rounded-lg p-8 shadow-sm"> <h2 class="text-2xl font-bold mb-4 font-serif">Gallery</h2> <div class="grid grid-cols-2 md:grid-cols-3 gap-4"> ${typedListing.gallery.map((img) => renderTemplate`<img${addAttribute(img, "src")} alt="Gallery" class="aspect-square object-cover rounded-lg hover:opacity-90 cursor-pointer">`)} </div> </div>`} </div> <!-- Sidebar Info --> <aside class="space-y-6"> <!-- Contact Card --> <div class="bg-white dark:bg-neutral-900 border border-gray-100 dark:border-white/10 rounded-lg p-6 shadow-sm"> <h3 class="font-bold text-lg mb-4">Contact Information</h3> <div class="space-y-4 text-sm"> ${typedListing.address_json?.street && renderTemplate`<div class="flex gap-3"> <svg class="w-5 h-5 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <p> ${typedListing.address_json.street}<br> ${typedListing.address_json.city}, ${typedListing.address_json.zip} </p> </div>`} ${typedListing.contact_phone && renderTemplate`<div class="flex gap-3 items-center"> <svg class="w-5 h-5 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> <a${addAttribute(`tel:${typedListing.contact_phone}`, "href")} class="hover:text-primary-600">${typedListing.contact_phone}</a> </div>`} ${typedListing.website && renderTemplate`<div class="flex gap-3 items-center"> <svg class="w-5 h-5 text-primary-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> <a${addAttribute(typedListing.website, "href")} target="_blank" rel="noopener noreferrer" class="hover:text-primary-600 break-all">Visit Website</a> </div>`} </div> </div> <!-- Map (Placeholder) --> <div class="bg-gray-200 dark:bg-white/5 rounded-lg h-64 flex items-center justify-center border border-gray-300 dark:border-white/10"> <span class="text-gray-500 text-sm">Map View Component</span> </div> </aside> </div> </div> ` })}`;
+}, "/Users/rockson61/Downloads/DR Astro/src/pages/directory/[...slug].astro", void 0);
+
+const $$file = "/Users/rockson61/Downloads/DR Astro/src/pages/directory/[...slug].astro";
+const $$url = "/directory/[...slug]";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: $$,
+  file: $$file,
+  prerender,
+  url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };
