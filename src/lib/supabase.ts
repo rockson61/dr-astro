@@ -10,8 +10,12 @@ export const createSupabaseBrowserClient = () => {
 
 // Server-side Supabase client (for Astro endpoints/middleware)
 export const createSupabaseServerClient = (context: { cookies: any }) => {
+    const supabaseUrl = import.meta.env.SSR
+        ? (process.env.INTERNAL_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL!)
+        : import.meta.env.PUBLIC_SUPABASE_URL!;
+
     return createServerClient(
-        import.meta.env.PUBLIC_SUPABASE_URL!,
+        supabaseUrl,
         import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
@@ -31,7 +35,12 @@ export const createSupabaseServerClient = (context: { cookies: any }) => {
 // Shared client for public data fetching (SSR/Client safe)
 import { createClient } from '@supabase/supabase-js';
 
+// Determine URL based on environment
+const supabaseUrl = import.meta.env.SSR
+    ? (process.env.INTERNAL_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL!)
+    : import.meta.env.PUBLIC_SUPABASE_URL!;
+
 export const supabase = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
+    supabaseUrl,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY!
 );
