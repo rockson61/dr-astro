@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, r as renderComponent, d as renderScript, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_C3fZcJHY.mjs';
+import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_DL6NAmdh.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
 export { renderers } from '../../renderers.mjs';
 
@@ -37,7 +37,7 @@ Status
 </th> <th class="text-right px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
 Actions
 </th> </tr> </thead> <tbody class="divide-y divide-gray-50"> ${products.map((product) => renderTemplate`<tr class="hover:bg-gray-50 transition-colors group"> <td class="px-8 py-5"> <div class="flex items-center gap-4"> <div class="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0"> <img${addAttribute(
-    product.images && product.images[0] || "/images/pattern.png",
+    product.images && product.images[0] || "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
     "src"
   )}${addAttribute(product.name, "alt")} class="w-full h-full object-cover"> </div> <div> <a${addAttribute(`/products/${product.slug}`, "href")} class="font-bold text-lg text-tuio-navy group-hover:text-tuio-red transition-colors block"> ${product.name} </a> <span class="text-xs text-gray-400">
 Added${" "} ${new Date(

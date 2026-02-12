@@ -1,6 +1,6 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
 import { s as supabase } from '../chunks/supabase_CFYPoMlB.mjs';
 export { renderers } from '../renderers.mjs';
 
@@ -51,7 +51,7 @@ Shop premium dental equipment, instruments, and supplies from
     cat === "All" ? "/products" : `/products?category=${cat.toLowerCase()}`,
     "href"
   )}${addAttribute(`px-6 py-2 rounded-full font-bold uppercase tracking-wide text-sm transition-all ${cat === "All" ? "bg-tuio-navy text-white" : "bg-white text-tuio-navy hover:bg-tuio-red hover:text-white"}`, "class")}> ${cat} </a>`)} </div> <!-- Products Grid --> <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"> ${products.map((product) => renderTemplate`<a${addAttribute(`/products/${product.slug}`, "href")} class="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all group block"> <div class="relative h-64 overflow-hidden"> <img${addAttribute(
-    Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : product.image_url || "/images/pattern.png",
+    Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : product.image_url || "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
     "src"
   )}${addAttribute(product.name, "alt")} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"> <span class="absolute top-4 left-4 bg-tuio-navy text-white px-4 py-1 rounded-full text-xs font-bold uppercase"> ${product.category} </span> </div> <div class="p-8"> <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest"> ${product.seller?.full_name || "Seller"} </p> <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-4 leading-tight group-hover:text-tuio-red transition-colors"> ${product.name} </h3> <div class="flex items-center justify-between"> <span class="text-2xl font-tuio text-tuio-red">
 $${product.price?.toLocaleString()} </span> <span class="w-12 h-12 bg-tuio-bg rounded-full flex items-center justify-center text-tuio-navy group-hover:bg-tuio-red group-hover:text-white transition-all">

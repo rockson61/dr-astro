@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, User, Activity, Camera, Save, Loader2, Plus, Trash2 } from 'lucide-react';
+import { FileText, User, Activity, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '../../lib/supabase';
 import GlassCard from '../ui/GlassCard';
 

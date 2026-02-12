@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Filter, Calendar, MapPin, Briefcase, User, FileText, ArrowRight, Store, Clock, X } from 'lucide-react';
+import { Search, Calendar, MapPin, Briefcase, User, FileText, ArrowRight, Store, Clock, X } from 'lucide-react';
 import { debounce } from '../../utils/debounce';
 
 interface SearchResult {

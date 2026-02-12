@@ -1,5 +1,4 @@
 import rss from '@astrojs/rss';
-import '../chunks/supabase_CFYPoMlB.mjs';
 import { createClient } from '@supabase/supabase-js';
 export { renderers } from '../renderers.mjs';
 

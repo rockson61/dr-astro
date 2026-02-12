@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
 import { User, Activity, FileText, CheckCircle } from 'lucide-react';
 export { renderers } from '../../renderers.mjs';
@@ -34,7 +34,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
       content: caseStudy.procedure_details
     }
   ];
-  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${caseStudy.title} | Clinical Case` }, { "default": async ($$result2) => renderTemplate`${maybeRenderHead()}<div class="bg-tuio-navy text-white pt-32 pb-20 relative overflow-hidden"> <div class="absolute inset-0 bg-[url('/images/pattern.png')] opacity-10"></div> <div class="container mx-auto px-4 relative z-10"> <span class="bg-tuio-red text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block">
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${caseStudy.title} | Clinical Case` }, { "default": async ($$result2) => renderTemplate`${maybeRenderHead()}<div class="bg-tuio-navy text-white pt-32 pb-20 relative overflow-hidden"> <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div> <div class="container mx-auto px-4 relative z-10"> <span class="bg-tuio-red text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4 inline-block">
 Clinical Case Study
 </span> <h1 class="text-3xl md:text-5xl font-tuio uppercase mb-6 leading-tight max-w-4xl"> ${caseStudy.title} </h1> <div class="flex items-center gap-6 mt-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 max-w-2xl"> <img${addAttribute(caseStudy.author?.avatar_url || `https://ui-avatars.com/api/?name=${caseStudy.author?.full_name}&background=random`, "src")} class="w-16 h-16 rounded-full border-2 border-tuio-red"> <div> <div class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">
 Presented By

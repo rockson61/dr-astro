@@ -20,6 +20,10 @@
 			"dest": "_render"
 		},
 		{
+			"src": "^/404/?$",
+			"dest": "_render"
+		},
+		{
 			"src": "^/about/?$",
 			"dest": "_render"
 		},
@@ -457,7 +461,7 @@
 		},
 		{
 			"src": "^/.*$",
-			"dest": "/404.html",
+			"dest": "_render",
 			"status": 404
 		}
 	]

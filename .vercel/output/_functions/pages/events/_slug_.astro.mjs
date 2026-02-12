@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute, ah as unescapeHTML } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
 import { s as supabase } from '../../chunks/supabase_CFYPoMlB.mjs';
 import { format } from 'date-fns';
 export { renderers } from '../../renderers.mjs';
@@ -35,7 +35,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
   const displayEvent = event || mockEvent;
   const startDate = new Date(displayEvent.start_date);
   const endDate = displayEvent.end_date ? new Date(displayEvent.end_date) : null;
-  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${displayEvent.title} | DentalReach Events` }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<section class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden"> <img${addAttribute(displayEvent.image_url || "/images/pattern.png", "src")}${addAttribute(displayEvent.title, "alt")} class="w-full h-full object-cover opacity-50"> <div class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/60 to-transparent"></div> <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16"> <div class="container mx-auto"> <span class="inline-block px-4 py-1 bg-tuio-red text-white rounded-full text-sm font-bold uppercase tracking-wider mb-4"> ${displayEvent.type || "Event"} </span> <h1 class="text-4xl md:text-6xl font-tuio uppercase text-white leading-tight max-w-4xl mb-4"> ${displayEvent.title} </h1> <div class="flex flex-wrap gap-6 text-white/80"> <span class="flex items-center gap-2">
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${displayEvent.title} | DentalReach Events` }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<section class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden"> <img${addAttribute(displayEvent.image_url || "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800", "src")}${addAttribute(displayEvent.title, "alt")} class="w-full h-full object-cover opacity-50"> <div class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/60 to-transparent"></div> <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16"> <div class="container mx-auto"> <span class="inline-block px-4 py-1 bg-tuio-red text-white rounded-full text-sm font-bold uppercase tracking-wider mb-4"> ${displayEvent.type || "Event"} </span> <h1 class="text-4xl md:text-6xl font-tuio uppercase text-white leading-tight max-w-4xl mb-4"> ${displayEvent.title} </h1> <div class="flex flex-wrap gap-6 text-white/80"> <span class="flex items-center gap-2">
 📅 ${format(startDate, "MMM d, yyyy")} ${endDate && ` - ${format(endDate, "MMM d, yyyy")}`} </span> <span class="flex items-center gap-2">
 📍 ${displayEvent.location} </span> ${displayEvent.is_virtual && renderTemplate`<span class="flex items-center gap-2">
 💻 Virtual Event

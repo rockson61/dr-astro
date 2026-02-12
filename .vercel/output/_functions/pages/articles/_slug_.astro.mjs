@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, m as maybeRenderHead, b as addAttribute, r as renderComponent, ak as Fragment, a as renderTemplate, d as renderScript, ah as unescapeHTML } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
 import 'clsx';
 import { L as LikeButton } from '../../chunks/LikeButton_ahGK-Lmi.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
@@ -429,7 +429,7 @@ const $$slug = createComponent(async ($$result, $$props, $$slots) => {
   const wordCount = (displayArticle.content || displayArticle.excerpt || "").split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
   const pageUrl = Astro2.url.href;
-  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${displayArticle.title} | DentalReach` }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<article> <!-- Hero Image --> <div class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden"> <img${addAttribute(displayArticle.image_url || "/images/pattern.png", "src")}${addAttribute(displayArticle.title, "alt")} class="w-full h-full object-cover opacity-60"> <div class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/50 to-transparent"></div> <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16"> <div class="container mx-auto"> <!-- Breadcrumbs --> ${renderComponent($$result2, "Breadcrumbs", $$Breadcrumbs, { "items": [
+  return renderTemplate`${renderComponent($$result, "BaseLayout", $$BaseLayout, { "title": `${displayArticle.title} | DentalReach` }, { "default": async ($$result2) => renderTemplate`  ${maybeRenderHead()}<article> <!-- Hero Image --> <div class="relative h-[50vh] md:h-[60vh] bg-tuio-navy overflow-hidden"> <img${addAttribute(displayArticle.image_url || "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800", "src")}${addAttribute(displayArticle.title, "alt")} class="w-full h-full object-cover opacity-60"> <div class="absolute inset-0 bg-gradient-to-t from-tuio-navy via-tuio-navy/50 to-transparent"></div> <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16"> <div class="container mx-auto"> <!-- Breadcrumbs --> ${renderComponent($$result2, "Breadcrumbs", $$Breadcrumbs, { "items": [
     { label: "Articles", href: "/articles" },
     {
       label: displayArticle.category?.name || "Article",

@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, a as renderTemplate, r as renderComponent, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_C3fZcJHY.mjs';
+import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_DL6NAmdh.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
 import { format } from 'date-fns';
 export { renderers } from '../../renderers.mjs';
@@ -40,7 +40,7 @@ Saved Articles
 </h1> <p class="text-gray-500">Your curated reading list.</p> </div> ${savedArticles && savedArticles.length > 0 ? renderTemplate`<div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"> ${savedArticles.map((item) => {
     const article = item.article;
     return renderTemplate`<div class="bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col h-full relative">  <button class="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm text-tuio-navy hover:text-red-500 hover:bg-white transition-colors" title="Remove from saved"${addAttribute(`removeBookmark('${item.article.id}', this)`, "onclick")}> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"> <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path> </svg> </button> <a${addAttribute(`/articles/${article.slug}`, "href")} class="block h-48 overflow-hidden relative"> <img${addAttribute(
-      article.image_url || "/images/pattern.png",
+      article.image_url || "https://images.pexels.com/photos/3845625/pexels-photo-3845625.jpeg?auto=compress&cs=tinysrgb&w=800",
       "src"
     )}${addAttribute(article.title, "alt")} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"> <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div> </a> <div class="p-6 flex flex-col flex-grow"> <div class="flex items-center gap-2 mb-3"> <span class="text-xs font-bold uppercase tracking-wider text-tuio-red bg-tuio-red/5 px-2 py-1 rounded-full"> ${article.category?.name || "Article"} </span> <span class="text-xs text-gray-400 ml-auto">
 Saved${" "} ${format(

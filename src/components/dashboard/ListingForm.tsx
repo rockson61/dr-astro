@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, MapPin, Globe, FileText, Phone, Camera, Loader2, Check } from 'lucide-react';
+import { Store, MapPin, Globe, FileText, Phone, Loader2, Check } from 'lucide-react';
 import { createSupabaseBrowserClient } from '../../lib/supabase';
 import GlassCard from '../ui/GlassCard';
 
@@ -274,8 +274,8 @@ export default function ListingForm({ initialData }: ListingFormProps) {
                                         key={service}
                                         onClick={() => handleServiceToggle(service)}
                                         className={`px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${formData.services.includes(service)
-                                                ? 'bg-tuio-navy text-white border-tuio-navy shadow-md'
-                                                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                                            ? 'bg-tuio-navy text-white border-tuio-navy shadow-md'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
                                             }`}
                                     >
                                         {formData.services.includes(service) && <Check className="w-3 h-3" />}

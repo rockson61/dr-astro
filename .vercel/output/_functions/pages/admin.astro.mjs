@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
 import { c as createSupabaseServerClient } from '../chunks/supabase_CFYPoMlB.mjs';
 export { renderers } from '../renderers.mjs';
 

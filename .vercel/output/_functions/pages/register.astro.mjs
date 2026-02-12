@@ -1,6 +1,6 @@
 import { c as createComponent, r as renderComponent, d as renderScript, a as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
 export { renderers } from '../renderers.mjs';
 
 const $$Register = createComponent(($$result, $$props, $$slots) => {

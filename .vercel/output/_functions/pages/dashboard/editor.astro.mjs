@@ -1,6 +1,6 @@
 import { e as createAstro, c as createComponent, a as renderTemplate, d as renderScript, r as renderComponent, m as maybeRenderHead, b as addAttribute, ak as Fragment } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_C3fZcJHY.mjs';
+import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_DL6NAmdh.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
 export { renderers } from '../../renderers.mjs';
 

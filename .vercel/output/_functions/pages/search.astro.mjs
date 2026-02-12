@@ -1,6 +1,6 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_C_IiUpen.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
 import { jsxs, jsx } from 'react/jsx-runtime';
 import { useState, useEffect, useCallback } from 'react';
 import { Search, X, Clock, MapPin, ArrowRight, Store, User, Briefcase, Calendar, FileText } from 'lucide-react';
