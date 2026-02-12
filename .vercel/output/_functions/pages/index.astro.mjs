@@ -467,53 +467,54 @@ const $$Index = createComponent(async ($$result, $$props, $$slots) => {
     if (artData) articles = artData;
     const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjU5NDI4ODYsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.QD1T3hz_0RBrnt-juLttpON4cdDyl1trbrV0zf7B6Ro";
     const publicUrl = "http://api.db.dentaloffice.io";
-    if (!serviceRoleKey || !publicUrl) ;
-    const adminSupabase = createClient(publicUrl, serviceRoleKey);
-    const { data: viewData, error: viewError } = await adminSupabase.from("profile_composite_reputation").select(
-      `
+    if (!serviceRoleKey || !publicUrl) ; else {
+      const adminSupabase = createClient(publicUrl, serviceRoleKey);
+      const { data: viewData, error: viewError } = await adminSupabase.from("profile_composite_reputation").select(
+        `
           profile_id,
           reputation,
           profiles:profile_id (
             first_name, last_name, avatar_url, specialty, is_verified, slug
           )
         `
-    ).order("reputation", { ascending: false }).limit(5);
-    if (!viewError && viewData) {
-      leaderboardData = viewData.map((item) => {
-        const profile = Array.isArray(item.profiles) ? item.profiles[0] : item.profiles;
-        return {
-          profile_id: item.profile_id,
-          reputation: item.reputation,
-          first_name: profile?.first_name || "",
-          last_name: profile?.last_name || "",
-          full_name: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : profile?.first_name || "Anonymous User",
-          avatar_url: profile?.avatar_url,
-          specialty: profile?.specialty,
-          is_verified: profile?.is_verified,
-          slug: profile?.slug
-        };
-      });
-    } else {
-      console.log("View failed, falling back to manual fetch");
-      const { data: profiles, error: manualError } = await adminSupabase.from("profiles").select("*, slug").limit(50);
-      if (manualError) {
-        console.error(
-          "Manual fetch failed:",
-          JSON.stringify(manualError, null, 2)
-        );
-      }
-      if (profiles) {
-        leaderboardData = profiles.map((p) => ({
-          profile_id: p.id,
-          reputation: p.reputation_score || 0,
-          first_name: p.first_name || "Dr.",
-          last_name: p.last_name || p.full_name?.split(" ").pop() || "User",
-          full_name: p.full_name,
-          avatar_url: p.avatar_url,
-          specialty: p.specialty,
-          is_verified: p.is_verified,
-          slug: p.slug
-        })).sort((a, b) => b.reputation - a.reputation).slice(0, 5);
+      ).order("reputation", { ascending: false }).limit(5);
+      if (!viewError && viewData) {
+        leaderboardData = viewData.map((item) => {
+          const profile = Array.isArray(item.profiles) ? item.profiles[0] : item.profiles;
+          return {
+            profile_id: item.profile_id,
+            reputation: item.reputation,
+            first_name: profile?.first_name || "",
+            last_name: profile?.last_name || "",
+            full_name: profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : profile?.first_name || "Anonymous User",
+            avatar_url: profile?.avatar_url,
+            specialty: profile?.specialty,
+            is_verified: profile?.is_verified,
+            slug: profile?.slug
+          };
+        });
+      } else {
+        console.log("View failed, falling back to manual fetch");
+        const { data: profiles, error: manualError } = await adminSupabase.from("profiles").select("*, slug").limit(50);
+        if (manualError) {
+          console.error(
+            "Manual fetch failed:",
+            JSON.stringify(manualError, null, 2)
+          );
+        }
+        if (profiles) {
+          leaderboardData = profiles.map((p) => ({
+            profile_id: p.id,
+            reputation: p.reputation_score || 0,
+            first_name: p.first_name || "Dr.",
+            last_name: p.last_name || p.full_name?.split(" ").pop() || "User",
+            full_name: p.full_name,
+            avatar_url: p.avatar_url,
+            specialty: p.specialty,
+            is_verified: p.is_verified,
+            slug: p.slug
+          })).sort((a, b) => b.reputation - a.reputation).slice(0, 5);
+        }
       }
     }
   } catch (e) {
