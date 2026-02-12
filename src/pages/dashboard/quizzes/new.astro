@@ -1,0 +1,33 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import QuizForm from "../../../components/dashboard/QuizForm";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Check role (Only admins/editors/super_admins)
+const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+const allowedRoles = ["admin", "super_admin", "editor"];
+if (!profile || !allowedRoles.includes(profile.role)) {
+    return Astro.redirect("/dashboard");
+}
+---
+
+<DashboardLayout title="Create CE Quiz">
+    <div class="animate-fade-in-up">
+        <QuizForm client:load />
+    </div>
+</DashboardLayout>

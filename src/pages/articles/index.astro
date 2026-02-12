@@ -8,6 +8,7 @@ export const prerender = false;
 let articles: any[] = [];
 let categories: any[] = [];
 
+try {
     const url = new URL(Astro.request.url);
     const categoryFilter = url.searchParams.get("category");
     const tagFilter = url.searchParams.get("tag");
@@ -43,7 +44,7 @@ let categories: any[] = [];
     }
 
     const { data: articleData } = await query.limit(20);
-    
+
     if (articleData) articles = articleData;
 
     // Fetch categories for filtering
@@ -211,7 +212,11 @@ const displayArticles =
                     <div class="flex justify-center mb-8">
                         <div class="inline-flex items-center gap-2 bg-tuio-navy text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
                             <span>Tag: #{tagFilter}</span>
-                            <a href="/articles" class="hover:text-tuio-red transition-colors ml-2" aria-label="Remove filter">
+                            <a
+                                href="/articles"
+                                class="hover:text-tuio-red transition-colors ml-2"
+                                aria-label="Remove filter"
+                            >
                                 ✕
                             </a>
                         </div>

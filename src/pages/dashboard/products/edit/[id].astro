@@ -6,11 +6,13 @@ export const prerender = false;
 
 const { id } = Astro.params;
 const supabase = createSupabaseServerClient(Astro);
-
 const {
     data: { user },
 } = await supabase.auth.getUser();
-if (!user) return Astro.redirect("/login");
+
+if (!user) {
+    return Astro.redirect("/login");
+}
 
 // Fetch product
 const { data: product, error } = await supabase
@@ -19,11 +21,14 @@ const { data: product, error } = await supabase
     .eq("id", id)
     .single();
 
-if (error || !product) return Astro.redirect("/404");
+if (error || !product) {
+    return Astro.redirect("/dashboard/my-products");
+}
 
 // Verify ownership
-if (product.seller_id !== user.id)
+if (product.seller_id !== user.id) {
     return Astro.redirect("/dashboard/my-products");
+}
 
 const categories = [
     "Equipment",
@@ -35,18 +40,18 @@ const categories = [
 ];
 ---
 
-<DashboardLayout title="Edit Product">
+<DashboardLayout title={`Edit ${product.name}`}>
     <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="mb-10 flex items-center justify-between">
             <div>
-                <h2 class="text-3xl font-heading uppercase text-primary-900">
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
                     Edit Product
                 </h2>
                 <p class="text-gray-500 mt-1">Update your product details.</p>
             </div>
             <a
                 href="/dashboard/my-products"
-                class="text-gray-400 font-bold hover:text-primary-600 transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
+                class="text-gray-400 font-bold hover:text-tuio-red transition-colors flex items-center gap-2 text-sm uppercase tracking-wide"
             >
                 ← Back to My Products
             </a>
@@ -54,12 +59,12 @@ const categories = [
 
         <form class="space-y-8" data-product-id={product.id}>
             <!-- Basic Info -->
-            <div class="glass-card bg-white p-8">
+            <div class="tuio-card">
                 <div
                     class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
                 >
                     <span class="text-2xl">📦</span>
-                    <h3 class="font-heading text-xl uppercase text-primary-900">
+                    <h3 class="font-tuio text-xl uppercase text-tuio-navy">
                         Product Details
                     </h3>
                 </div>
@@ -75,7 +80,7 @@ const categories = [
                             name="name"
                             value={product.name}
                             required
-                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-bold text-lg focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all placeholder:font-normal"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-bold text-lg focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all placeholder:font-normal"
                         />
                     </div>
 
@@ -88,7 +93,7 @@ const categories = [
                             <div class="relative">
                                 <select
                                     name="category"
-                                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none appearance-none cursor-pointer"
+                                    class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer"
                                 >
                                     {
                                         categories.map((cat) => (
@@ -122,7 +127,7 @@ const categories = [
                                 min="0"
                                 step="0.01"
                                 required
-                                class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-bold focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all"
+                                class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-bold focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all"
                             />
                         </div>
                     </div>
@@ -136,7 +141,7 @@ const categories = [
                             name="description"
                             rows="5"
                             required
-                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none resize-none"
+                            class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none resize-none"
                             >{product.description}</textarea
                         >
                     </div>
@@ -149,7 +154,7 @@ const categories = [
                         <div class="relative">
                             <select
                                 name="status"
-                                class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none appearance-none cursor-pointer"
+                                class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none appearance-none cursor-pointer"
                             >
                                 <option
                                     value="active"
@@ -178,12 +183,12 @@ const categories = [
             </div>
 
             <!-- Image Upload -->
-            <div class="glass-card bg-white p-8">
+            <div class="tuio-card">
                 <div
                     class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100"
                 >
                     <span class="text-2xl">📸</span>
-                    <h3 class="font-heading text-xl uppercase text-primary-900">
+                    <h3 class="font-tuio text-xl uppercase text-tuio-navy">
                         Product Image
                     </h3>
                 </div>
@@ -196,7 +201,8 @@ const categories = [
                         type="url"
                         name="image_url"
                         value={product.images?.[0] || ""}
-                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-primary-900 font-medium focus:ring-4 focus:ring-primary-600/20 focus:border-primary-600 focus:outline-none transition-all"
+                        class="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50/50 text-tuio-navy font-medium focus:ring-4 focus:ring-tuio-red/20 focus:border-tuio-red focus:outline-none transition-all"
+                        placeholder="https://example.com/image.jpg"
                     />
                 </div>
             </div>
@@ -207,7 +213,7 @@ const categories = [
             >
                 <button
                     type="submit"
-                    class="px-10 py-4 bg-primary-600 text-white rounded-full font-bold uppercase tracking-wide hover:bg-primary-900 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                    class="px-10 py-4 bg-tuio-navy text-white rounded-full font-bold uppercase tracking-wide hover:bg-tuio-red transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                 >
                     Save Changes
                 </button>
@@ -225,13 +231,12 @@ const categories = [
 
     form?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (!submitBtn) return;
+        if (!submitBtn || !form.dataset.productId) return;
 
         const originalText = submitBtn.textContent;
         submitBtn.textContent = "Saving...";
         (submitBtn as HTMLButtonElement).disabled = true;
 
-        const productId = form.getAttribute("data-product-id");
         const formData = new FormData(form);
         const name = formData.get("name") as string;
         const price = formData.get("price");
@@ -254,11 +259,10 @@ const categories = [
                     images,
                     updated_at: new Date().toISOString(),
                 })
-                .eq("id", productId);
+                .eq("id", form.dataset.productId);
 
             if (error) throw error;
 
-            alert("Product updated successfully");
             window.location.href = "/dashboard/my-products";
         } catch (err: any) {
             console.error(err);

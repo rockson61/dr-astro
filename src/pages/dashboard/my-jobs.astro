@@ -16,16 +16,9 @@ if (!user) {
 // Fetch user's jobs
 const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, title, slug, is_active, location, created_at, company_name")
-    .eq("employer_id", user.id)
+    .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
-
-// Note: If 'jobs' table uses 'owner_id' or 'profile_id', this query might need adjustment.
-// Based on 'listings' using 'owner_id', 'jobs' might act similarly, but 'seed-database.ts' didn't explicitly show 'user_id' column, it showed 'is_active'.
-// I will assume 'user_id' for now as is standard, but if it fails I'll check schema.
-// Actually, looking at seed script, jobs weren't seeded with user_id! They were mock data in the seed script too?
-// No, I see 'articles' has 'author_id'.
-// Let's assume 'user_id' for jobs. If column error occurs, I will fix.
 ---
 
 <DashboardLayout title="My Jobs">
@@ -35,10 +28,10 @@ const { data: jobs } = await supabase
         >
             <div>
                 <h2 class="text-3xl font-tuio uppercase text-tuio-navy">
-                    My Jobs
+                    My Job Listings
                 </h2>
                 <p class="text-gray-500 mt-1">
-                    Manage your job postings and applicants.
+                    Manage your job posts and track applicants.
                 </p>
             </div>
             <a
@@ -51,65 +44,117 @@ const { data: jobs } = await supabase
 
         {
             jobs && jobs.length > 0 ? (
-                <div class="grid md:grid-cols-2 gap-6">
-                    {jobs.map((job: any) => (
-                        <div class="tuio-card group !p-6 hover:border-tuio-red/50 border border-transparent transition-all">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-xl font-bold text-tuio-navy mb-1 group-hover:text-tuio-red transition-colors">
-                                        <a href={`/jobs/${job.slug}`}>
-                                            {job.title}
-                                        </a>
-                                    </h3>
-                                    <p class="text-sm text-gray-500 font-medium">
-                                        {job.company_name}
-                                    </p>
-                                </div>
-                                <span
-                                    class={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${job.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                                >
-                                    {job.is_active ? "Active" : "Inactive"}
-                                </span>
-                            </div>
-
-                            <div class="flex items-center gap-4 text-sm text-gray-400 font-bold uppercase tracking-wider mb-6">
-                                <span>📍 {job.location}</span>
-                                <span>
-                                    📅{" "}
-                                    {new Date(
-                                        job.created_at,
-                                    ).toLocaleDateString()}
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <a
-                                    href={`/jobs/${job.slug}`}
-                                    class="text-center py-3 border border-gray-200 rounded-xl text-gray-600 hover:border-tuio-red hover:text-tuio-red transition-all text-sm font-bold uppercase tracking-wide"
-                                >
-                                    View
-                                </a>
-                                <a
-                                    href={`/dashboard/jobs/edit/${job.id}`}
-                                    class="text-center py-3 bg-gray-50 rounded-xl text-tuio-navy hover:bg-tuio-navy hover:text-white transition-all text-sm font-bold uppercase tracking-wide"
-                                >
-                                    Edit
-                                </a>
-                            </div>
-                        </div>
-                    ))}
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50/50 border-b border-gray-100">
+                                <tr>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Job Title
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Location
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Status
+                                    </th>
+                                    <th class="text-left px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Posted
+                                    </th>
+                                    <th class="text-right px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {jobs.map((job: any) => (
+                                    <tr class="hover:bg-gray-50 transition-colors group">
+                                        <td class="px-8 py-5">
+                                            <a
+                                                href={`/jobs/${job.slug}`}
+                                                class="font-bold text-lg text-tuio-navy group-hover:text-tuio-red transition-colors block"
+                                            >
+                                                {job.title}
+                                            </a>
+                                            <span class="text-xs text-gray-500 font-medium">
+                                                {job.company_name}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <span class="text-sm text-gray-600 flex items-center gap-1">
+                                                📍 {job.location}
+                                            </span>
+                                            <span
+                                                class={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${job.type === "full_time" ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-600"}`}
+                                            >
+                                                {job.type?.replace("_", " ")}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <span
+                                                class={`text-xs font-bold uppercase px-3 py-1.5 rounded-full tracking-wide ${job.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                                            >
+                                                {job.is_active
+                                                    ? "Active"
+                                                    : "Closed"}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5 text-sm text-gray-500">
+                                            {new Date(
+                                                job.created_at,
+                                            ).toLocaleDateString()}
+                                        </td>
+                                        <td class="px-8 py-5 text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <button
+                                                    data-toggle-btn
+                                                    data-id={job.id}
+                                                    data-active={String(
+                                                        job.is_active,
+                                                    )}
+                                                    class="px-3 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 transition-all bg-white"
+                                                    title={
+                                                        job.is_active
+                                                            ? "Close Job"
+                                                            : "Reopen Job"
+                                                    }
+                                                >
+                                                    {job.is_active
+                                                        ? "Close"
+                                                        : "Reopen"}
+                                                </button>
+                                                <a
+                                                    href={`/dashboard/jobs/edit/${job.id}`}
+                                                    class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-tuio-red hover:text-tuio-red transition-all bg-white"
+                                                >
+                                                    Edit
+                                                </a>
+                                                <button
+                                                    data-delete-btn
+                                                    data-id={job.id}
+                                                    class="px-3 py-2 border border-gray-200 rounded-xl text-xs font-bold text-red-400 hover:bg-red-50 hover:border-red-200 transition-all bg-white"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             ) : (
-                <div class="tuio-card py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50/30">
+                <div class="bg-white rounded-3xl py-20 text-center flex flex-col items-center justify-center border-2 border-dashed border-gray-200 bg-gray-50/30">
                     <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl mb-6 shadow-sm">
                         💼
                     </div>
                     <h3 class="text-2xl font-tuio uppercase text-tuio-navy mb-2">
-                        No jobs posted yet
+                        No jobs posted
                     </h3>
                     <p class="text-gray-500 max-w-md mb-8">
-                        Looking for talent? Post a job listing to find the best
-                        dental professionals.
+                        You haven't posted any job openings yet. Find the
+                        perfect candidate for your practice.
                     </p>
                     <a
                         href="/dashboard/jobs/new"
@@ -122,3 +167,56 @@ const { data: jobs } = await supabase
         }
     </div>
 </DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../lib/supabase";
+
+    const supabase = createSupabaseBrowserClient();
+
+    // Handle Delete
+    const deleteBtns = document.querySelectorAll("[data-delete-btn]");
+    deleteBtns.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            if (!confirm("Are you sure you want to delete this job posting?"))
+                return;
+
+            const id = (btn as HTMLButtonElement).dataset.id;
+            const row = btn.closest("tr");
+
+            try {
+                const { error } = await supabase
+                    .from("jobs")
+                    .delete()
+                    .eq("id", id);
+                if (error) throw error;
+                row?.remove();
+                if (document.querySelectorAll("tbody tr").length === 0)
+                    window.location.reload();
+            } catch (err: any) {
+                alert("Error deleting job: " + err.message);
+            }
+        });
+    });
+
+    // Handle Toggle Status
+    const toggleBtns = document.querySelectorAll("[data-toggle-btn]");
+    toggleBtns.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            const id = (btn as HTMLButtonElement).dataset.id;
+            const isActive =
+                (btn as HTMLButtonElement).dataset.active === "true";
+
+            try {
+                const { error } = await supabase
+                    .from("jobs")
+                    .update({ is_active: !isActive })
+                    .eq("id", id);
+
+                if (error) throw error;
+                window.location.reload();
+            } catch (err: any) {
+                alert("Error updating status: " + err.message);
+            }
+        });
+    });
+</script>

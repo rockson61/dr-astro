@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BackToTop from "../components/BackToTop.astro";
 import Toast from "../components/Toast.astro";
+import InstallPrompt from "../components/pwa/InstallPrompt";
 
 interface Props {
 	title: string;
@@ -28,6 +29,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/png" href="/images/logo-mini.png" />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<meta name="theme-color" content="#0F172A" />
+		<link rel="apple-touch-icon" href="/icons/pwa-192x192.png" />
 
 		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -67,14 +71,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 	<body
 		class="flex flex-col min-h-screen bg-white text-neutral-900 font-body"
 	>
+		<a
+			href="#main-content"
+			class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-primary-600 text-white px-4 py-2 rounded-md font-bold shadow-lg"
+		>
+			Skip to content
+		</a>
 		<Header currentPath={Astro.url.pathname} />
 
-		<main class="flex-grow">
+		<main id="main-content" class="flex-grow">
 			<slot />
 		</main>
 
 		<Footer />
 		<BackToTop />
 		<Toast />
+		<InstallPrompt client:load />
 	</body>
 </html>

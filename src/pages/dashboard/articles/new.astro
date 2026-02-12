@@ -373,29 +373,34 @@ Write your article here using Markdown..."
             } = await supabase.auth.getUser();
             if (!user) throw new Error("Not authenticated");
 
-            // Generate unique slug
-            const slug = `${slugify(title)}-${Math.random().toString(36).substring(2, 7)}`;
+            // Handle Image Upload (Mock logic as actual upload needs storage)
+            // Ideally we upload to Supabase Storage first, get URL, then send here.
+            // For MVP, if image is selected, we might skip it or handle it if we had storage logic.
+            // Let's passed null for now as the original script didn't implement upload logic either.
+            let imageUrl = null;
 
-            const { error } = await supabase.from("articles").insert({
-                title,
-                slug,
-                category_id,
-                // category: 'legacy_col', // Optional if you still use text column
-                content,
-                excerpt,
-                tags,
-                tags,
-                doi,
-                references,
-                issue_id,
-                author_id: user.id,
-                author_id: user.id,
-                status: "published", // Or 'draft' depending on logic
-                is_approved: true, // Autoapprove for trusted users?
-                created_at: new Date().toISOString(),
+            const response = await fetch("/api/articles/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    category_id,
+                    type,
+                    excerpt,
+                    content,
+                    tags,
+                    doi,
+                    references,
+                    issue_id,
+                    image: imageUrl,
+                }),
             });
 
-            if (error) throw error;
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error);
+            }
 
             // Success
             window.location.href = "/dashboard/my-articles";

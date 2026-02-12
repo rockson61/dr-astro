@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import ProfileReviewForm from "../../components/profile/ProfileReviewForm";
 import ProfileReviewsList from "../../components/profile/ProfileReviewsList";
 import FollowButton from "../../components/social/FollowButton";
+import ReputationBadge from "../../components/gamification/ReputationBadge";
 
 export const prerender = false;
 
@@ -124,6 +125,13 @@ const stats = [
                     <p class="text-cyan-400 font-bold text-lg mb-2">
                         {profile.title}
                     </p>
+                    <div class="mb-3">
+                        <ReputationBadge
+                            client:visible
+                            points={profile.reputation_points || 0}
+                            badges={profile.badges || []}
+                        />
+                    </div>
                     <p class="text-gray-400">
                         📍 {profile.location || "Location not specified"}
                     </p>
@@ -133,9 +141,8 @@ const stats = [
                 <div class="shrink-0">
                     <FollowButton
                         client:load
-                        profileId={profile.id}
-                        initialIsFollowing={isFollowing}
-                        isOwnProfile={user?.id === profile.id}
+                        targetUserId={profile.id}
+                        targetUserName={profile.full_name}
                     />
                 </div>
             </div>

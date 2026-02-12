@@ -1,0 +1,192 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) return Astro.redirect("/login");
+
+// Check Moderator Role
+const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+if (
+    profile?.role !== "moderator" &&
+    profile?.role !== "admin" &&
+    profile?.role !== "super_admin"
+) {
+    return Astro.redirect("/dashboard");
+}
+
+// Params
+const view = Astro.url.searchParams.get("view") || "pending"; // pending, approved, flagged
+
+// Fetch Comments
+let query = supabase
+    .from("comments")
+    .select(
+        "*, author:profiles(full_name, avatar_url), article:articles(title, slug)",
+    )
+    .order("created_at", { ascending: false });
+
+if (view === "pending") {
+    query = query.eq("is_approved", false);
+} else if (view === "approved") {
+    query = query.eq("is_approved", true);
+} // flagged logic would go here if column exists
+
+const { data: comments } = await query;
+
+const tabs = [
+    { id: "pending", label: "Pending Approval" },
+    { id: "approved", label: "Approved History" },
+];
+---
+
+<DashboardLayout title="Moderation Queue">
+    <div class="animate-fade-in space-y-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-3xl font-tuio uppercase text-tuio-navy mb-2">
+                    Moderation Queue
+                </h2>
+                <p class="text-gray-500">
+                    Review community comments and reports.
+                </p>
+            </div>
+        </div>
+
+        {/* Tabs */}
+        <div class="flex gap-2 overflow-x-auto pb-2 border-b border-gray-100">
+            {
+                tabs.map((tab) => (
+                    <a
+                        href={`?view=${tab.id}`}
+                        class={`px-6 py-3 rounded-t-2xl font-bold text-sm transition-all whitespace-nowrap ${
+                            view === tab.id
+                                ? "bg-white text-tuio-navy border-t border-x border-gray-100 shadow-sm translate-y-[1px]"
+                                : "text-gray-400 hover:text-tuio-navy hover:bg-gray-100/50"
+                        }`}
+                    >
+                        {tab.label}
+                    </a>
+                ))
+            }
+        </div>
+
+        {/* Comment List */}
+        <div
+            class="bg-white rounded-b-3xl rounded-tr-3xl shadow-sm border border-gray-100 min-h-[400px]"
+        >
+            {
+                comments && comments.length > 0 ? (
+                    <ul class="divide-y divide-gray-50">
+                        {comments.map((comment: any) => (
+                            <li class="p-6 hover:bg-gray-50 transition-colors group">
+                                <div class="flex gap-4">
+                                    <img
+                                        src={
+                                            comment.author?.avatar_url ||
+                                            `https://ui-avatars.com/api/?name=${comment.author?.full_name}&background=random`
+                                        }
+                                        class="w-10 h-10 rounded-full object-cover shrink-0"
+                                        alt="User"
+                                    />
+                                    <div class="flex-grow">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="font-bold text-tuio-navy">
+                                                {comment.author?.full_name}
+                                            </span>
+                                            <span class="text-xs text-gray-400">
+                                                on{" "}
+                                                <a
+                                                    href={`/articles/${comment.article?.slug}`}
+                                                    class="underline hover:text-tuio-red"
+                                                >
+                                                    {comment.article?.title}
+                                                </a>
+                                            </span>
+                                            <span class="text-xs text-gray-400">
+                                                •{" "}
+                                                {new Date(
+                                                    comment.created_at,
+                                                ).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <p class="text-gray-600 my-2 bg-gray-50 p-3 rounded-xl border border-gray-100 italic">
+                                            "{comment.content}"
+                                        </p>
+
+                                        <div class="flex gap-2 mt-3">
+                                            {view === "pending" && (
+                                                <button
+                                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-green-200"
+                                                    onclick={`approveComment('${comment.id}')`}
+                                                >
+                                                    Approve
+                                                </button>
+                                            )}
+                                            <button
+                                                class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-500 rounded-xl text-xs font-bold transition-colors"
+                                                onclick={`deleteComment('${comment.id}')`}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+                        <span class="text-4xl mb-4">✅</span>
+                        <p>All caught up! No comments to review.</p>
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</DashboardLayout>
+
+<script>
+    import { createSupabaseBrowserClient } from "../../../lib/supabase";
+    const supabase = createSupabaseBrowserClient();
+
+    window.approveComment = async (id: string) => {
+        try {
+            const { error } = await supabase
+                .from("comments")
+                .update({ is_approved: true })
+                .eq("id", id);
+
+            if (error) throw error;
+            window.location.reload();
+        } catch (e: any) {
+            alert("Error approving comment: " + e.message);
+        }
+    };
+
+    window.deleteComment = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this comment?")) return;
+        try {
+            const { error } = await supabase
+                .from("comments")
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+            window.location.reload();
+        } catch (e: any) {
+            alert("Error deleting comment: " + e.message);
+        }
+    };
+</script>

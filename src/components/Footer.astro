@@ -1,5 +1,6 @@
 ---
 const currentYear = new Date().getFullYear();
+import NewsletterForm from "./newsletter/NewsletterForm";
 
 const footerSections = [
     {
@@ -83,75 +84,14 @@ const socialLinks = [
 
                 <!-- Newsletter -->
                 <div
-                    class="bg-white/5 rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
+                    class="bg-white/5 rounded-[24px] p-6 border border-white/10 backdrop-blur-sm"
                 >
                     <h4
                         class="font-heading font-bold text-lg uppercase mb-4 text-cyan-200"
                     >
                         Stay Updated
                     </h4>
-                    <form id="footer-newsletter-form" class="flex gap-2">
-                        <input
-                            name="email"
-                            type="email"
-                            required
-                            placeholder="Your email"
-                            class="flex-grow px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-cyan-200/50 focus:ring-2 focus:ring-primary-500 focus:outline-none text-sm transition-all"
-                        />
-                        <button
-                            type="submit"
-                            class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center hover:bg-white hover:text-primary-600 transition-all shrink-0 shadow-lg"
-                        >
-                            →
-                        </button>
-                    </form>
-                    <div
-                        id="footer-newsletter-response"
-                        class="mt-2 text-xs font-bold text-accent hidden"
-                    >
-                    </div>
-
-                    <script>
-                        const footerForm = document.getElementById(
-                            "footer-newsletter-form",
-                        ) as HTMLFormElement;
-                        const footerResponse = document.getElementById(
-                            "footer-newsletter-response",
-                        );
-
-                        footerForm?.addEventListener("submit", async (e) => {
-                            e.preventDefault();
-                            const btn = footerForm.querySelector("button");
-                            if (btn) btn.disabled = true;
-
-                            try {
-                                const formData = new FormData(footerForm);
-                                const res = await fetch("/api/newsletter", {
-                                    method: "POST",
-                                    body: formData,
-                                });
-                                const data = await res.json();
-
-                                if (footerResponse) {
-                                    footerResponse.classList.remove("hidden");
-                                    footerResponse.textContent =
-                                        data.message || data.error;
-                                    if (res.ok) {
-                                        footerForm.reset();
-                                        if (window.showToast)
-                                            window.showToast(
-                                                "Subscribed to newsletter!",
-                                                "success",
-                                            );
-                                    }
-                                }
-                            } catch (err) {
-                                console.error(err);
-                            } finally {
-                                if (btn) btn.disabled = false;
-                            }
-                        });
-                    </script>
+                    <NewsletterForm client:visible />
                 </div>
             </div>
 

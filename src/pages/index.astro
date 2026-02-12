@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import Leaderboard from "../components/home/Leaderboard";
 import Carousel from "../components/ui/Carousel";
 import { createClient } from "@supabase/supabase-js";
+import { Image } from "astro:assets";
 
 // Data Fetching with Robust Fallback
 let articles: any[] = [];
@@ -658,12 +659,15 @@ const awards =
                         articles.map((article: any) => (
                             <article class="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
                                 <div class="relative h-64 overflow-hidden">
-                                    <img
+                                    <Image
                                         src={
                                             article.image_url ||
                                             "/images/pattern.png"
                                         }
                                         alt={article.title}
+                                        width={800}
+                                        height={600}
+                                        format="webp"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-primary-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">

@@ -7,6 +7,9 @@ import CommentSection from "../../components/comments/CommentSection.astro";
 import BookmarkButton from "../../components/actions/BookmarkButton";
 import TableOfContents from "../../components/article/TableOfContents.astro";
 import ArticleActions from "../../components/article/ArticleActions";
+import FollowButton from "../../components/social/FollowButton";
+import PremiumLock from "../../components/monetization/PremiumLock.tsx";
+import AnalyticsTracker from "../../components/analytics/AnalyticsTracker.tsx";
 import { createSupabaseServerClient } from "../../lib/supabase";
 import { format } from "date-fns";
 
@@ -20,6 +23,7 @@ let relatedArticles: any[] = [];
 let likesCount: number | null = 0;
 let isLiked = false;
 let isSaved = false;
+let isPro = false;
 
 try {
     const supabase = createSupabaseServerClient(Astro);
@@ -35,6 +39,16 @@ try {
         .single();
 
     article = data;
+
+    // Check subscription if premium
+    if (article?.is_premium && user) {
+        const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("status")
+            .eq("user_id", user.id)
+            .single();
+        isPro = sub?.status === "active" || sub?.status === "trialing";
+    }
 
     // Fetch related articles
     // Strategy: Try to find articles with matching tags first, then fallback to category
@@ -130,6 +144,7 @@ const mockArticle = {
         avatar_url: null,
     },
     category: { name: "Technology", slug: "technology" },
+    is_premium: false,
 };
 
 const displayArticle = article || mockArticle;
@@ -406,6 +421,14 @@ const pageUrl = Astro.url.href;
                     <div class="mt-8 flex gap-4">
                         <ArticleActions client:load article={displayArticle} />
                     </div>
+                    {
+                        article?.id && (
+                            <AnalyticsTracker
+                                client:load
+                                articleId={article.id}
+                            />
+                        )
+                    }
                 </div>
             </div>
         </div>
@@ -480,11 +503,19 @@ const pageUrl = Astro.url.href;
                                 />
                             </div>
 
-                            <div
-                                class="prose prose-lg max-w-none prose-headings:font-tuio prose-headings:uppercase prose-headings:text-tuio-navy prose-a:text-tuio-red prose-img:rounded-2xl"
-                                set:html={displayArticle.content ||
-                                    `<p>${displayArticle.excerpt}</p>`}
-                            />
+                            {
+                                displayArticle.is_premium && !isPro ? (
+                                    <PremiumLock client:load />
+                                ) : (
+                                    <div
+                                        class="prose prose-lg max-w-none prose-headings:font-tuio prose-headings:uppercase prose-headings:text-tuio-navy prose-a:text-tuio-red prose-img:rounded-2xl"
+                                        set:html={
+                                            displayArticle.content ||
+                                            `<p>${displayArticle.excerpt}</p>`
+                                        }
+                                    />
+                                )
+                            }
 
                             <!-- Mobile Share Buttons -->
                             <div
@@ -561,12 +592,30 @@ const pageUrl = Astro.url.href;
                                     }
                                 </p>
                             </div>
-                            <a
-                                href={`/profile/${displayArticle.author?.slug || displayArticle.author?.id || "1"}`}
-                                class="px-6 py-3 bg-tuio-bg hover:bg-tuio-navy hover:text-white text-tuio-navy rounded-full font-bold transition-all shrink-0"
-                            >
-                                View Profile
-                            </a>
+                            <div class="flex flex-col gap-2 shrink-0">
+                                <a
+                                    href={`/profile/${displayArticle.author?.slug || displayArticle.author?.id || "1"}`}
+                                    class="px-6 py-3 bg-tuio-bg hover:bg-tuio-navy hover:text-white text-tuio-navy rounded-full font-bold transition-all text-center"
+                                >
+                                    View Profile
+                                </a>
+                                {
+                                    displayArticle.author?.id && (
+                                        <div class="flex justify-center">
+                                            <FollowButton
+                                                client:load
+                                                targetUserId={
+                                                    displayArticle.author.id
+                                                }
+                                                targetUserName={
+                                                    displayArticle.author
+                                                        .full_name
+                                                }
+                                            />
+                                        </div>
+                                    )
+                                }
+                            </div>
                         </div>
 
                         <!-- Comments Section -->

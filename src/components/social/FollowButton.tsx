@@ -1,62 +1,111 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, UserCheck, Loader2 } from 'lucide-react';
+import { createSupabaseBrowserClient } from '../../lib/supabase';
+
+const supabase = createSupabaseBrowserClient();
 
 interface FollowButtonProps {
-    profileId: string;
-    initialIsFollowing?: boolean;
-    isOwnProfile?: boolean;
+    targetUserId: string;
+    targetUserName?: string; // For notification
 }
 
-export default function FollowButton({ profileId, initialIsFollowing = false, isOwnProfile = false }: FollowButtonProps) {
-    const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
-    const [loading, setLoading] = useState(false);
+export default function FollowButton({ targetUserId, targetUserName }: FollowButtonProps) {
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-    if (isOwnProfile) return null;
+    useEffect(() => {
+        checkFollowStatus();
+    }, [targetUserId]);
 
-    const toggleFollow = async () => {
-        setLoading(true);
-        try {
-            const action = isFollowing ? 'unfollow' : 'follow';
-            const response = await fetch('/api/social/follow', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target_id: profileId, action })
-            });
-
-            if (response.ok) {
-                setIsFollowing(!isFollowing);
-                if (window.showToast) {
-                    window.showToast(isFollowing ? 'Unfollowed successfully' : 'Followed successfully', 'success');
-                }
-            } else {
-                if (window.showToast) window.showToast('Please login to follow', 'error');
-            }
-        } catch (error) {
-            console.error('Follow error:', error);
-        } finally {
-            setLoading(false);
+    const checkFollowStatus = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            setIsLoading(false);
+            return;
         }
+
+        setCurrentUserId(user.id);
+        if (user.id === targetUserId) {
+            setIsLoading(false);
+            return; // Can't follow self
+        }
+
+        const { data } = await supabase
+            .from('follows')
+            .select('*')
+            .eq('follower_id', user.id)
+            .eq('following_id', targetUserId)
+            .single();
+
+        if (data) setIsFollowing(true);
+        setIsLoading(false);
     };
+
+    const handleFollowToggle = async () => {
+        if (!currentUserId) {
+            window.location.href = '/login';
+            return;
+        }
+
+        setIsLoading(true);
+        if (isFollowing) {
+            // Unfollow
+            const { error } = await supabase
+                .from('follows')
+                .delete()
+                .eq('follower_id', currentUserId)
+                .eq('following_id', targetUserId);
+
+            if (!error) setIsFollowing(false);
+        } else {
+            // Follow
+            const { error } = await supabase
+                .from('follows')
+                .insert({
+                    follower_id: currentUserId,
+                    following_id: targetUserId
+                });
+
+            if (!error) {
+                setIsFollowing(true);
+                // Trigger Notification
+                await supabase.from('notifications').insert({
+                    user_id: targetUserId,
+                    type: 'follow',
+                    title: 'New Follower',
+                    message: 'Someone started following you!', // detailed info needs sender name fetch
+                    link: `/profile/${currentUserId}`, // Assuming public profile link
+                    is_read: false
+                });
+            }
+        }
+        setIsLoading(false);
+    };
+
+    if (!currentUserId || currentUserId === targetUserId) return null;
 
     return (
         <button
-            onClick={toggleFollow}
-            disabled={loading}
-            className={`px-8 py-3 rounded-full font-bold uppercase tracking-wide transition-all flex items-center gap-2 ${isFollowing
-                    ? 'bg-white text-tuio-red border-2 border-tuio-red hover:bg-tuio-red hover:text-white'
-                    : 'bg-tuio-red text-white hover:bg-white hover:text-tuio-red'
+            onClick={handleFollowToggle}
+            disabled={isLoading}
+            className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-2 ${isFollowing
+                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-red-500 group'
+                    : 'bg-tuio-red text-white hover:bg-tuio-navy shadow-md hover:shadow-lg'
                 }`}
         >
-            {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+            {isLoading ? (
+                <Loader2 size={16} className="animate-spin" />
             ) : isFollowing ? (
                 <>
-                    <UserCheck className="w-5 h-5" /> Following
+                    <UserCheck size={16} className="group-hover:hidden" />
+                    <span className="group-hover:hidden">Following</span>
+                    <span className="hidden group-hover:inline">Unfollow</span>
                 </>
             ) : (
                 <>
-                    <UserPlus className="w-5 h-5" /> Follow
+                    <UserPlus size={16} />
+                    <span>Follow</span>
                 </>
             )}
         </button>

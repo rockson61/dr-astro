@@ -1,0 +1,129 @@
+---
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import AnalyticsChart from "../../components/dashboard/AnalyticsChart.tsx";
+import { createSupabaseServerClient } from "../../lib/supabase";
+
+const supabase = createSupabaseServerClient(Astro);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Fetch Analytics Data
+// 1. Get user's articles
+const { data: articles } = await supabase
+    .from("articles")
+    .select("id, title")
+    .eq("author_id", user.id);
+
+const articleIds = articles?.map((a) => a.id) || [];
+
+let totalViews = 0;
+let totalReads = 0;
+let chartData: any[] = [];
+
+if (articleIds.length > 0) {
+    // 2. Get Analytics entries
+    const { data: analytics } = await supabase
+        .from("article_analytics")
+        .select("type, created_at")
+        .in("article_id", articleIds);
+
+    // Aggregate Data
+    if (analytics) {
+        totalViews = analytics.filter((a) => a.type === "view").length;
+        totalReads = analytics.filter((a) => a.type === "read").length;
+
+        // Group by Date (Last 30 days)
+        const days = 30;
+        const dailyStats = new Map();
+
+        for (let i = 0; i < days; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split("T")[0];
+            dailyStats.set(dateStr, { views: 0, reads: 0 });
+        }
+
+        analytics.forEach((a) => {
+            const dateStr = new Date(a.created_at).toISOString().split("T")[0];
+            if (dailyStats.has(dateStr)) {
+                const stat = dailyStats.get(dateStr);
+                if (a.type === "view") stat.views++;
+                if (a.type === "read") stat.reads++;
+            }
+        });
+
+        chartData = Array.from(dailyStats.entries())
+            .map(([date, stats]) => ({ date, ...stats }))
+            .sort(
+                (a, b) =>
+                    new Date(a.date).getTime() - new Date(b.date).getTime(),
+            );
+    }
+}
+---
+
+<DashboardLayout title="Analytics & Insights">
+    <div class="mb-8">
+        <h1 class="text-3xl font-heading uppercase text-primary-900 mb-2">
+            Your Performance
+        </h1>
+        <p class="text-gray-600">
+            Track how your articles are performing over the last 30 days.
+        </p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <span
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
+                >Total Views</span
+            >
+            <span class="text-4xl font-tuio text-tuio-navy">{totalViews}</span>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <span
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
+                >Total Reads</span
+            >
+            <span class="text-4xl font-tuio text-tuio-red">{totalReads}</span>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <span
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
+                >Read Ratio</span
+            >
+            <span class="text-4xl font-tuio text-green-600">
+                {
+                    totalViews > 0
+                        ? Math.round((totalReads / totalViews) * 100)
+                        : 0
+                }%
+            </span>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <span
+                class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2"
+                >Total Articles</span
+            >
+            <span class="text-4xl font-tuio text-blue-500"
+                >{articles?.length || 0}</span
+            >
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div
+        class="bg-white p-8 rounded-[32px] shadow-sm mb-12 border border-gray-100"
+    >
+        <h3 class="font-tuio text-xl uppercase text-tuio-navy mb-6">
+            Audience Growth
+        </h3>
+        <AnalyticsChart client:visible data={chartData} />
+    </div>
+</DashboardLayout>

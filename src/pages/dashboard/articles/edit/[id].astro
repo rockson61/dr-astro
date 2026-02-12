@@ -411,8 +411,6 @@ const { data: issues } = await supabase
 
         const slug = formData.get("slug") as string;
         const status = formData.get("status");
-        const tagsStr = formData.get("tags") as string;
-        const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()) : [];
 
         const doi = formData.get("doi");
         const referencesStr = formData.get("references") as string;
