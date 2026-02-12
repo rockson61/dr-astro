@@ -1,8 +1,0 @@
-{
-    "rewrites": [
-        {
-            "source": "/supaproxy/:match*",
-            "destination": "http://database-supabase-f8b77d-103-178-166-64.traefik.me/:match*"
-        }
-    ]
-}
