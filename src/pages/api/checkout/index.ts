@@ -19,6 +19,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             });
         }
 
+        if (!stripe) {
+            console.error("Stripe is not initialized. Check STRIPE_SECRET_KEY.");
+            return new Response(JSON.stringify({ error: "Payment system unavailable" }), {
+                status: 503,
+            });
+        }
+
         // 2. Get Request Data
         const { priceId, successUrl, cancelUrl } = await request.json();
 

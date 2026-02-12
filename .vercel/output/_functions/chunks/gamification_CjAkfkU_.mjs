@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  "http://api.db.dentaloffice.io",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjU5NDI4ODYsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.QD1T3hz_0RBrnt-juLttpON4cdDyl1trbrV0zf7B6Ro"
-);
+const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjU5NDI4ODYsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.QD1T3hz_0RBrnt-juLttpON4cdDyl1trbrV0zf7B6Ro";
+const publicUrl = "http://api.db.dentaloffice.io";
+let supabaseAdmin = null;
+{
+  supabaseAdmin = createClient(publicUrl, serviceRoleKey);
+}
 const POINTS = {
   PUBLISH_ARTICLE: 50,
   COMMENT: 5,
@@ -15,6 +17,7 @@ const POINTS = {
 };
 async function awardPoints(userId, action, points, metadata = {}) {
   try {
+    if (!supabaseAdmin) return;
     const { error: logError } = await supabaseAdmin.from("reputation_logs").insert({
       user_id: userId,
       action,

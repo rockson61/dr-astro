@@ -1,10 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Admin Client for Gamification (Bypass RLS)
-const supabaseAdmin = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+const publicUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+
+let supabaseAdmin: any = null;
+
+if (serviceRoleKey && publicUrl) {
+    supabaseAdmin = createClient(publicUrl, serviceRoleKey);
+} else {
+    console.warn("Gamification: Missing Service Role Key. Points will not be awarded.");
+}
 
 export const POINTS = {
     PUBLISH_ARTICLE: 50,
@@ -16,6 +22,8 @@ export const POINTS = {
 
 export async function awardPoints(userId: string, action: string, points: number, metadata: any = {}) {
     try {
+        if (!supabaseAdmin) return;
+
         // 1. Log the transaction
         const { error: logError } = await supabaseAdmin
             .from('reputation_logs')

@@ -12,7 +12,7 @@ const POST = async ({ request, cookies }) => {
     const { error } = await supabase.from("newsletter_subscribers").upsert({ email, is_active: true });
     if (error) throw error;
     try {
-      const { sendNewsletterSubscriptionEmail } = await import('../../../chunks/email_CC-M__I7.mjs');
+      const { sendNewsletterSubscriptionEmail } = await import('../../../chunks/email_DOsP20R6.mjs');
       await sendNewsletterSubscriptionEmail(email);
     } catch (emailError) {
       console.error("Failed to send email:", emailError);

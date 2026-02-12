@@ -1,6 +1,5 @@
-import { Resend } from 'resend';
+import 'resend';
 
-new Resend(undefined                              );
 const sendNewsletterSubscriptionEmail = async (email) => {
   return;
 };

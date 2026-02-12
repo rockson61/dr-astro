@@ -1,4 +1,4 @@
-import { s as stripe } from '../../chunks/stripe_BB53bCh_.mjs';
+import { s as stripe } from '../../chunks/stripe_C0U5A9jd.mjs';
 import { c as createSupabaseServerClient } from '../../chunks/supabase_CYzxA37O.mjs';
 export { renderers } from '../../renderers.mjs';
 
@@ -12,6 +12,12 @@ const POST = async ({ request, cookies }) => {
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401
+      });
+    }
+    if (!stripe) {
+      console.error("Stripe is not initialized. Check STRIPE_SECRET_KEY.");
+      return new Response(JSON.stringify({ error: "Payment system unavailable" }), {
+        status: 503
       });
     }
     const { priceId, successUrl, cancelUrl } = await request.json();

@@ -30,7 +30,7 @@ const POST = async ({ request, cookies }) => {
     }).select().single();
     if (error) throw error;
     try {
-      const { awardPoints, POINTS } = await import('../../chunks/gamification_DLIjRc8c.mjs');
+      const { awardPoints, POINTS } = await import('../../chunks/gamification_CjAkfkU_.mjs');
       await awardPoints(user.id, "comment", POINTS.COMMENT, { article_id, comment_id: data.id });
     } catch (pointError) {
       console.error("Error awarding points:", pointError);

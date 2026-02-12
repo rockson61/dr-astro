@@ -1,12 +1,14 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(import.meta.env.RESEND_API_KEY);
+const resendApiKey = import.meta.env.RESEND_API_KEY;
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
-    if (!import.meta.env.RESEND_API_KEY) {
+    if (!resendApiKey) {
         console.warn("RESEND_API_KEY is missing. Skipping email.");
         return;
     }
+
+    const resend = new Resend(resendApiKey);
 
     try {
         await resend.emails.send({
@@ -33,9 +35,10 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
 };
 
 export const sendNewsletterSubscriptionEmail = async (email: string) => {
-    if (!import.meta.env.RESEND_API_KEY) return;
+    if (!resendApiKey) return;
 
     try {
+        const resend = new Resend(resendApiKey);
         await resend.emails.send({
             from: 'DentalReach <newsletter@dentalreach.today>',
             to: email,

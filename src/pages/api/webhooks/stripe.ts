@@ -13,6 +13,10 @@ const supabaseAdmin = createClient(
 
 export const POST: APIRoute = async ({ request }) => {
     const signature = request.headers.get("stripe-signature");
+
+    if (!stripe) {
+        return new Response("Stripe not configured", { status: 503 });
+    }
     if (!signature) {
         return new Response("Missing signature", { status: 400 });
     }
