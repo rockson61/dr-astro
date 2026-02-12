@@ -1,4 +1,4 @@
-import { s as supabase } from '../../chunks/supabase_CFYPoMlB.mjs';
+import { s as supabase } from '../../chunks/supabase_woKm2pOd.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const cleanSlug = (slug) => decodeURIComponent(slug);

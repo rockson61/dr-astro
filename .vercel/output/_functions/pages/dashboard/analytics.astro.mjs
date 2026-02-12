@@ -1,9 +1,9 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_DL6NAmdh.mjs';
+import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_CKsRPMqu.mjs';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import 'react';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
 export { renderers } from '../../renderers.mjs';
 
 function AnalyticsChart({ data }) {

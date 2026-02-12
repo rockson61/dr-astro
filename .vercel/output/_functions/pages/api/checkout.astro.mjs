@@ -1,5 +1,5 @@
 import { s as stripe } from '../../chunks/stripe_BB53bCh_.mjs';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const prerender = false;

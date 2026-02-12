@@ -1,7 +1,7 @@
 import { e as createAstro, c as createComponent, r as renderComponent, d as renderScript, a as renderTemplate, m as maybeRenderHead, b as addAttribute, ah as unescapeHTML } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_CFYPoMlB.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const $$Astro = createAstro("https://dentalreach.today");

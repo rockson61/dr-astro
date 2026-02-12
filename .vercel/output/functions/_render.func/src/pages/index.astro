@@ -32,10 +32,14 @@ try {
 
     // 3. Fetch Leaderboard (SSR to bypass CORS/RLS)
     // Use Service Role to bypass RLS policies
-    const adminSupabase = createClient(
-        import.meta.env.PUBLIC_SUPABASE_URL,
-        import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-    );
+    const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+    const publicUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+
+    if (!serviceRoleKey || !publicUrl) {
+        throw new Error("Missing Supabase Service Role Key or Public URL");
+    }
+
+    const adminSupabase = createClient(publicUrl, serviceRoleKey);
 
     // Try view first
     const { data: viewData, error: viewError } = await (

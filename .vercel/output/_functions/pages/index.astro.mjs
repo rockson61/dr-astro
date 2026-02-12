@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute, d as renderScript } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { s as supabase } from '../chunks/supabase_CFYPoMlB.mjs';
+import { s as supabase } from '../chunks/supabase_woKm2pOd.mjs';
 import { jsxs, jsx } from 'react/jsx-runtime';
 import { useState, useEffect, useRef } from 'react';
 import { Trophy, Star, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -465,10 +465,10 @@ const $$Index = createComponent(async ($$result, $$props, $$slots) => {
     if (catData) categories = catData;
     const { data: artData } = await supabase.from("articles").select("*, author:profiles(full_name, avatar_url)").eq("status", "published").order("published_at", { ascending: false }).limit(6);
     if (artData) articles = artData;
-    const adminSupabase = createClient(
-      "http://api.db.dentaloffice.io",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjU5NDI4ODYsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.QD1T3hz_0RBrnt-juLttpON4cdDyl1trbrV0zf7B6Ro"
-    );
+    const serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjU5NDI4ODYsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.QD1T3hz_0RBrnt-juLttpON4cdDyl1trbrV0zf7B6Ro";
+    const publicUrl = "http://api.db.dentaloffice.io";
+    if (!serviceRoleKey || !publicUrl) ;
+    const adminSupabase = createClient(publicUrl, serviceRoleKey);
     const { data: viewData, error: viewError } = await adminSupabase.from("profile_composite_reputation").select(
       `
           profile_id,

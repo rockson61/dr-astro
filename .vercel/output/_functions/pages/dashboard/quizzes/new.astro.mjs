@@ -1,10 +1,10 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from '../../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../../chunks/DashboardLayout_DL6NAmdh.mjs';
+import { $ as $$DashboardLayout } from '../../../chunks/DashboardLayout_CKsRPMqu.mjs';
 import { jsxs, jsx } from 'react/jsx-runtime';
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, Loader2, Save } from 'lucide-react';
-import { a as createSupabaseBrowserClient, c as createSupabaseServerClient } from '../../../chunks/supabase_CFYPoMlB.mjs';
+import { a as createSupabaseBrowserClient, c as createSupabaseServerClient } from '../../../chunks/supabase_woKm2pOd.mjs';
 import { G as GlassCard } from '../../../chunks/GlassCard_B5fS4Hva.mjs';
 export { renderers } from '../../../renderers.mjs';
 

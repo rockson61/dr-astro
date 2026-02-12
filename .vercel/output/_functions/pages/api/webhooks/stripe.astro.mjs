@@ -1,5 +1,5 @@
 import { s as stripe } from '../../../chunks/stripe_BB53bCh_.mjs';
-import '../../../chunks/supabase_CFYPoMlB.mjs';
+import '../../../chunks/supabase_woKm2pOd.mjs';
 import { createClient } from '@supabase/supabase-js';
 export { renderers } from '../../../renderers.mjs';
 
