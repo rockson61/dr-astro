@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import partytown from '@astrojs/partytown';
 import { VitePWA } from 'vite-plugin-pwa';
 
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
@@ -80,7 +80,9 @@ export default defineConfig({
 
   prefetch: true,
 
-  adapter: node({
-    mode: 'standalone',
+  adapter: vercel({
+    webAnalytics: {
+      enabled: true,
+    },
   }),
 });
