@@ -1,0 +1,1 @@
+import{c as e}from"./supabase.svVmE_Zl.js";const o=e();window.updateStatus=async(t,r)=>{try{const{error:a}=await o.from("articles").update({status:r}).eq("id",t);if(a)throw a;window.location.reload()}catch(a){alert("Error updating status: "+a.message)}};

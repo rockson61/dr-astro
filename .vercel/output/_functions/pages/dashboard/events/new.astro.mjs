@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead } from '../../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../../chunks/DashboardLayout_CKsRPMqu.mjs';
-import { E as EventForm } from '../../../chunks/EventForm_CI_im1lq.mjs';
+import { $ as $$DashboardLayout } from '../../../chunks/DashboardLayout_B_rgsWHr.mjs';
+import { E as EventForm } from '../../../chunks/EventForm_Cn1Kkcpk.mjs';
 export { renderers } from '../../../renderers.mjs';
 
 const prerender = false;

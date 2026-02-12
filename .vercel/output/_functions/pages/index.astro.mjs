@@ -1,7 +1,7 @@
 import { c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute, d as renderScript } from '../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { s as supabase } from '../chunks/supabase_woKm2pOd.mjs';
+import { s as supabase } from '../chunks/supabase_CYzxA37O.mjs';
 import { jsxs, jsx } from 'react/jsx-runtime';
 import { useState, useEffect, useRef } from 'react';
 import { Trophy, Star, ChevronLeft, ChevronRight } from 'lucide-react';

@@ -1,7 +1,7 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_CYzxA37O.mjs';
 import { MapPin, Star, Share2, Phone, Globe } from 'lucide-react';
 export { renderers } from '../../renderers.mjs';
 

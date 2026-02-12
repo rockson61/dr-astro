@@ -1,7 +1,7 @@
 import { e as createAstro, c as createComponent, r as renderComponent, d as renderScript, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../../../chunks/DashboardLayout_CKsRPMqu.mjs';
-import { c as createSupabaseServerClient } from '../../../../chunks/supabase_woKm2pOd.mjs';
+import { $ as $$DashboardLayout } from '../../../../chunks/DashboardLayout_B_rgsWHr.mjs';
+import { c as createSupabaseServerClient } from '../../../../chunks/supabase_CYzxA37O.mjs';
 import { format } from 'date-fns';
 export { renderers } from '../../../../renderers.mjs';
 

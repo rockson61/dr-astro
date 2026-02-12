@@ -1,4 +1,4 @@
-import { s as supabase } from '../../../chunks/supabase_woKm2pOd.mjs';
+import { s as supabase } from '../../../chunks/supabase_CYzxA37O.mjs';
 import * as fs from 'fs';
 import * as path from 'path';
 export { renderers } from '../../../renderers.mjs';

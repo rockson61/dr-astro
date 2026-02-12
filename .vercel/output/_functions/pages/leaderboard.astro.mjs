@@ -2,8 +2,8 @@ import { e as createAstro, c as createComponent, r as renderComponent, a as rend
 import 'piccolore';
 import { $ as $$Layout } from '../chunks/Layout_BrSpvVaz.mjs';
 import { R as ReputationBadge } from '../chunks/ReputationBadge_DzQywR8E.mjs';
-import { F as FollowButton } from '../chunks/FollowButton_BzlmVEJH.mjs';
-import { c as createSupabaseServerClient } from '../chunks/supabase_woKm2pOd.mjs';
+import { F as FollowButton } from '../chunks/FollowButton_Bwj6D1PW.mjs';
+import { c as createSupabaseServerClient } from '../chunks/supabase_CYzxA37O.mjs';
 export { renderers } from '../renderers.mjs';
 
 const $$Astro = createAstro("https://dentalreach.today");

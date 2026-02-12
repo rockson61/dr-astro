@@ -3,11 +3,11 @@ import 'piccolore';
 import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
 import 'clsx';
 import { L as LikeButton } from '../../chunks/LikeButton_ahGK-Lmi.mjs';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_CYzxA37O.mjs';
 import { formatDistanceToNow, format } from 'date-fns';
 import { jsxs, jsx, Fragment as Fragment$1 } from 'react/jsx-runtime';
 import { useState, useRef, useEffect } from 'react';
-import { F as FollowButton } from '../../chunks/FollowButton_BzlmVEJH.mjs';
+import { F as FollowButton } from '../../chunks/FollowButton_Bwj6D1PW.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const $$Astro$4 = createAstro("https://dentalreach.today");

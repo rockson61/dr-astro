@@ -2,31 +2,40 @@ import { createBrowserClient, createServerClient, type CookieOptions } from '@su
 
 // Client-side Supabase client
 export const createSupabaseBrowserClient = () => {
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
     return createBrowserClient(
-        import.meta.env.PUBLIC_SUPABASE_URL!,
-        import.meta.env.PUBLIC_SUPABASE_ANON_KEY!
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseKey || 'placeholder'
     );
 };
 
 // Server-side Supabase client (for Astro endpoints/middleware)
 export const createSupabaseServerClient = (context: { cookies: any }) => {
     const supabaseUrl = import.meta.env.SSR
-        ? (process.env.INTERNAL_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL!)
-        : import.meta.env.PUBLIC_SUPABASE_URL!;
+        ? (process.env.INTERNAL_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL)
+        : import.meta.env.PUBLIC_SUPABASE_URL;
+
+    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+    // Guard against missing vars
+    if ((!supabaseUrl || !supabaseKey) && import.meta.env.PROD) {
+        console.warn("Supabase credentials missing in Server Client initialization.");
+    }
 
     return createServerClient(
-        supabaseUrl,
-        import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseKey || 'placeholder',
         {
             cookies: {
-                get(key) {
-                    return context.cookies.get(key)?.value;
+                getAll() {
+                    return context.cookies.entries();
                 },
-                set(key, value, options) {
-                    context.cookies.set(key, value, options);
-                },
-                remove(key, options) {
-                    context.cookies.delete(key, options);
+                setAll(cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        context.cookies.set(name, value, options);
+                    });
                 },
             },
         }
@@ -35,7 +44,6 @@ export const createSupabaseServerClient = (context: { cookies: any }) => {
 // Shared client for public data fetching (SSR/Client safe)
 import { createClient } from '@supabase/supabase-js';
 
-// Determine URL based on environment
 // Determine URL based on environment
 const supabaseUrl = import.meta.env.SSR
     ? (process.env.INTERNAL_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL)

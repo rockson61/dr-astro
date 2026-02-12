@@ -1,7 +1,7 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, b as addAttribute, m as maybeRenderHead } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
-import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_CKsRPMqu.mjs';
-import { c as createSupabaseServerClient } from '../../chunks/supabase_woKm2pOd.mjs';
+import { $ as $$DashboardLayout } from '../../chunks/DashboardLayout_B_rgsWHr.mjs';
+import { c as createSupabaseServerClient } from '../../chunks/supabase_CYzxA37O.mjs';
 import { Download, CheckCircle, Award } from 'lucide-react';
 import { format } from 'date-fns';
 export { renderers } from '../../renderers.mjs';

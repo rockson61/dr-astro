@@ -1,7 +1,7 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute, ah as unescapeHTML } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { s as supabase } from '../../chunks/supabase_woKm2pOd.mjs';
+import { s as supabase } from '../../chunks/supabase_CYzxA37O.mjs';
 import { format } from 'date-fns';
 export { renderers } from '../../renderers.mjs';
 

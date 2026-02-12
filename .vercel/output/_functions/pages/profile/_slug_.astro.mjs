@@ -1,11 +1,11 @@
 import { e as createAstro, c as createComponent, r as renderComponent, a as renderTemplate, m as maybeRenderHead, b as addAttribute } from '../../chunks/astro/server_DcquF9um.mjs';
 import 'piccolore';
 import { $ as $$BaseLayout } from '../../chunks/BaseLayout_Dxh0pRbF.mjs';
-import { s as supabase } from '../../chunks/supabase_woKm2pOd.mjs';
+import { s as supabase } from '../../chunks/supabase_CYzxA37O.mjs';
 import { jsxs, jsx, Fragment } from 'react/jsx-runtime';
 import { useState, useEffect, useMemo } from 'react';
 import { Star, ThumbsUp } from 'lucide-react';
-import { F as FollowButton } from '../../chunks/FollowButton_BzlmVEJH.mjs';
+import { F as FollowButton } from '../../chunks/FollowButton_Bwj6D1PW.mjs';
 import { R as ReputationBadge } from '../../chunks/ReputationBadge_DzQywR8E.mjs';
 import { createClient } from '@supabase/supabase-js';
 export { renderers } from '../../renderers.mjs';

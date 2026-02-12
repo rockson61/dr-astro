@@ -1,5 +1,5 @@
-import '../../../chunks/supabase_woKm2pOd.mjs';
-import { S as ScoringService } from '../../../chunks/awardsScoringService_Ban8dlw0.mjs';
+import '../../../chunks/supabase_CYzxA37O.mjs';
+import { S as ScoringService } from '../../../chunks/awardsScoringService_BzCFDhRq.mjs';
 export { renderers } from '../../../renderers.mjs';
 
 const POST = async ({ request, cookies }) => {
